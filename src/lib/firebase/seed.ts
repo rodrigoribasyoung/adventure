@@ -1,8 +1,8 @@
-import { collection, getDocs, query, limit } from 'firebase/firestore'
+import { collection, getDocs, query, limit, Timestamp } from 'firebase/firestore'
 import { db } from './config'
 import { createDocument } from './db'
-import { Timestamp } from 'firebase/firestore'
-import { Contact, Company, Service, Deal, Funnel } from '@/types'
+import { Contact, Company, Service, Deal, Funnel, CloseReason } from '@/types'
+import { DEFAULT_MARTECH_FUNNEL, DEFAULT_MARTECH_CLOSE_REASONS } from './martechFunnel'
 
 // Função para verificar se já existem dados
 const hasData = async (collectionName: string): Promise<boolean> => {
@@ -112,20 +112,21 @@ export const seedDatabase = async (userId: string) => {
       createdBy: userId,
     })
 
-    // Criar funil padrão
-    console.log('[Seed] Criando funil padrão...')
+    // Criar funil padrão Martech
+    console.log('[Seed] Criando funil Martech...')
     await createDocument<Funnel>('funnels', {
-      name: 'Funil Padrão de Vendas',
-      stages: [
-        { id: '1', name: 'Qualificação', order: 1, color: '#4285F4' },
-        { id: '2', name: 'Proposta Enviada', order: 2, color: '#FBBC04' },
-        { id: '3', name: 'Negociação', order: 3, color: '#FF9800' },
-        { id: '4', name: 'Fechado Ganho', order: 4, color: '#34A853' },
-        { id: '5', name: 'Fechado Perdido', order: 5, color: '#EA4335' },
-      ],
-      active: true,
+      ...DEFAULT_MARTECH_FUNNEL,
       createdBy: userId,
     })
+
+    // Criar motivos de fechamento padrão
+    console.log('[Seed] Criando motivos de fechamento...')
+    for (const reason of DEFAULT_MARTECH_CLOSE_REASONS) {
+      await createDocument<CloseReason>('closeReasons', {
+        ...reason,
+        createdBy: userId,
+      })
+    }
 
     // Criar negociações
     console.log('[Seed] Criando negociações...')
@@ -146,11 +147,12 @@ export const seedDatabase = async (userId: string) => {
       title: 'E-commerce Digital Marketing',
       contactId: contact2Id,
       companyId: company2Id,
-      stage: '2',
+      stage: 'proposta',
       value: 15000.00,
       currency: 'BRL',
       probability: 50,
       serviceIds: [service2Id],
+      status: 'active',
       expectedCloseDate: Timestamp.fromDate(new Date(Date.now() + 45 * 24 * 60 * 60 * 1000)), // 45 dias
       createdBy: userId,
     })
@@ -158,9 +160,10 @@ export const seedDatabase = async (userId: string) => {
     await createDocument<Deal>('deals', {
       title: 'Consultoria Pedro Oliveira',
       contactId: contact3Id,
-      stage: '1',
+      stage: 'qualificacao',
       value: 2500.00,
       currency: 'BRL',
+      status: 'active',
       probability: 30,
       serviceIds: [service4Id],
       createdBy: userId,

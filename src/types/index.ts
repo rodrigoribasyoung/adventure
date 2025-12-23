@@ -64,6 +64,9 @@ export interface Deal extends BaseEntity {
   paymentType?: 'cash' | 'installment' // à vista ou à prazo
   paymentMethod?: 'pix' | 'boleto' | 'credit_card' | 'debit_card' | 'bank_transfer' | 'exchange' | 'other' // método de pagamento
   contractUrl?: string // link do contrato (drive ou outro)
+  status?: 'active' | 'won' | 'lost' | 'paused' // Em andamento, Vendiada, Perdida, Pausada
+  closeReason?: string // motivo de fechamento (ID do motivo)
+  closedAt?: Timestamp // data de fechamento
   customFields?: Record<string, any>
 }
 
@@ -80,8 +83,10 @@ export interface Task extends BaseEntity {
 // Funnel
 export interface Funnel extends BaseEntity {
   name: string
+  description?: string
   stages: FunnelStage[]
   active: boolean
+  type?: 'martech' | 'custom' // tipo de funil
 }
 
 export interface FunnelStage {
@@ -89,6 +94,17 @@ export interface FunnelStage {
   name: string
   order: number
   color: string
+  isWonStage?: boolean // se é etapa de ganho
+  isLostStage?: boolean // se é etapa de perda
+}
+
+// Close Reason (Motivo de Fechamento)
+export interface CloseReason extends BaseEntity {
+  name: string
+  type: 'won' | 'lost' // ganho ou perda
+  category?: string // categoria para agrupamento
+  active: boolean
+  order?: number
 }
 
 // Custom Field

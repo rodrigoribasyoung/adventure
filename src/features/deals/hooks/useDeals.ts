@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Deal } from '@/types'
-import { getDocuments, createDocument, updateDocument, deleteDocument, orderBy } from '@/lib/firebase/db'
+import { getDocuments, createDocument, updateDocument, deleteDocument, orderBy, Timestamp } from '@/lib/firebase/db'
 import { useAuth } from '@/contexts/AuthContext'
 
 export const useDeals = () => {
@@ -46,6 +46,7 @@ export const useDeals = () => {
       const dealData = {
         ...data,
         currency: 'BRL' as const,
+        status: 'active' as const, // Todas as negociações começam como "Em andamento"
         createdBy: currentUser.uid,
       }
       const id = await createDocument<Deal>('deals', dealData)
@@ -87,6 +88,47 @@ export const useDeals = () => {
     }
   }
 
+  const closeDeal = async (id: string, status: 'won' | 'lost', closeReason?: string) => {
+    try {
+      const updateData: any = {
+        status: status === 'won' ? 'won' : 'lost',
+        closedAt: Timestamp.now(),
+      }
+      if (closeReason) {
+        updateData.closeReason = closeReason
+      }
+      await updateDocument<Deal>('deals', id, updateData)
+      await fetchDeals()
+    } catch (err) {
+      setError('Erro ao fechar negociação')
+      throw err
+    }
+  }
+
+  const reopenDeal = async (id: string) => {
+    try {
+      await updateDocument<Deal>('deals', id, {
+        status: 'active',
+        closeReason: undefined,
+        closedAt: undefined,
+      })
+      await fetchDeals()
+    } catch (err) {
+      setError('Erro ao reabrir negociação')
+      throw err
+    }
+  }
+
+  const pauseDeal = async (id: string) => {
+    try {
+      await updateDocument<Deal>('deals', id, { status: 'paused' })
+      await fetchDeals()
+    } catch (err) {
+      setError('Erro ao pausar negociação')
+      throw err
+    }
+  }
+
   return {
     deals,
     loading,
@@ -95,6 +137,9 @@ export const useDeals = () => {
     updateDeal,
     deleteDeal,
     updateDealStage,
+    closeDeal,
+    reopenDeal,
+    pauseDeal,
     refetch: fetchDeals,
   }
 }

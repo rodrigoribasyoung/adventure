@@ -53,6 +53,11 @@ service cloud.firestore {
       allow read, write: if request.auth != null;
     }
     
+    // Regras para motivos de fechamento
+    match /closeReasons/{reasonId} {
+      allow read, write: if request.auth != null;
+    }
+    
     // Regras para conversas WhatsApp
     match /whatsappConversations/{conversationId} {
       allow read, write: if request.auth != null;

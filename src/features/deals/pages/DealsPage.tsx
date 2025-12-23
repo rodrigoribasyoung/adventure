@@ -5,6 +5,7 @@ import { DealListView } from '../components/DealListView'
 import { DealForm } from '../components/DealForm'
 import { Modal } from '@/components/ui/Modal'
 import { Card } from '@/components/ui/Card'
+import { DealCloseModal } from '@/components/deals/DealCloseModal'
 import { useDeals } from '../hooks/useDeals'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
 import { Deal } from '@/types'
@@ -14,10 +15,11 @@ import { Button } from '@/components/ui/Button'
 type ViewMode = 'kanban' | 'list'
 
 const DealsPage = () => {
-  const { deals, loading, createDeal, updateDeal, deleteDeal, updateDealStage } = useDeals()
+  const { deals, loading, createDeal, updateDeal, deleteDeal, updateDealStage, closeDeal } = useDeals()
   const { activeFunnel } = useFunnels()
   const [viewMode, setViewMode] = useState<ViewMode>('kanban')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false)
   const [selectedDeal, setSelectedDeal] = useState<Deal | undefined>()
   const [formLoading, setFormLoading] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; visible: boolean }>({
@@ -79,11 +81,46 @@ const DealsPage = () => {
 
   const handleStageChange = async (dealId: string, newStage: string) => {
     try {
-      await updateDealStage(dealId, newStage)
-      setToast({ message: 'Estágio atualizado!', type: 'success', visible: true })
+      const deal = deals.find(d => d.id === dealId)
+      const stage = activeFunnel?.stages.find(s => s.id === newStage)
+      
+      // Se mover para estágio de ganho/perda, abre modal de fechamento
+      if (stage?.isWonStage || stage?.isLostStage) {
+        setSelectedDeal(deal)
+        setIsCloseModalOpen(true)
+      } else {
+        await updateDealStage(dealId, newStage)
+        setToast({ message: 'Estágio atualizado!', type: 'success', visible: true })
+      }
     } catch (error: any) {
       console.error('[DealsPage] Erro ao atualizar estágio:', error)
       setToast({ message: 'Erro ao atualizar estágio', type: 'error', visible: true })
+    }
+  }
+
+  const handleCloseDeal = async (status: 'won' | 'lost', closeReason?: string) => {
+    if (!selectedDeal) return
+    
+    try {
+      const stage = activeFunnel?.stages.find(s => 
+        (status === 'won' && s.isWonStage) || (status === 'lost' && s.isLostStage)
+      )
+      
+      if (stage) {
+        await updateDealStage(selectedDeal.id, stage.id)
+      }
+      
+      await closeDeal(selectedDeal.id, status, closeReason)
+      setToast({ 
+        message: `Negociação ${status === 'won' ? 'vendiada' : 'perdida'} com sucesso!`, 
+        type: 'success', 
+        visible: true 
+      })
+      setIsCloseModalOpen(false)
+      setSelectedDeal(undefined)
+    } catch (error: any) {
+      console.error('[DealsPage] Erro ao fechar negociação:', error)
+      setToast({ message: 'Erro ao fechar negociação', type: 'error', visible: true })
     }
   }
 
@@ -167,6 +204,17 @@ const DealsPage = () => {
           loading={formLoading}
         />
       </Modal>
+
+      <DealCloseModal
+        isOpen={isCloseModalOpen}
+        deal={selectedDeal || null}
+        onClose={() => {
+          setIsCloseModalOpen(false)
+          setSelectedDeal(undefined)
+        }}
+        onConfirm={handleCloseDeal}
+        loading={formLoading}
+      />
 
       <Toast
         message={toast.message}
