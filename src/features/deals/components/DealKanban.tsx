@@ -104,6 +104,17 @@ export const DealKanban = ({ deals, stages, onDealClick, onStageChange, loading 
                         </span>
                       )}
                     </div>
+                    {deal.contractUrl && (
+                      <a
+                        href={deal.contractUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-xs text-primary-blue hover:underline mt-2 block"
+                      >
+                        📄 Ver Contrato
+                      </a>
+                    )}
                   </div>
                 </Card>
               ))}

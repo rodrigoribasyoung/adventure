@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Container } from '@/components/layout/Container'
-import { CompanyList } from '../components/CompanyList'
+import { CompanyTable } from '../components/CompanyTable'
 import { CompanyForm } from '../components/CompanyForm'
 import { Modal } from '@/components/ui/Modal'
 import { useCompanies } from '../hooks/useCompanies'
@@ -70,7 +70,7 @@ const CompaniesPage = () => {
           <p className="text-white/70">Gerencie suas empresas</p>
         </div>
 
-        <CompanyList
+        <CompanyTable
           companies={companies}
           loading={loading}
           onEdit={handleEdit}

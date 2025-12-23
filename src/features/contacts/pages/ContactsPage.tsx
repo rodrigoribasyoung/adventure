@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Container } from '@/components/layout/Container'
-import { ContactList } from '../components/ContactList'
+import { ContactTable } from '../components/ContactTable'
 import { ContactForm } from '../components/ContactForm'
 import { Modal } from '@/components/ui/Modal'
 import { useContacts } from '../hooks/useContacts'
@@ -70,7 +70,7 @@ const ContactsPage = () => {
           <p className="text-white/70">Gerencie seus contatos</p>
         </div>
 
-        <ContactList
+        <ContactTable
           contacts={contacts}
           loading={loading}
           onEdit={handleEdit}

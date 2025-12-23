@@ -124,6 +124,17 @@ export const DealListView = ({ deals, onDealClick, onEdit, onDelete, loading }: 
                   <p className="text-xl font-bold text-primary-red">
                     {formatCurrency(deal.value, deal.currency)}
                   </p>
+                  {deal.contractUrl && (
+                    <a
+                      href={deal.contractUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-xs text-primary-blue hover:underline"
+                    >
+                      Ver Contrato
+                    </a>
+                  )}
                 </div>
 
                 <div className="flex gap-2">

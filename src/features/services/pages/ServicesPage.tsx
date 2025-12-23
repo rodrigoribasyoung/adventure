@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Container } from '@/components/layout/Container'
-import { ServiceList } from '../components/ServiceList'
+import { ServiceTable } from '../components/ServiceTable'
 import { ServiceForm } from '../components/ServiceForm'
 import { Modal } from '@/components/ui/Modal'
 import { useServices } from '../hooks/useServices'
@@ -70,7 +70,7 @@ const ServicesPage = () => {
           <p className="text-white/70">Gerencie seus serviços</p>
         </div>
 
-        <ServiceList
+        <ServiceTable
           services={services}
           loading={loading}
           onEdit={handleEdit}

@@ -10,6 +10,7 @@ import { useCompanies } from '@/features/companies/hooks/useCompanies'
 import { useServices } from '@/features/services/hooks/useServices'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
 import { formatCurrency } from '@/lib/utils/formatCurrency'
+import { shortenUrl } from '@/lib/utils/shortenUrl'
 import { Timestamp as FirestoreTimestamp } from 'firebase/firestore'
 
 const dealSchema = z.object({
@@ -22,6 +23,9 @@ const dealSchema = z.object({
   expectedCloseDate: z.string().optional(),
   serviceIds: z.array(z.string()),
   assignedTo: z.string().optional(),
+  paymentType: z.enum(['cash', 'installment']).optional(),
+  paymentMethod: z.enum(['pix', 'boleto', 'credit_card', 'debit_card', 'bank_transfer', 'exchange', 'other']).optional(),
+  contractUrl: z.string().url('URL inválida').optional().or(z.literal('')),
 })
 
 type DealFormData = z.infer<typeof dealSchema>
@@ -71,6 +75,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
   const selectedServiceIds = watch('serviceIds')
   const selectedServices = services.filter(s => selectedServiceIds.includes(s.id))
   const totalValue = selectedServices.reduce((sum, s) => sum + s.price, 0)
+  const paymentType = watch('paymentType')
 
   // Atualizar valor quando serviços mudarem (apenas se não houver valor manual)
   useEffect(() => {
@@ -92,14 +97,31 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
   }
 
   const handleSubmitForm = async (data: DealFormData) => {
-    await onSubmit({
+    const submitData: any = {
       ...data,
       companyId: data.companyId || undefined,
       assignedTo: data.assignedTo || undefined,
-      expectedCloseDate: data.expectedCloseDate
-        ? FirestoreTimestamp.fromDate(new Date(data.expectedCloseDate))
-        : undefined,
-    } as DealFormData)
+      paymentType: data.paymentType || undefined,
+      paymentMethod: data.paymentMethod || undefined,
+    }
+    
+    if (data.expectedCloseDate) {
+      submitData.expectedCloseDate = FirestoreTimestamp.fromDate(new Date(data.expectedCloseDate))
+    }
+    
+    // Encurtar URL do contrato se existir
+    if (data.contractUrl) {
+      try {
+        submitData.contractUrl = await shortenUrl(data.contractUrl)
+      } catch (error) {
+        console.warn('Erro ao encurtar URL, usando URL original:', error)
+        submitData.contractUrl = data.contractUrl
+      }
+    } else {
+      submitData.contractUrl = undefined
+    }
+    
+    await onSubmit(submitData)
   }
 
   return (
@@ -225,6 +247,55 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
         type="date"
         {...register('expectedCloseDate')}
         error={errors.expectedCloseDate?.message}
+      />
+
+      <div>
+        <label className="block text-sm font-medium text-white/90 mb-2">
+          Forma de Pagamento
+        </label>
+        <select
+          {...register('paymentType')}
+          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
+        >
+          <option value="">Selecione</option>
+          <option value="cash">À Vista</option>
+          <option value="installment">À Prazo</option>
+        </select>
+        {errors.paymentType && (
+          <p className="mt-1 text-sm text-red-400">{errors.paymentType.message}</p>
+        )}
+      </div>
+
+      {paymentType && (
+        <div>
+          <label className="block text-sm font-medium text-white/90 mb-2">
+            Método de Pagamento
+          </label>
+          <select
+            {...register('paymentMethod')}
+            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
+          >
+            <option value="">Selecione</option>
+            <option value="pix">PIX</option>
+            <option value="boleto">Boleto</option>
+            <option value="credit_card">Cartão de Crédito</option>
+            <option value="debit_card">Cartão de Débito</option>
+            <option value="bank_transfer">Transferência Bancária</option>
+            <option value="exchange">Permuta</option>
+            <option value="other">Outro</option>
+          </select>
+          {errors.paymentMethod && (
+            <p className="mt-1 text-sm text-red-400">{errors.paymentMethod.message}</p>
+          )}
+        </div>
+      )}
+
+      <Input
+        label="Link do Contrato (Drive ou outro)"
+        type="url"
+        {...register('contractUrl')}
+        error={errors.contractUrl?.message}
+        placeholder="https://drive.google.com/..."
       />
 
       <div className="flex justify-end gap-3 pt-4">

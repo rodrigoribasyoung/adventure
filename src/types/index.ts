@@ -61,6 +61,9 @@ export interface Deal extends BaseEntity {
   expectedCloseDate?: Timestamp
   serviceIds: string[]
   assignedTo?: string // userId
+  paymentType?: 'cash' | 'installment' // à vista ou à prazo
+  paymentMethod?: 'pix' | 'boleto' | 'credit_card' | 'debit_card' | 'bank_transfer' | 'exchange' | 'other' // método de pagamento
+  contractUrl?: string // link do contrato (drive ou outro)
   customFields?: Record<string, any>
 }
 
