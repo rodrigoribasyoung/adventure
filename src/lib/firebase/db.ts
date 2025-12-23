@@ -19,6 +19,19 @@ import { db } from './config'
 // Tipos utilitários
 export type FirestoreTimestamp = Timestamp
 
+// Helper para remover campos undefined do objeto
+const removeUndefinedFields = (obj: Record<string, any>): Record<string, any> => {
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    if (value !== undefined) {
+      acc[key] = value
+    }
+    return acc
+  }, {} as Record<string, any>)
+}
+
+// Exportar helper para uso externo
+export { removeUndefinedFields }
+
 // Helpers genéricos para CRUD
 export const getDocument = async <T>(collectionName: string, docId: string): Promise<T | null> => {
   try {
@@ -58,13 +71,26 @@ export const getDocuments = async <T>(
   }
 }
 
+// Helper para remover campos undefined do objeto
+const removeUndefinedFields = (obj: Record<string, any>): Record<string, any> => {
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    if (value !== undefined) {
+      acc[key] = value
+    }
+    return acc
+  }, {} as Record<string, any>)
+}
+
 export const createDocument = async <T extends Record<string, any>>(
   collectionName: string, 
   data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<string> => {
   try {
+    // Remove campos undefined antes de salvar
+    const cleanData = removeUndefinedFields(data as Record<string, any>)
+    
     const docData = {
-      ...data,
+      ...cleanData,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     }
@@ -85,13 +111,18 @@ export const updateDocument = async <T extends Record<string, any>>(
   data: Partial<Omit<T, 'id' | 'createdAt'>>
 ): Promise<void> => {
   try {
+    // Remove campos undefined antes de atualizar
+    const cleanData = removeUndefinedFields(data as Record<string, any>)
+    
     const docRef = doc(db, collectionName, docId)
     await updateDoc(docRef, {
-      ...data,
+      ...cleanData,
       updatedAt: Timestamp.now(),
     })
-  } catch (error) {
-    console.error(`Erro ao atualizar documento ${collectionName}/${docId}:`, error)
+    console.log(`[Firestore] Documento ${collectionName}/${docId} atualizado com sucesso`)
+  } catch (error: any) {
+    console.error(`[Firestore] Erro ao atualizar documento ${collectionName}/${docId}:`, error)
+    console.error(`[Firestore] Código do erro: ${error.code}, Mensagem: ${error.message}`)
     throw error
   }
 }

@@ -3,6 +3,7 @@ import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/lib/firebase/auth'
 import { signInWithGoogle, signOut } from '@/lib/firebase/auth'
 import { getDocument, createDocument } from '@/lib/firebase/db'
+import { seedDatabase } from '@/lib/firebase/seed'
 import { User } from '@/types'
 
 interface AuthContextType {
@@ -60,6 +61,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }
           
           setUserData(userDoc)
+          
+          // Criar dados de teste se for o primeiro acesso
+          try {
+            await seedDatabase(user.uid)
+          } catch (seedError) {
+            console.warn('[AuthContext] Erro ao criar dados de teste (pode ignorar):', seedError)
+          }
         } catch (error: any) {
           console.error('[AuthContext] Erro ao buscar/criar dados do usuário:', error)
           console.error('[AuthContext] Código do erro:', error?.code, 'Mensagem:', error?.message)
