@@ -1,0 +1,107 @@
+import { useState } from 'react'
+import { Container } from '@/components/layout/Container'
+import { CompanyList } from '../components/CompanyList'
+import { CompanyForm } from '../components/CompanyForm'
+import { Modal } from '@/components/ui/Modal'
+import { useCompanies } from '../hooks/useCompanies'
+import { Company } from '@/types'
+import { Toast } from '@/components/ui/Toast'
+
+const CompaniesPage = () => {
+  const { companies, loading, createCompany, updateCompany, deleteCompany } = useCompanies()
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedCompany, setSelectedCompany] = useState<Company | undefined>()
+  const [formLoading, setFormLoading] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; visible: boolean }>({
+    message: '',
+    type: 'success',
+    visible: false,
+  })
+
+  const handleCreateNew = () => {
+    setSelectedCompany(undefined)
+    setIsModalOpen(true)
+  }
+
+  const handleEdit = (company: Company) => {
+    setSelectedCompany(company)
+    setIsModalOpen(true)
+  }
+
+  const handleSubmit = async (data: any) => {
+    try {
+      setFormLoading(true)
+      if (selectedCompany) {
+        await updateCompany(selectedCompany.id, data)
+        setToast({ message: 'Empresa atualizada com sucesso!', type: 'success', visible: true })
+      } else {
+        await createCompany(data)
+        setToast({ message: 'Empresa criada com sucesso!', type: 'success', visible: true })
+      }
+      setIsModalOpen(false)
+      setSelectedCompany(undefined)
+    } catch (error) {
+      setToast({ message: 'Erro ao salvar empresa', type: 'error', visible: true })
+    } finally {
+      setFormLoading(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteCompany(id)
+      setToast({ message: 'Empresa excluída com sucesso!', type: 'success', visible: true })
+    } catch (error) {
+      setToast({ message: 'Erro ao excluir empresa', type: 'error', visible: true })
+    }
+  }
+
+  return (
+    <Container>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Empresas</h1>
+          <p className="text-white/70">Gerencie suas empresas</p>
+        </div>
+
+        <CompanyList
+          companies={companies}
+          loading={loading}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onCreateNew={handleCreateNew}
+        />
+      </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false)
+          setSelectedCompany(undefined)
+        }}
+        title={selectedCompany ? 'Editar Empresa' : 'Nova Empresa'}
+        size="md"
+      >
+        <CompanyForm
+          company={selectedCompany}
+          onSubmit={handleSubmit}
+          onCancel={() => {
+            setIsModalOpen(false)
+            setSelectedCompany(undefined)
+          }}
+          loading={formLoading}
+        />
+      </Modal>
+
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.visible}
+        onClose={() => setToast({ ...toast, visible: false })}
+      />
+    </Container>
+  )
+}
+
+export default CompaniesPage
+

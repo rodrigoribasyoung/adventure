@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background-dark text-white;
+    font-family: 'Inter', 'Roboto', system-ui, sans-serif;
+    cursor: url('/assets/brand/navigation_cursor/navigation-cursor-navy.svg') 0 0, auto;
+  }
+  
+  button, a, input, textarea, select {
+    cursor: url('/assets/brand/navigation_cursor/navigation-cursor-navy.svg') 0 0, auto;
+  }
+  
+  button:disabled, a:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@layer utilities {
+  .glow-red {
+    box-shadow: 0 0 20px rgba(218, 0, 40, 0.5);
+  }
+  
+  .glow-blue {
+    box-shadow: 0 0 20px rgba(4, 42, 161, 0.5);
+  }
+  
+  .glow-combined {
+    box-shadow: 
+      0 0 25px rgba(218, 0, 40, 0.4),
+      0 0 25px rgba(4, 42, 161, 0.4);
+  }
+  
+  .text-gradient-red {
+    background: linear-gradient(135deg, #DA0028 0%, #FF1744 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-blue {
+    background: linear-gradient(135deg, #042AA1 0%, #1976D2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  @keyframes slide-in {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  .animate-slide-in {
+    animation: slide-in 0.3s ease-out;
+  }
+}
+

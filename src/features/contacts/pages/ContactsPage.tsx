@@ -1,0 +1,107 @@
+import { useState } from 'react'
+import { Container } from '@/components/layout/Container'
+import { ContactList } from '../components/ContactList'
+import { ContactForm } from '../components/ContactForm'
+import { Modal } from '@/components/ui/Modal'
+import { useContacts } from '../hooks/useContacts'
+import { Contact } from '@/types'
+import { Toast } from '@/components/ui/Toast'
+
+const ContactsPage = () => {
+  const { contacts, loading, createContact, updateContact, deleteContact } = useContacts()
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedContact, setSelectedContact] = useState<Contact | undefined>()
+  const [formLoading, setFormLoading] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; visible: boolean }>({
+    message: '',
+    type: 'success',
+    visible: false,
+  })
+
+  const handleCreateNew = () => {
+    setSelectedContact(undefined)
+    setIsModalOpen(true)
+  }
+
+  const handleEdit = (contact: Contact) => {
+    setSelectedContact(contact)
+    setIsModalOpen(true)
+  }
+
+  const handleSubmit = async (data: any) => {
+    try {
+      setFormLoading(true)
+      if (selectedContact) {
+        await updateContact(selectedContact.id, data)
+        setToast({ message: 'Contato atualizado com sucesso!', type: 'success', visible: true })
+      } else {
+        await createContact(data)
+        setToast({ message: 'Contato criado com sucesso!', type: 'success', visible: true })
+      }
+      setIsModalOpen(false)
+      setSelectedContact(undefined)
+    } catch (error) {
+      setToast({ message: 'Erro ao salvar contato', type: 'error', visible: true })
+    } finally {
+      setFormLoading(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteContact(id)
+      setToast({ message: 'Contato excluído com sucesso!', type: 'success', visible: true })
+    } catch (error) {
+      setToast({ message: 'Erro ao excluir contato', type: 'error', visible: true })
+    }
+  }
+
+  return (
+    <Container>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Contatos</h1>
+          <p className="text-white/70">Gerencie seus contatos</p>
+        </div>
+
+        <ContactList
+          contacts={contacts}
+          loading={loading}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onCreateNew={handleCreateNew}
+        />
+      </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false)
+          setSelectedContact(undefined)
+        }}
+        title={selectedContact ? 'Editar Contato' : 'Novo Contato'}
+        size="md"
+      >
+        <ContactForm
+          contact={selectedContact}
+          onSubmit={handleSubmit}
+          onCancel={() => {
+            setIsModalOpen(false)
+            setSelectedContact(undefined)
+          }}
+          loading={formLoading}
+        />
+      </Modal>
+
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.visible}
+        onClose={() => setToast({ ...toast, visible: false })}
+      />
+    </Container>
+  )
+}
+
+export default ContactsPage
+

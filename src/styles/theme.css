@@ -1,0 +1,38 @@
+:root {
+  /* Cores principais */
+  --color-primary-red: #DA0028;
+  --color-primary-blue: #042AA1;
+  
+  /* Backgrounds */
+  --color-bg-dark: #0a1929;
+  --color-bg-darker: #071018;
+  
+  /* Textos */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #b0b8c4;
+  --color-text-muted: #6b7280;
+  
+  /* Bordas */
+  --color-border: rgba(255, 255, 255, 0.1);
+  
+  /* Cores Google para gráficos */
+  --color-google-blue: #4285F4;
+  --color-google-green: #34A853;
+  --color-google-yellow: #FBBC04;
+  --color-google-red: #EA4335;
+  
+  /* Espaçamentos */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  
+  /* Bordas */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
