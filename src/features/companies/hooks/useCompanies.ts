@@ -13,11 +13,21 @@ export const useCompanies = () => {
     try {
       setLoading(true)
       setError(null)
-      const data = await getDocuments<Company>('companies', [orderBy('createdAt', 'desc')])
-      setCompanies(data)
+      try {
+        const data = await getDocuments<Company>('companies', [orderBy('createdAt', 'desc')])
+        setCompanies(data)
+      } catch (orderByError) {
+        console.warn('orderBy não disponível, buscando sem ordenação:', orderByError)
+        const data = await getDocuments<Company>('companies', [])
+        setCompanies(data.sort((a, b) => {
+          const aTime = a.createdAt?.toMillis() || 0
+          const bTime = b.createdAt?.toMillis() || 0
+          return bTime - aTime
+        }))
+      }
     } catch (err) {
       setError('Erro ao carregar empresas')
-      console.error(err)
+      console.error('Erro ao buscar empresas:', err)
     } finally {
       setLoading(false)
     }

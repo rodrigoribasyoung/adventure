@@ -6,11 +6,15 @@
   body {
     @apply bg-background-dark text-white;
     font-family: 'Inter', 'Roboto', system-ui, sans-serif;
-    cursor: url('/assets/brand/navigation_cursor/navigation-cursor-navy.svg') 0 0, auto;
+    cursor: url('/assets/brand/navigation_cursor/navigation-cursor-red-small.svg') 0 0, auto;
   }
   
-  button, a, input, textarea, select {
-    cursor: url('/assets/brand/navigation_cursor/navigation-cursor-navy.svg') 0 0, auto;
+  button, a, [role="button"], .cursor-pointer {
+    cursor: url('/assets/brand/navigation_cursor/navigation-cursor-red-small.svg') 0 0, pointer;
+  }
+  
+  input, textarea, select, [contenteditable], [contenteditable="true"] {
+    cursor: url('/assets/brand/navigation_cursor/navigation-cursor-text-red.svg') 1 10, text;
   }
   
   button:disabled, a:disabled {

@@ -13,11 +13,23 @@ export const useContacts = () => {
     try {
       setLoading(true)
       setError(null)
-      const data = await getDocuments<Contact>('contacts', [orderBy('createdAt', 'desc')])
-      setContacts(data)
+      // Tenta com orderBy, se falhar tenta sem (pode não ter índice criado ainda)
+      try {
+        const data = await getDocuments<Contact>('contacts', [orderBy('createdAt', 'desc')])
+        setContacts(data)
+      } catch (orderByError) {
+        console.warn('orderBy não disponível, buscando sem ordenação:', orderByError)
+        const data = await getDocuments<Contact>('contacts', [])
+        // Ordena localmente
+        setContacts(data.sort((a, b) => {
+          const aTime = a.createdAt?.toMillis() || 0
+          const bTime = b.createdAt?.toMillis() || 0
+          return bTime - aTime
+        }))
+      }
     } catch (err) {
       setError('Erro ao carregar contatos')
-      console.error(err)
+      console.error('Erro ao buscar contatos:', err)
     } finally {
       setLoading(false)
     }

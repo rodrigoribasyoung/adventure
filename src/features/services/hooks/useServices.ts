@@ -13,11 +13,21 @@ export const useServices = () => {
     try {
       setLoading(true)
       setError(null)
-      const data = await getDocuments<Service>('services', [orderBy('createdAt', 'desc')])
-      setServices(data)
+      try {
+        const data = await getDocuments<Service>('services', [orderBy('createdAt', 'desc')])
+        setServices(data)
+      } catch (orderByError) {
+        console.warn('orderBy não disponível, buscando sem ordenação:', orderByError)
+        const data = await getDocuments<Service>('services', [])
+        setServices(data.sort((a, b) => {
+          const aTime = a.createdAt?.toMillis() || 0
+          const bTime = b.createdAt?.toMillis() || 0
+          return bTime - aTime
+        }))
+      }
     } catch (err) {
       setError('Erro ao carregar serviços')
-      console.error(err)
+      console.error('Erro ao buscar serviços:', err)
     } finally {
       setLoading(false)
     }
