@@ -1,0 +1,46 @@
+Desenvolva um aplicativo com banco de dados em firebase (dados em '.firebase')
+Sua função inicial será de CRM.
+Deve ter uma ux bonita e responsiva, com ui fluída.
+Siga parâmetros internacionais de CRM para a estrutura de dados e coleções
+utilize Vite
+Será utilizado o Vercel para deployment vinculado ao Github
+realize versionamentos com commit de assunto e comentário e push no GitHub
+login será pelo google através do firebase
+o crm precisa ser em português brasil, com unidades monetárias em Real (BRL)
+O CRM é focado em serviços
+Preferencialmente que a arquitetura dele e engenharia seja parecida com a do RD Station
+Divida o projeto em etapas funcionais, assim poderemos testar e evoluir de acordo com as features
+Procure desde o início deixar o projeto o mais organizado possível, evitando códigos gigantes
+O CRM deverá ter um chat onde se possa utilizar ele como Whatsapp Web (integração não oficial) de forma que as conversas de atendimentos relacionados a negociações fiquem regitradaas no app mediante algum botão de 'salvar conversa'
+Priorize a organização dos códigos e hierarquia de arquivos com lógicas bem estruturadas, assim será mais fácil versionar e trazer melhorias constantes
+
+
+
+Nome da empresa: Adventure Labs
+Projeto: CRM e Marketing
+
+
+o que é essencial:
+
+1.Pipeline de negociações (modo kanban e modo lista) com buscas, classificações, paginação e filtros avançados
+2.Cadastro de contatos
+3.Cadastro de empresas
+4.Cadastro de serviços
+5.Relatórios
+6.Dashboard com principais métricas e taxas de conversão
+7.Marketing - uma página exclusiva para dashboards e BI pensado em integrações - inicialmente preparado para Meta Ads e Google Ads da empresa em uma etapa posterior para integração de contas de anúncios de clientes
+8. Tarefas ou Atividades (são tarefas padrões com observação que são adicionadas dentro de uma negociação)
+9.Configurações
+-Gerenciamento de funis
+-Gerenciamento de campos padrões e personalizados
+-Gerenciamento de usuários
+-Configuração de relatórios automáticos (e-mails e notificações)
+10.Ajuda
+-Readme para o desenvolvedor
+-Guia do usuário
+-documentação api (página voltada para especificar strings e possíveis integrações futuras)
+
+
+O App deverá ter suas slugs específicas para cada página e aba, facilitando compartilhamentos e refresh de paginas
+O App deverá apresentar avisos de erros na tela sempre que houver qualquer tipo de erro por falta de carregamento, bug ou falta de vínculos
+O App deverá ter atalhos em formulários ou popups em seus cadastros, evitando ter que sair do preenchimento para ir em outra página cadastrar algo que poderia ter um botão de 'Novo' próximo ao campo
