@@ -29,9 +29,6 @@ const removeUndefinedFields = (obj: Record<string, any>): Record<string, any> =>
   }, {} as Record<string, any>)
 }
 
-// Exportar helper para uso externo
-export { removeUndefinedFields }
-
 // Helpers genéricos para CRUD
 export const getDocument = async <T>(collectionName: string, docId: string): Promise<T | null> => {
   try {
@@ -69,16 +66,6 @@ export const getDocuments = async <T>(
     console.error(`[Firestore] Código do erro: ${error.code}, Mensagem: ${error.message}`)
     throw error
   }
-}
-
-// Helper para remover campos undefined do objeto
-const removeUndefinedFields = (obj: Record<string, any>): Record<string, any> => {
-  return Object.entries(obj).reduce((acc, [key, value]) => {
-    if (value !== undefined) {
-      acc[key] = value
-    }
-    return acc
-  }, {} as Record<string, any>)
 }
 
 export const createDocument = async <T extends Record<string, any>>(
