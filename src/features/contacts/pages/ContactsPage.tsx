@@ -31,17 +31,23 @@ const ContactsPage = () => {
   const handleSubmit = async (data: any) => {
     try {
       setFormLoading(true)
+      console.log('[ContactsPage] Submetendo formulário:', data)
       if (selectedContact) {
+        console.log('[ContactsPage] Atualizando contato:', selectedContact.id)
         await updateContact(selectedContact.id, data)
         setToast({ message: 'Contato atualizado com sucesso!', type: 'success', visible: true })
       } else {
-        await createContact(data)
+        console.log('[ContactsPage] Criando novo contato')
+        const id = await createContact(data)
+        console.log('[ContactsPage] Contato criado com ID:', id)
         setToast({ message: 'Contato criado com sucesso!', type: 'success', visible: true })
       }
       setIsModalOpen(false)
       setSelectedContact(undefined)
-    } catch (error) {
-      setToast({ message: 'Erro ao salvar contato', type: 'error', visible: true })
+    } catch (error: any) {
+      console.error('[ContactsPage] Erro ao salvar contato:', error)
+      const errorMessage = error?.message || 'Erro ao salvar contato'
+      setToast({ message: errorMessage, type: 'error', visible: true })
     } finally {
       setFormLoading(false)
     }

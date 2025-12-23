@@ -34,14 +34,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      console.log('[AuthContext] Estado de autenticação mudou:', user ? `Usuário: ${user.email}` : 'Não autenticado')
       setCurrentUser(user)
       
       if (user) {
         // Buscar ou criar dados do usuário no Firestore
         try {
+          console.log('[AuthContext] Buscando dados do usuário:', user.uid)
           let userDoc = await getDocument<User>('users', user.uid)
           
           if (!userDoc) {
+            console.log('[AuthContext] Usuário não encontrado, criando novo documento')
             // Criar documento do usuário se não existir
             const newUserData: Omit<User, 'id' | 'createdAt' | 'updatedAt'> = {
               email: user.email || '',
@@ -51,11 +54,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             }
             await createDocument<User>('users', newUserData)
             userDoc = await getDocument<User>('users', user.uid)
+            console.log('[AuthContext] Usuário criado com sucesso')
+          } else {
+            console.log('[AuthContext] Dados do usuário carregados:', userDoc)
           }
           
           setUserData(userDoc)
-        } catch (error) {
-          console.error('Erro ao buscar dados do usuário:', error)
+        } catch (error: any) {
+          console.error('[AuthContext] Erro ao buscar/criar dados do usuário:', error)
+          console.error('[AuthContext] Código do erro:', error?.code, 'Mensagem:', error?.message)
         }
       } else {
         setUserData(null)

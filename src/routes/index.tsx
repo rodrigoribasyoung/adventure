@@ -40,7 +40,7 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/contatos',
+    path: '/contacts',
     element: (
       <PrivateRoute>
         <ContactsPage />
@@ -48,7 +48,7 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/empresas',
+    path: '/companies',
     element: (
       <PrivateRoute>
         <CompaniesPage />
@@ -56,10 +56,60 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/servicos',
+    path: '/services',
     element: (
       <PrivateRoute>
         <ServicesPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/deals',
+    element: (
+      <PrivateRoute>
+        <div className="flex items-center justify-center min-h-screen bg-background-dark">
+          <div className="text-white">Deals page - Coming soon</div>
+        </div>
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/reports',
+    element: (
+      <PrivateRoute>
+        <div className="flex items-center justify-center min-h-screen bg-background-dark">
+          <div className="text-white">Reports page - Coming soon</div>
+        </div>
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/marketing',
+    element: (
+      <PrivateRoute>
+        <div className="flex items-center justify-center min-h-screen bg-background-dark">
+          <div className="text-white">Marketing page - Coming soon</div>
+        </div>
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/settings',
+    element: (
+      <PrivateRoute>
+        <div className="flex items-center justify-center min-h-screen bg-background-dark">
+          <div className="text-white">Settings page - Coming soon</div>
+        </div>
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/help',
+    element: (
+      <PrivateRoute>
+        <div className="flex items-center justify-center min-h-screen bg-background-dark">
+          <div className="text-white">Help page - Coming soon</div>
+        </div>
       </PrivateRoute>
     ),
   },

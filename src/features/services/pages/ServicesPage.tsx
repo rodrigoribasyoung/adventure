@@ -31,17 +31,23 @@ const ServicesPage = () => {
   const handleSubmit = async (data: any) => {
     try {
       setFormLoading(true)
+      console.log('[ServicesPage] Submetendo formulário:', data)
       if (selectedService) {
+        console.log('[ServicesPage] Atualizando serviço:', selectedService.id)
         await updateService(selectedService.id, data)
         setToast({ message: 'Serviço atualizado com sucesso!', type: 'success', visible: true })
       } else {
-        await createService(data)
+        console.log('[ServicesPage] Criando novo serviço')
+        const id = await createService(data)
+        console.log('[ServicesPage] Serviço criado com ID:', id)
         setToast({ message: 'Serviço criado com sucesso!', type: 'success', visible: true })
       }
       setIsModalOpen(false)
       setSelectedService(undefined)
-    } catch (error) {
-      setToast({ message: 'Erro ao salvar serviço', type: 'error', visible: true })
+    } catch (error: any) {
+      console.error('[ServicesPage] Erro ao salvar serviço:', error)
+      const errorMessage = error?.message || 'Erro ao salvar serviço'
+      setToast({ message: errorMessage, type: 'error', visible: true })
     } finally {
       setFormLoading(false)
     }

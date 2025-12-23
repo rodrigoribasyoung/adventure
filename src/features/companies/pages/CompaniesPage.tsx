@@ -31,17 +31,23 @@ const CompaniesPage = () => {
   const handleSubmit = async (data: any) => {
     try {
       setFormLoading(true)
+      console.log('[CompaniesPage] Submetendo formulário:', data)
       if (selectedCompany) {
+        console.log('[CompaniesPage] Atualizando empresa:', selectedCompany.id)
         await updateCompany(selectedCompany.id, data)
         setToast({ message: 'Empresa atualizada com sucesso!', type: 'success', visible: true })
       } else {
-        await createCompany(data)
+        console.log('[CompaniesPage] Criando nova empresa')
+        const id = await createCompany(data)
+        console.log('[CompaniesPage] Empresa criada com ID:', id)
         setToast({ message: 'Empresa criada com sucesso!', type: 'success', visible: true })
       }
       setIsModalOpen(false)
       setSelectedCompany(undefined)
-    } catch (error) {
-      setToast({ message: 'Erro ao salvar empresa', type: 'error', visible: true })
+    } catch (error: any) {
+      console.error('[CompaniesPage] Erro ao salvar empresa:', error)
+      const errorMessage = error?.message || 'Erro ao salvar empresa'
+      setToast({ message: errorMessage, type: 'error', visible: true })
     } finally {
       setFormLoading(false)
     }

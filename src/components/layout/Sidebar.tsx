@@ -8,14 +8,14 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/' },
-  { label: 'Negociações', path: '/negociacoes' },
-  { label: 'Contatos', path: '/contatos' },
-  { label: 'Empresas', path: '/empresas' },
-  { label: 'Serviços', path: '/servicos' },
-  { label: 'Relatórios', path: '/relatorios' },
+  { label: 'Negociações', path: '/deals' },
+  { label: 'Contatos', path: '/contacts' },
+  { label: 'Empresas', path: '/companies' },
+  { label: 'Serviços', path: '/services' },
+  { label: 'Relatórios', path: '/reports' },
   { label: 'Marketing', path: '/marketing' },
-  { label: 'Configurações', path: '/configuracoes' },
-  { label: 'Ajuda', path: '/ajuda' },
+  { label: 'Configurações', path: '/settings' },
+  { label: 'Ajuda', path: '/help' },
 ]
 
 export const Sidebar = () => {

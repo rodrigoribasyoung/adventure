@@ -40,15 +40,20 @@ export const getDocuments = async <T>(
   constraints: QueryConstraint[] = []
 ): Promise<T[]> => {
   try {
+    console.log(`[Firestore] Buscando documentos de ${collectionName}`)
     const q = query(collection(db, collectionName), ...constraints)
     const querySnapshot = await getDocs(q)
     
-    return querySnapshot.docs.map(doc => ({
+    const data = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as T[]
-  } catch (error) {
-    console.error(`Erro ao buscar documentos de ${collectionName}:`, error)
+    
+    console.log(`[Firestore] ${data.length} documentos encontrados em ${collectionName}`)
+    return data
+  } catch (error: any) {
+    console.error(`[Firestore] Erro ao buscar documentos de ${collectionName}:`, error)
+    console.error(`[Firestore] Código do erro: ${error.code}, Mensagem: ${error.message}`)
     throw error
   }
 }
@@ -63,10 +68,13 @@ export const createDocument = async <T extends Record<string, any>>(
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     }
+    console.log(`[Firestore] Criando documento em ${collectionName}:`, docData)
     const docRef = await addDoc(collection(db, collectionName), docData)
+    console.log(`[Firestore] Documento criado com sucesso: ${docRef.id}`)
     return docRef.id
-  } catch (error) {
-    console.error(`Erro ao criar documento em ${collectionName}:`, error)
+  } catch (error: any) {
+    console.error(`[Firestore] Erro ao criar documento em ${collectionName}:`, error)
+    console.error(`[Firestore] Código do erro: ${error.code}, Mensagem: ${error.message}`)
     throw error
   }
 }
