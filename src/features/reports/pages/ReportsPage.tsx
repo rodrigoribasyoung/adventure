@@ -3,9 +3,11 @@ import { Container } from '@/components/layout/Container'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { SalesReportModal } from '../components/SalesReportModal'
+import { ConversionReportModal } from '../components/ConversionReportModal'
 
 const ReportsPage = () => {
   const [isSalesReportOpen, setIsSalesReportOpen] = useState(false)
+  const [isConversionReportOpen, setIsConversionReportOpen] = useState(false)
 
   return (
     <Container>
@@ -40,7 +42,11 @@ const ReportsPage = () => {
               <p className="text-white/70 text-sm mb-4">
                 Taxa de conversão por estágio e período
               </p>
-              <Button variant="primary-red" className="w-full">
+              <Button 
+                variant="primary-red" 
+                className="w-full"
+                onClick={() => setIsConversionReportOpen(true)}
+              >
                 Gerar Relatório
               </Button>
             </div>
@@ -73,6 +79,11 @@ const ReportsPage = () => {
       <SalesReportModal
         isOpen={isSalesReportOpen}
         onClose={() => setIsSalesReportOpen(false)}
+      />
+
+      <ConversionReportModal
+        isOpen={isConversionReportOpen}
+        onClose={() => setIsConversionReportOpen(false)}
       />
     </Container>
   )
