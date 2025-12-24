@@ -1,14 +1,24 @@
+import { useState } from 'react'
 import { Container } from '@/components/layout/Container'
 import { useDashboardStats } from '../hooks/useDashboardStats'
 import { MetricCard } from '../components/MetricCard'
 import { DealsByStageChart } from '../components/DealsByStageChart'
 import { RecentDealsList } from '../components/RecentDealsList'
+import { PeriodFilter, PeriodOption } from '../components/PeriodFilter'
 import { useNavigate } from 'react-router-dom'
 import { formatCurrency } from '@/lib/utils/formatCurrency'
 
 const DashboardPage = () => {
-  const { stats, loading } = useDashboardStats()
+  const [period, setPeriod] = useState<PeriodOption>('all')
+  const [customStartDate, setCustomStartDate] = useState<Date | undefined>()
+  const [customEndDate, setCustomEndDate] = useState<Date | undefined>()
+  const { stats, loading } = useDashboardStats(period, customStartDate, customEndDate)
   const navigate = useNavigate()
+
+  const handleCustomDateRange = (startDate: Date, endDate: Date) => {
+    setCustomStartDate(startDate)
+    setCustomEndDate(endDate)
+  }
 
   const handleDealClick = (_deal?: any) => {
     navigate(`/deals`)
@@ -25,12 +35,21 @@ const DashboardPage = () => {
   }
 
   return (
-    <Container>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
-          <p className="text-white/70">Visão geral do seu pipeline de vendas</p>
-        </div>
+      <Container>
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
+              <p className="text-white/70">Visão geral do seu pipeline de vendas</p>
+            </div>
+            <PeriodFilter
+              selectedPeriod={period}
+              onPeriodChange={setPeriod}
+              onCustomDateRange={handleCustomDateRange}
+              customStartDate={customStartDate}
+              customEndDate={customEndDate}
+            />
+          </div>
 
         {/* Cards de Métricas Principais */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -50,32 +69,54 @@ const DashboardPage = () => {
           
           <MetricCard
             title="Taxa de Conversão"
-            value={stats.conversionRate}
+            value={stats.conversionRate.toFixed(1)}
             subtitle={`${stats.wonDeals} ganhas / ${stats.wonDeals + stats.lostDeals} fechadas`}
             format="percentage"
           />
           
           <MetricCard
-            title="Ticket Médio"
-            value={stats.averageDealValue}
-            subtitle="Valor médio por negociação"
-            format="currency"
+            title="Taxa de Perda"
+            value={stats.lossRate.toFixed(1)}
+            subtitle={`${stats.lostDeals} perdidas`}
+            format="percentage"
           />
         </div>
 
         {/* Cards Secundários */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <MetricCard
+            title="Ticket Médio"
+            value={stats.averageDealValue}
+            subtitle="Valor médio por negociação"
+            format="currency"
+          />
+
+          {stats.averageTimeToClose !== undefined && (
+            <MetricCard
+              title="Tempo Médio de Fechamento"
+              value={`${Math.round(stats.averageTimeToClose)} dias`}
+              subtitle="Baseado em negociações fechadas"
+            />
+          )}
+          
+          <MetricCard
             title="Negociações Ativas"
             value={stats.activeDeals}
-            subtitle={formatCurrency(stats.activeValue)}
+            subtitle={formatCurrency(stats.activeValue, 'BRL')}
             format="number"
           />
           
           <MetricCard
             title="Vendidas"
             value={stats.wonDeals}
-            subtitle={formatCurrency(stats.wonValue)}
+            subtitle={formatCurrency(stats.wonValue, 'BRL')}
+            format="number"
+          />
+          
+          <MetricCard
+            title="Perdidas"
+            value={stats.lostDeals}
+            subtitle={formatCurrency(stats.lostValue, 'BRL')}
             format="number"
           />
           

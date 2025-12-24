@@ -4,10 +4,12 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { SalesReportModal } from '../components/SalesReportModal'
 import { ConversionReportModal } from '../components/ConversionReportModal'
+import { PipelineReportModal } from '../components/PipelineReportModal'
 
 const ReportsPage = () => {
   const [isSalesReportOpen, setIsSalesReportOpen] = useState(false)
   const [isConversionReportOpen, setIsConversionReportOpen] = useState(false)
+  const [isPipelineReportOpen, setIsPipelineReportOpen] = useState(false)
 
   return (
     <Container>
@@ -59,7 +61,11 @@ const ReportsPage = () => {
               <p className="text-white/70 text-sm mb-4">
                 Distribuição, valor e tempo médio em cada estágio
               </p>
-              <Button variant="primary-red" className="w-full">
+              <Button 
+                variant="primary-red" 
+                className="w-full"
+                onClick={() => setIsPipelineReportOpen(true)}
+              >
                 Gerar Relatório
               </Button>
             </div>
@@ -84,6 +90,11 @@ const ReportsPage = () => {
       <ConversionReportModal
         isOpen={isConversionReportOpen}
         onClose={() => setIsConversionReportOpen(false)}
+      />
+
+      <PipelineReportModal
+        isOpen={isPipelineReportOpen}
+        onClose={() => setIsPipelineReportOpen(false)}
       />
     </Container>
   )
