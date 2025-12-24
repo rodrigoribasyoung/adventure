@@ -101,6 +101,7 @@ export const useDashboardStats = (period: PeriodOption = 'all', customStartDate?
     }
 
     // Calcular estatísticas básicas
+    const totalDeals = filteredDeals.length
     const activeDeals = filteredDeals.filter(d => d.status === 'active').length
     const wonDeals = filteredDeals.filter(d => d.status === 'won').length
     const lostDeals = filteredDeals.filter(d => d.status === 'lost').length
