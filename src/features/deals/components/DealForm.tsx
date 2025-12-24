@@ -102,6 +102,14 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
 
   const handleSubmitForm = async (data: DealFormData) => {
     try {
+      if (!activeFunnel) {
+        throw new Error('É necessário ter um funil ativo para criar negociações. Por favor, crie um funil primeiro.')
+      }
+      
+      if (!data.stage || data.stage.trim() === '') {
+        throw new Error('Selecione um estágio para a negociação.')
+      }
+      
       console.log('[DealForm] Dados do formulário:', data)
       
       const submitData: any = {
@@ -185,7 +193,17 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
         </select>
       </div>
 
-      {activeFunnel && (
+      {!activeFunnel ? (
+        <div className="p-4 bg-yellow-500/20 border border-yellow-500/50 rounded-lg">
+          <p className="text-yellow-400 text-sm font-medium mb-2">
+            ⚠️ Nenhum funil ativo encontrado
+          </p>
+          <p className="text-yellow-300/80 text-sm">
+            É necessário criar e ativar um funil antes de criar negociações. 
+            <a href="/funnels" className="underline ml-1">Criar funil agora</a>
+          </p>
+        </div>
+      ) : (
         <div>
           <label className="block text-sm font-medium text-white/90 mb-2">
             Estágio *
@@ -194,6 +212,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
             {...register('stage')}
             className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
           >
+            <option value="">Selecione um estágio</option>
             {activeFunnel.stages
               .sort((a, b) => a.order - b.order)
               .map(stage => (

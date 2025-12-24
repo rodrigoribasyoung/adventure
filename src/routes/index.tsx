@@ -6,6 +6,7 @@ import ContactsPage from '@/features/contacts/pages/ContactsPage'
 import CompaniesPage from '@/features/companies/pages/CompaniesPage'
 import ServicesPage from '@/features/services/pages/ServicesPage'
 import DealsPage from '@/features/deals/pages/DealsPage'
+import FunnelsPage from '@/features/funnels/pages/FunnelsPage'
 import { ReactNode } from 'react'
 
 // Componente para proteger rotas privadas
@@ -69,6 +70,14 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <DealsPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/funnels',
+    element: (
+      <PrivateRoute>
+        <FunnelsPage />
       </PrivateRoute>
     ),
   },
