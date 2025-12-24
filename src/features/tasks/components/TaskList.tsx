@@ -10,7 +10,6 @@ interface TaskListProps {
   onDelete: (id: string) => void
   onToggleStatus: (id: string) => void
   loading?: boolean
-  showDealInfo?: boolean
 }
 
 const TASK_TYPE_LABELS: Record<string, string> = {
@@ -31,7 +30,6 @@ export const TaskList = ({
   onDelete, 
   onToggleStatus, 
   loading,
-  showDealInfo = false 
 }: TaskListProps) => {
   if (loading) {
     return (
