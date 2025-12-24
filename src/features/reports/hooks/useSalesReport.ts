@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { Deal } from '@/types'
 import { useDeals } from '@/features/deals/hooks/useDeals'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
 
