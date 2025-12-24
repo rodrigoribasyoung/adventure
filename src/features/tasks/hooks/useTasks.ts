@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Task } from '@/types'
-import { getDocuments, createDocument, updateDocument, deleteDocument, orderBy, Timestamp } from '@/lib/firebase/db'
+import { getDocuments, createDocument, updateDocument, deleteDocument, orderBy } from '@/lib/firebase/db'
 import { useAuth } from '@/contexts/AuthContext'
 
 export const useTasks = (dealId?: string) => {
