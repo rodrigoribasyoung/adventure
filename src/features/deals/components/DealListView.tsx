@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react'
 import { Deal } from '@/types'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { Pagination } from '@/components/ui/Pagination'
 import { formatCurrency } from '@/lib/utils/formatCurrency'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -10,6 +12,7 @@ interface DealListViewProps {
   onDealClick: (deal: Deal) => void
   onEdit: (deal: Deal) => void
   onDelete: (id: string) => void
+  onOpenTasks?: (deal: Deal) => void
   sortBy?: 'value' | 'createdAt' | 'title' | 'probability' | 'expectedCloseDate'
   sortOrder?: 'asc' | 'desc'
   onSortChange?: (sortBy: 'value' | 'createdAt' | 'title' | 'probability' | 'expectedCloseDate', sortOrder: 'asc' | 'desc') => void
@@ -20,12 +23,16 @@ export const DealListView = ({
   deals, 
   onDealClick, 
   onEdit, 
-  onDelete, 
+  onDelete,
+  onOpenTasks,
   sortBy = 'createdAt',
   sortOrder = 'desc',
   onSortChange,
   loading 
 }: DealListViewProps) => {
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(25)
+
   const handleSortChange = (newSortBy: 'value' | 'createdAt' | 'title' | 'probability' | 'expectedCloseDate') => {
     if (onSortChange) {
       // Se já está ordenando por este campo, inverte a ordem
@@ -35,7 +42,14 @@ export const DealListView = ({
         onSortChange(newSortBy, 'desc')
       }
     }
+    // Resetar para primeira página ao mudar ordenação
+    setCurrentPage(1)
   }
+
+  // Resetar página quando os dados mudarem
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [deals.length])
 
   const sortedDeals = [...deals].sort((a, b) => {
     let aVal: any, bVal: any
@@ -70,6 +84,17 @@ export const DealListView = ({
       return aVal < bVal ? 1 : -1
     }
   })
+
+  // Calcular paginação
+  const totalPages = Math.ceil(sortedDeals.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedDeals = sortedDeals.slice(startIndex, endIndex)
+
+  // Resetar página se necessário quando os dados mudarem
+  if (currentPage > totalPages && totalPages > 0) {
+    setCurrentPage(1)
+  }
 
   if (loading) {
     return (
@@ -106,7 +131,7 @@ export const DealListView = ({
         </div>
       )}
 
-      {sortedDeals.length === 0 ? (
+      {paginatedDeals.length === 0 ? (
         <Card>
           <div className="text-center py-12">
             <p className="text-white/70 mb-4">
@@ -115,8 +140,9 @@ export const DealListView = ({
           </div>
         </Card>
       ) : (
-        <div className="space-y-3">
-          {sortedDeals.map((deal) => (
+        <>
+          <div className="space-y-3">
+            {paginatedDeals.map((deal) => (
             <Card
               key={deal.id}
               variant="elevated"
@@ -157,6 +183,18 @@ export const DealListView = ({
                 </div>
 
                 <div className="flex gap-2">
+                  {onOpenTasks && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onOpenTasks(deal)
+                      }}
+                    >
+                      Tarefas
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -182,8 +220,23 @@ export const DealListView = ({
                 </div>
               </div>
             </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+
+          {sortedDeals.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={sortedDeals.length}
+              onItemsPerPageChange={(newItemsPerPage) => {
+                setItemsPerPage(newItemsPerPage)
+                setCurrentPage(1) // Resetar para primeira página
+              }}
+            />
+          )}
+        </>
       )}
     </div>
   )

@@ -11,10 +11,11 @@ interface DealKanbanProps {
   stages: FunnelStage[]
   onDealClick: (deal: Deal) => void
   onStageChange: (dealId: string, newStage: string) => void
+  onOpenTasks?: (deal: Deal) => void
   loading?: boolean
 }
 
-export const DealKanban = ({ deals, stages, onDealClick, onStageChange, loading }: DealKanbanProps) => {
+export const DealKanban = ({ deals, stages, onDealClick, onStageChange, onOpenTasks, loading }: DealKanbanProps) => {
   const [draggedDeal, setDraggedDeal] = useState<Deal | null>(null)
 
   const sortedStages = [...stages].sort((a, b) => a.order - b.order)
@@ -114,6 +115,17 @@ export const DealKanban = ({ deals, stages, onDealClick, onStageChange, loading 
                       >
                         📄 Ver Contrato
                       </a>
+                    )}
+                    {onOpenTasks && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onOpenTasks(deal)
+                        }}
+                        className="w-full mt-2 px-3 py-1.5 text-xs bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white/90 transition-all"
+                      >
+                        📋 Tarefas
+                      </button>
                     )}
                   </div>
                 </Card>

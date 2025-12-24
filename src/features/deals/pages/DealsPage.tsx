@@ -7,6 +7,7 @@ import { DealFilters as DealFiltersComponent, DealFilters as DealFiltersType } f
 import { Modal } from '@/components/ui/Modal'
 import { Card } from '@/components/ui/Card'
 import { DealCloseModal } from '@/components/deals/DealCloseModal'
+import { DealTasksModal } from '../components/DealTasksModal'
 import { useDeals } from '../hooks/useDeals'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
@@ -41,6 +42,7 @@ const DealsPage = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false)
+  const [isTasksModalOpen, setIsTasksModalOpen] = useState(false)
   const [selectedDeal, setSelectedDeal] = useState<Deal | undefined>()
   const [formLoading, setFormLoading] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; visible: boolean }>({
@@ -62,6 +64,11 @@ const DealsPage = () => {
   const handleDealClick = (deal: Deal) => {
     // TODO: Abrir página de detalhes da negociação
     handleEdit(deal)
+  }
+
+  const handleOpenTasks = (deal: Deal) => {
+    setSelectedDeal(deal)
+    setIsTasksModalOpen(true)
   }
 
   const handleSubmit = async (data: any) => {
@@ -220,6 +227,7 @@ const DealsPage = () => {
                 stages={stages}
                 onDealClick={handleDealClick}
                 onStageChange={handleStageChange}
+                onOpenTasks={handleOpenTasks}
                 loading={loading}
               />
             ) : (
@@ -228,6 +236,7 @@ const DealsPage = () => {
                 onDealClick={handleDealClick}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onOpenTasks={handleOpenTasks}
                 sortBy={sortBy}
                 sortOrder={sortOrder}
                 onSortChange={handleSortChange}
@@ -268,6 +277,18 @@ const DealsPage = () => {
         onConfirm={handleCloseDeal}
         loading={formLoading}
       />
+
+      {selectedDeal && (
+        <DealTasksModal
+          isOpen={isTasksModalOpen}
+          dealId={selectedDeal.id}
+          dealTitle={selectedDeal.title}
+          onClose={() => {
+            setIsTasksModalOpen(false)
+            setSelectedDeal(undefined)
+          }}
+        />
+      )}
 
       <Toast
         message={toast.message}
