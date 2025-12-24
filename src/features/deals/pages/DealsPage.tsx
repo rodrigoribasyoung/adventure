@@ -3,21 +3,42 @@ import { Container } from '@/components/layout/Container'
 import { DealKanban } from '../components/DealKanban'
 import { DealListView } from '../components/DealListView'
 import { DealForm } from '../components/DealForm'
+import { DealFilters as DealFiltersComponent, DealFilters as DealFiltersType } from '../components/DealFilters'
 import { Modal } from '@/components/ui/Modal'
 import { Card } from '@/components/ui/Card'
 import { DealCloseModal } from '@/components/deals/DealCloseModal'
 import { useDeals } from '../hooks/useDeals'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
+import { useContacts } from '@/features/contacts/hooks/useContacts'
+import { useCompanies } from '@/features/companies/hooks/useCompanies'
 import { Deal } from '@/types'
 import { Toast } from '@/components/ui/Toast'
 import { Button } from '@/components/ui/Button'
+import { filterDeals } from '../utils/filterDeals'
 
 type ViewMode = 'kanban' | 'list'
+
+const initialFilters: DealFiltersType = {
+  search: '',
+  status: [],
+  stage: [],
+  contactId: '',
+  companyId: '',
+  minValue: null,
+  maxValue: null,
+  dateFrom: '',
+  dateTo: '',
+}
 
 const DealsPage = () => {
   const { deals, loading, createDeal, updateDeal, deleteDeal, updateDealStage, closeDeal } = useDeals()
   const { activeFunnel } = useFunnels()
+  const { contacts } = useContacts()
+  const { companies } = useCompanies()
   const [viewMode, setViewMode] = useState<ViewMode>('kanban')
+  const [filters, setFilters] = useState<DealFiltersType>(initialFilters)
+  const [sortBy, setSortBy] = useState<'value' | 'createdAt' | 'title' | 'probability' | 'expectedCloseDate'>('createdAt')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false)
   const [selectedDeal, setSelectedDeal] = useState<Deal | undefined>()
@@ -126,6 +147,23 @@ const DealsPage = () => {
 
   const stages = activeFunnel?.stages || []
 
+  // Aplicar filtros
+  const filteredDeals = filterDeals(
+    deals,
+    filters,
+    contacts.map(c => ({ id: c.id, name: c.name })),
+    companies.map(c => ({ id: c.id, name: c.name }))
+  )
+
+  const handleFiltersReset = () => {
+    setFilters(initialFilters)
+  }
+
+  const handleSortChange = (newSortBy: 'value' | 'createdAt' | 'title' | 'probability' | 'expectedCloseDate', newSortOrder: 'asc' | 'desc') => {
+    setSortBy(newSortBy)
+    setSortOrder(newSortOrder)
+  }
+
   return (
     <Container>
       <div className="space-y-6">
@@ -166,22 +204,37 @@ const DealsPage = () => {
               <p className="text-white/50 text-sm">Configure um funil em Configurações</p>
             </div>
           </Card>
-        ) : viewMode === 'kanban' ? (
-          <DealKanban
-            deals={deals}
-            stages={stages}
-            onDealClick={handleDealClick}
-            onStageChange={handleStageChange}
-            loading={loading}
-          />
         ) : (
-          <DealListView
-            deals={deals}
-            onDealClick={handleDealClick}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            loading={loading}
-          />
+          <>
+            {viewMode === 'list' && (
+              <DealFiltersComponent
+                filters={filters}
+                onFiltersChange={setFilters}
+                onReset={handleFiltersReset}
+              />
+            )}
+            
+            {viewMode === 'kanban' ? (
+              <DealKanban
+                deals={filteredDeals}
+                stages={stages}
+                onDealClick={handleDealClick}
+                onStageChange={handleStageChange}
+                loading={loading}
+              />
+            ) : (
+              <DealListView
+                deals={filteredDeals}
+                onDealClick={handleDealClick}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortChange={handleSortChange}
+                loading={loading}
+              />
+            )}
+          </>
         )}
       </div>
 
