@@ -1,7 +1,7 @@
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Funnel, FunnelStage } from '@/types'
+import { Funnel } from '@/types'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 
@@ -102,7 +102,7 @@ export const FunnelForm = ({ funnel, onSubmit, onCancel, loading = false }: Funn
       // Atualizar ordem após mover
       setTimeout(() => {
         const stages = watch('stages')
-        stages.forEach((stage, i) => {
+        stages.forEach((_, i) => {
           setValue(`stages.${i}.order`, i + 1)
         })
       }, 0)
@@ -115,7 +115,7 @@ export const FunnelForm = ({ funnel, onSubmit, onCancel, loading = false }: Funn
       // Atualizar ordem após mover
       setTimeout(() => {
         const stages = watch('stages')
-        stages.forEach((stage, i) => {
+        stages.forEach((_, i) => {
           setValue(`stages.${i}.order`, i + 1)
         })
       }, 0)
