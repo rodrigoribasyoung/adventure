@@ -46,6 +46,23 @@ O aplicativo estará disponível em `http://localhost:5173`
 npm run build
 ```
 
+## Validação
+
+Antes de fazer commit, é recomendado validar o código:
+
+```bash
+# Verificar tipos TypeScript
+npm run type-check
+
+# Verificar lint
+npm run lint
+
+# Executar ambas as validações
+npm run validate
+```
+
+**Nota:** Um git hook pre-commit foi configurado para executar validações automaticamente antes de cada commit. Se o hook não funcionar, você pode executar `npm run validate` manualmente antes de fazer commit.
+
 ## Estrutura do Projeto
 
 ```

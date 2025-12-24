@@ -6,7 +6,10 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "type-check": "tsc --noEmit",
+    "validate": "npm run type-check && npm run lint",
+    "precommit": "npm run validate"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.0",

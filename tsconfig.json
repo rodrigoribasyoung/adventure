@@ -17,7 +17,7 @@
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedParameters": true, // Parâmetros com prefixo _ são permitidos automaticamente
     "noFallthroughCasesInSwitch": true,
 
     /* Path aliases */

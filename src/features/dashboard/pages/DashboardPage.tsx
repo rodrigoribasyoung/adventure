@@ -10,7 +10,7 @@ const DashboardPage = () => {
   const { stats, loading } = useDashboardStats()
   const navigate = useNavigate()
 
-  const handleDealClick = (deal: any) => {
+  const handleDealClick = (_deal?: any) => {
     navigate(`/deals`)
   }
 
