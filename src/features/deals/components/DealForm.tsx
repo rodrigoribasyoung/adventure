@@ -25,7 +25,10 @@ const dealSchema = z.object({
   assignedTo: z.string().optional(),
   paymentType: z.enum(['cash', 'installment']).optional(),
   paymentMethod: z.enum(['pix', 'boleto', 'credit_card', 'debit_card', 'bank_transfer', 'exchange', 'other']).optional(),
-  contractUrl: z.string().url('URL inválida').optional().or(z.literal('')),
+  contractUrl: z.union([
+    z.string().url('URL inválida'),
+    z.literal('')
+  ]).optional(),
 })
 
 type DealFormData = z.infer<typeof dealSchema>
@@ -68,6 +71,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
       : {
           serviceIds: [],
           probability: 50,
+          value: 0,
           stage: activeFunnel?.stages[0]?.id || '',
         },
   })
@@ -97,31 +101,42 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
   }
 
   const handleSubmitForm = async (data: DealFormData) => {
-    const submitData: any = {
-      ...data,
-      companyId: data.companyId || undefined,
-      assignedTo: data.assignedTo || undefined,
-      paymentType: data.paymentType || undefined,
-      paymentMethod: data.paymentMethod || undefined,
-    }
-    
-    if (data.expectedCloseDate) {
-      submitData.expectedCloseDate = FirestoreTimestamp.fromDate(new Date(data.expectedCloseDate))
-    }
-    
-    // Encurtar URL do contrato se existir
-    if (data.contractUrl) {
-      try {
-        submitData.contractUrl = await shortenUrl(data.contractUrl)
-      } catch (error) {
-        console.warn('Erro ao encurtar URL, usando URL original:', error)
-        submitData.contractUrl = data.contractUrl
+    try {
+      console.log('[DealForm] Dados do formulário:', data)
+      
+      const submitData: any = {
+        title: data.title,
+        contactId: data.contactId,
+        stage: data.stage,
+        value: data.value,
+        probability: data.probability,
+        serviceIds: data.serviceIds || [],
+        companyId: data.companyId && typeof data.companyId === 'string' && data.companyId.trim() !== '' ? data.companyId : undefined,
+        assignedTo: data.assignedTo && typeof data.assignedTo === 'string' && data.assignedTo.trim() !== '' ? data.assignedTo : undefined,
+        paymentType: data.paymentType || undefined,
+        paymentMethod: data.paymentMethod || undefined,
       }
-    } else {
-      submitData.contractUrl = undefined
+      
+      if (data.expectedCloseDate && data.expectedCloseDate.trim() !== '') {
+        submitData.expectedCloseDate = FirestoreTimestamp.fromDate(new Date(data.expectedCloseDate))
+      }
+      
+      // Encurtar URL do contrato se existir
+      if (data.contractUrl && data.contractUrl.trim() !== '') {
+        try {
+          submitData.contractUrl = await shortenUrl(data.contractUrl)
+        } catch (error) {
+          console.warn('Erro ao encurtar URL, usando URL original:', error)
+          submitData.contractUrl = data.contractUrl
+        }
+      }
+      
+      console.log('[DealForm] Dados preparados para envio:', submitData)
+      await onSubmit(submitData)
+    } catch (error) {
+      console.error('[DealForm] Erro ao preparar dados:', error)
+      throw error
     }
-    
-    await onSubmit(submitData)
   }
 
   return (
