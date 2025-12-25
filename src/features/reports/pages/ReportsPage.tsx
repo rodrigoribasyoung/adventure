@@ -74,9 +74,9 @@ const ReportsPage = () => {
 
         <Card>
           <div className="p-6">
-            <h2 className="text-xl font-semibold text-white mb-4">Relatórios em Desenvolvimento</h2>
+            <h2 className="text-xl font-semibold text-white mb-4">Exportação de Relatórios</h2>
             <p className="text-white/70">
-              Em breve você poderá gerar relatórios detalhados e exportá-los em PDF, Excel ou CSV.
+              Todos os relatórios podem ser exportados em formato CSV ou PDF. Utilize os botões de exportação disponíveis em cada relatório.
             </p>
           </div>
         </Card>

@@ -118,3 +118,4 @@ export const FunnelList = ({ funnels, onEdit, onDelete, onSetActive, loading }: 
   )
 }
 
+

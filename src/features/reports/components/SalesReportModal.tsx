@@ -6,6 +6,8 @@ import { Card } from '@/components/ui/Card'
 import { useSalesReport, SalesReportFilters } from '../hooks/useSalesReport'
 import { formatCurrency } from '@/lib/utils/formatCurrency'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
+import { exportSalesReportToCSV, exportSalesReportToPDF } from '@/lib/utils/exportReport'
+import { Toast } from '@/components/ui/Toast'
 
 interface SalesReportModalProps {
   isOpen: boolean
@@ -16,6 +18,35 @@ export const SalesReportModal = ({ isOpen, onClose }: SalesReportModalProps) => 
   const { activeFunnel } = useFunnels()
   const [filters, setFilters] = useState<SalesReportFilters>({})
   const { reportData, loading } = useSalesReport(filters)
+  const [exportLoading, setExportLoading] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; visible: boolean }>({
+    message: '',
+    type: 'success',
+    visible: false,
+  })
+
+  const handleExportCSV = () => {
+    if (!reportData) return
+    try {
+      exportSalesReportToCSV(reportData, filters)
+      setToast({ message: 'Relatório exportado para CSV com sucesso!', type: 'success', visible: true })
+    } catch (error) {
+      setToast({ message: 'Erro ao exportar CSV', type: 'error', visible: true })
+    }
+  }
+
+  const handleExportPDF = async () => {
+    if (!reportData) return
+    try {
+      setExportLoading(true)
+      await exportSalesReportToPDF(reportData, filters)
+      setToast({ message: 'Relatório exportado para PDF com sucesso!', type: 'success', visible: true })
+    } catch (error: any) {
+      setToast({ message: error.message || 'Erro ao exportar PDF', type: 'error', visible: true })
+    } finally {
+      setExportLoading(false)
+    }
+  }
 
 
   return (
@@ -198,12 +229,39 @@ export const SalesReportModal = ({ isOpen, onClose }: SalesReportModalProps) => 
           </div>
         ) : null}
 
-        <div className="flex justify-end">
-          <Button variant="primary-red" onClick={onClose}>
-            Fechar
-          </Button>
+        <div className="flex justify-between items-center">
+          {reportData && (
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                onClick={handleExportCSV}
+                disabled={exportLoading}
+              >
+                Exportar CSV
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={handleExportPDF}
+                disabled={exportLoading}
+              >
+                {exportLoading ? 'Exportando...' : 'Exportar PDF'}
+              </Button>
+            </div>
+          )}
+          <div className="flex gap-3 ml-auto">
+            <Button variant="primary-red" onClick={onClose}>
+              Fechar
+            </Button>
+          </div>
         </div>
       </div>
+
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.visible}
+        onClose={() => setToast({ ...toast, visible: false })}
+      />
     </Modal>
   )
 }

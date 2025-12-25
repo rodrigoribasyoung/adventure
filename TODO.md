@@ -195,3 +195,4 @@ Lista de tarefas e melhorias pendentes para o projeto.
 - Priorizar tarefas baseado no feedback dos usuários
 - Revisar periodicamente e atualizar prioridades
 
+
