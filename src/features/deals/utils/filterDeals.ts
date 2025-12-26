@@ -89,3 +89,4 @@ export const filterDeals = (deals: Deal[], filters: DealFilters, contacts: Array
 }
 
 
+

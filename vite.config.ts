@@ -11,5 +11,18 @@ export default defineConfig({
     },
   },
   publicDir: 'public',
+  build: {
+    rollupOptions: {
+      output: {
+        // Garantir que o service worker seja copiado
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name === 'sw.js') {
+            return 'sw.js'
+          }
+          return 'assets/[name]-[hash][extname]'
+        },
+      },
+    },
+  },
 })
 

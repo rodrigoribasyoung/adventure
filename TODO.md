@@ -196,3 +196,4 @@ Lista de tarefas e melhorias pendentes para o projeto.
 - Revisar periodicamente e atualizar prioridades
 
 
+

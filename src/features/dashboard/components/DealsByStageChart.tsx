@@ -58,3 +58,4 @@ export const DealsByStageChart = ({ data, maxValue }: DealsByStageChartProps) =>
 }
 
 
+

@@ -96,3 +96,4 @@ export const RecentDealsList = ({ deals, onDealClick }: RecentDealsListProps) =>
 }
 
 
+

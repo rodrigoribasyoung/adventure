@@ -1,14 +1,20 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Deal } from '@/types'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { Modal } from '@/components/ui/Modal'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { useCompanies } from '@/features/companies/hooks/useCompanies'
 import { useServices } from '@/features/services/hooks/useServices'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
+import { useCustomFields } from '@/features/customFields/hooks/useCustomFields'
+import { RenderCustomFields } from '@/components/customFields/RenderCustomFields'
+import { ContactForm } from '@/features/contacts/components/ContactForm'
+import { CompanyForm } from '@/features/companies/components/CompanyForm'
+import { QuickCreateButton } from '@/components/forms/QuickCreateButton'
 import { formatCurrency } from '@/lib/utils/formatCurrency'
 import { shortenUrl } from '@/lib/utils/shortenUrl'
 import { Timestamp as FirestoreTimestamp } from 'firebase/firestore'
@@ -29,6 +35,7 @@ const dealSchema = z.object({
     z.string().url('URL inválida'),
     z.literal('')
   ]).optional(),
+  customFields: z.record(z.any()).optional(),
 })
 
 type DealFormData = z.infer<typeof dealSchema>
@@ -41,18 +48,17 @@ interface DealFormProps {
 }
 
 export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealFormProps) => {
-  const { contacts } = useContacts()
-  const { companies } = useCompanies()
+  const { contacts, createContact } = useContacts()
+  const { companies, createCompany } = useCompanies()
   const { services } = useServices()
   const { activeFunnel } = useFunnels()
+  const { customFields } = useCustomFields('deal')
+  
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false)
+  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
+  const [quickCreateLoading, setQuickCreateLoading] = useState(false)
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<DealFormData>({
+  const form = useForm<DealFormData>({
     resolver: zodResolver(dealSchema),
     defaultValues: deal
       ? {
@@ -67,19 +73,83 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
             : '',
           serviceIds: deal.serviceIds || [],
           assignedTo: deal.assignedTo || '',
+          customFields: deal.customFields || {},
         }
       : {
           serviceIds: [],
           probability: 50,
           value: 0,
           stage: activeFunnel?.stages[0]?.id || '',
+          customFields: {},
         },
   })
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    control,
+    formState: { errors },
+  } = form
+
+  useEffect(() => {
+    form.reset(deal
+      ? {
+          title: deal.title,
+          contactId: deal.contactId,
+          companyId: deal.companyId || '',
+          stage: deal.stage,
+          value: deal.value,
+          probability: deal.probability,
+          expectedCloseDate: deal.expectedCloseDate
+            ? new Date(deal.expectedCloseDate.toMillis()).toISOString().split('T')[0]
+            : '',
+          serviceIds: deal.serviceIds || [],
+          assignedTo: deal.assignedTo || '',
+          customFields: deal.customFields || {},
+        }
+      : {
+          serviceIds: [],
+          probability: 50,
+          value: 0,
+          stage: activeFunnel?.stages[0]?.id || '',
+          customFields: {},
+        })
+  }, [deal, activeFunnel, form])
 
   const selectedServiceIds = watch('serviceIds')
   const selectedServices = services.filter(s => selectedServiceIds.includes(s.id))
   const totalValue = selectedServices.reduce((sum, s) => sum + s.price, 0)
   const paymentType = watch('paymentType')
+
+  const handleQuickCreateContact = async (contactData: any) => {
+    try {
+      setQuickCreateLoading(true)
+      const contactId = await createContact(contactData)
+      setValue('contactId', contactId)
+      setIsContactModalOpen(false)
+    } catch (error) {
+      console.error('Erro ao criar contato:', error)
+      throw error
+    } finally {
+      setQuickCreateLoading(false)
+    }
+  }
+
+  const handleQuickCreateCompany = async (companyData: any) => {
+    try {
+      setQuickCreateLoading(true)
+      const companyId = await createCompany(companyData)
+      setValue('companyId', companyId)
+      setIsCompanyModalOpen(false)
+    } catch (error) {
+      console.error('Erro ao criar empresa:', error)
+      throw error
+    } finally {
+      setQuickCreateLoading(false)
+    }
+  }
 
   // Atualizar valor quando serviços mudarem (apenas se não houver valor manual)
   useEffect(() => {
@@ -123,6 +193,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
         assignedTo: data.assignedTo && typeof data.assignedTo === 'string' && data.assignedTo.trim() !== '' ? data.assignedTo : undefined,
         paymentType: data.paymentType || undefined,
         paymentMethod: data.paymentMethod || undefined,
+        customFields: data.customFields && Object.keys(data.customFields).length > 0 ? data.customFields : undefined,
       }
       
       if (data.expectedCloseDate && data.expectedCloseDate.trim() !== '') {
@@ -157,9 +228,12 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
       />
 
       <div>
-        <label className="block text-sm font-medium text-white/90 mb-2">
-          Contato *
-        </label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-white/90">
+            Contato *
+          </label>
+          <QuickCreateButton onClick={() => setIsContactModalOpen(true)} />
+        </div>
         <select
           {...register('contactId')}
           className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
@@ -332,6 +406,12 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
         placeholder="https://drive.google.com/..."
       />
 
+      <RenderCustomFields
+        customFields={customFields}
+        control={control}
+        entityCustomFields={deal?.customFields}
+      />
+
       <div className="flex justify-end gap-3 pt-4">
         <Button type="button" variant="ghost" onClick={onCancel} disabled={loading}>
           Cancelar
@@ -340,6 +420,34 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
           {loading ? 'Salvando...' : deal ? 'Atualizar' : 'Criar'}
         </Button>
       </div>
+
+      {/* Modal rápido de criação de contato */}
+      <Modal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        title="Novo Contato"
+        size="md"
+      >
+        <ContactForm
+          onSubmit={handleQuickCreateContact}
+          onCancel={() => setIsContactModalOpen(false)}
+          loading={quickCreateLoading}
+        />
+      </Modal>
+
+      {/* Modal rápido de criação de empresa */}
+      <Modal
+        isOpen={isCompanyModalOpen}
+        onClose={() => setIsCompanyModalOpen(false)}
+        title="Nova Empresa"
+        size="md"
+      >
+        <CompanyForm
+          onSubmit={handleQuickCreateCompany}
+          onCancel={() => setIsCompanyModalOpen(false)}
+          loading={quickCreateLoading}
+        />
+      </Modal>
     </form>
   )
 }

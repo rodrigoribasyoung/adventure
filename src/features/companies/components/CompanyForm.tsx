@@ -4,12 +4,15 @@ import { z } from 'zod'
 import { Company } from '@/types'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { useCustomFields } from '@/features/customFields/hooks/useCustomFields'
+import { RenderCustomFields } from '@/components/customFields/RenderCustomFields'
 
 const companySchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   cnpj: z.string().optional(),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   phone: z.string().optional(),
+  customFields: z.record(z.any()).optional(),
 })
 
 type CompanyFormData = z.infer<typeof companySchema>
@@ -22,9 +25,11 @@ interface CompanyFormProps {
 }
 
 export const CompanyForm = ({ company, onSubmit, onCancel, loading = false }: CompanyFormProps) => {
+  const { customFields } = useCustomFields('company')
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<CompanyFormData>({
     resolver: zodResolver(companySchema),
@@ -34,8 +39,11 @@ export const CompanyForm = ({ company, onSubmit, onCancel, loading = false }: Co
           cnpj: company.cnpj || '',
           email: company.email || '',
           phone: company.phone || '',
+          customFields: company.customFields || {},
         }
-      : undefined,
+      : {
+          customFields: {},
+        },
   })
 
   const handleFormSubmit = async (data: CompanyFormData) => {
@@ -44,6 +52,7 @@ export const CompanyForm = ({ company, onSubmit, onCancel, loading = false }: Co
       email: data.email || undefined,
       phone: data.phone || undefined,
       cnpj: data.cnpj || undefined,
+      customFields: data.customFields && Object.keys(data.customFields).length > 0 ? data.customFields : undefined,
     })
   }
 
@@ -76,6 +85,12 @@ export const CompanyForm = ({ company, onSubmit, onCancel, loading = false }: Co
         {...register('phone')}
         error={errors.phone?.message}
         placeholder="(00) 00000-0000"
+      />
+
+      <RenderCustomFields
+        customFields={customFields}
+        control={control}
+        entityCustomFields={company?.customFields}
       />
 
       <div className="flex justify-end gap-3 pt-4">

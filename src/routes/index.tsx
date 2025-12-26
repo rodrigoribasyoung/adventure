@@ -8,6 +8,12 @@ import ServicesPage from '@/features/services/pages/ServicesPage'
 import DealsPage from '@/features/deals/pages/DealsPage'
 import FunnelsPage from '@/features/funnels/pages/FunnelsPage'
 import ReportsPage from '@/features/reports/pages/ReportsPage'
+import CustomFieldsPage from '@/features/customFields/pages/CustomFieldsPage'
+import SettingsPage from '@/features/settings/pages/SettingsPage'
+import UsersPage from '@/features/users/pages/UsersPage'
+import AutomationsPage from '@/features/automations/pages/AutomationsPage'
+import IntegrationsPage from '@/features/integrations/pages/IntegrationsPage'
+import MarketingPage from '@/features/marketing/pages/MarketingPage'
 import { ReactNode } from 'react'
 
 // Componente para proteger rotas privadas
@@ -94,9 +100,7 @@ export const router = createBrowserRouter([
     path: '/marketing',
     element: (
       <PrivateRoute>
-        <div className="flex items-center justify-center min-h-screen bg-background-dark">
-          <div className="text-white">Marketing page - Coming soon</div>
-        </div>
+        <MarketingPage />
       </PrivateRoute>
     ),
   },
@@ -104,9 +108,39 @@ export const router = createBrowserRouter([
     path: '/settings',
     element: (
       <PrivateRoute>
-        <div className="flex items-center justify-center min-h-screen bg-background-dark">
-          <div className="text-white">Settings page - Coming soon</div>
-        </div>
+        <SettingsPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/settings/custom-fields',
+    element: (
+      <PrivateRoute>
+        <CustomFieldsPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/settings/users',
+    element: (
+      <PrivateRoute>
+        <UsersPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/settings/automations',
+    element: (
+      <PrivateRoute>
+        <AutomationsPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/settings/integrations',
+    element: (
+      <PrivateRoute>
+        <IntegrationsPage />
       </PrivateRoute>
     ),
   },

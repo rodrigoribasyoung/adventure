@@ -4,12 +4,15 @@ import { z } from 'zod'
 import { Contact } from '@/types'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { useCustomFields } from '@/features/customFields/hooks/useCustomFields'
+import { RenderCustomFields } from '@/components/customFields/RenderCustomFields'
 
 const contactSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   phone: z.string().optional(),
   companyId: z.string().optional(),
+  customFields: z.record(z.any()).optional(),
 })
 
 type ContactFormData = z.infer<typeof contactSchema>
@@ -22,9 +25,11 @@ interface ContactFormProps {
 }
 
 export const ContactForm = ({ contact, onSubmit, onCancel, loading = false }: ContactFormProps) => {
+  const { customFields } = useCustomFields('contact')
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
@@ -34,8 +39,11 @@ export const ContactForm = ({ contact, onSubmit, onCancel, loading = false }: Co
           email: contact.email || '',
           phone: contact.phone || '',
           companyId: contact.companyId || '',
+          customFields: contact.customFields || {},
         }
-      : undefined,
+      : {
+          customFields: {},
+        },
   })
 
   const handleFormSubmit = async (data: ContactFormData) => {
@@ -44,6 +52,7 @@ export const ContactForm = ({ contact, onSubmit, onCancel, loading = false }: Co
       email: data.email || undefined,
       phone: data.phone || undefined,
       companyId: data.companyId || undefined,
+      customFields: data.customFields && Object.keys(data.customFields).length > 0 ? data.customFields : undefined,
     })
   }
 
@@ -69,6 +78,12 @@ export const ContactForm = ({ contact, onSubmit, onCancel, loading = false }: Co
         {...register('phone')}
         error={errors.phone?.message}
         placeholder="(00) 00000-0000"
+      />
+
+      <RenderCustomFields
+        customFields={customFields}
+        control={control}
+        entityCustomFields={contact?.customFields}
       />
 
       <div className="flex justify-end gap-3 pt-4">

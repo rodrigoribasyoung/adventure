@@ -416,3 +416,4 @@ export const exportPipelineReportToPDF = async (reportData: PipelineReportData, 
   await exportToPDF(title, content, tables, `relatorio-pipeline-${new Date().toISOString().split('T')[0]}.pdf`)
 }
 
+
