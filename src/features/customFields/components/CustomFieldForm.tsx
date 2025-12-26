@@ -23,13 +23,7 @@ interface CustomFieldFormProps {
 }
 
 export const CustomFieldForm = ({ customField, onSubmit, onCancel, loading = false }: CustomFieldFormProps) => {
-  const {
-    register,
-    handleSubmit,
-    watch,
-    control,
-    formState: { errors },
-  } = useForm<CustomFieldFormData>({
+  const form = useForm<CustomFieldFormData>({
     resolver: zodResolver(customFieldSchema),
     defaultValues: customField
       ? {
@@ -47,7 +41,15 @@ export const CustomFieldForm = ({ customField, onSubmit, onCancel, loading = fal
         },
   })
 
-  const { fields, append, remove } = useFieldArray<CustomFieldFormData, 'options'>({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    control,
+    formState: { errors },
+  } = form
+
+  const { fields, append, remove } = useFieldArray({
     control,
     name: 'options',
   })
