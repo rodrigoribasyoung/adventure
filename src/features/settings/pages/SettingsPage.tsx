@@ -1,10 +1,8 @@
 import { Container } from '@/components/layout/Container'
 import { Card } from '@/components/ui/Card'
 import { Link } from 'react-router-dom'
-import { useLocation } from 'react-router-dom'
 
 const SettingsPage = () => {
-  const location = useLocation()
 
   const settingsItems = [
     { id: 'funnels', label: 'Funís', icon: '🎯', path: '/funnels', description: 'Gerencie seus funis e estágios de vendas' },

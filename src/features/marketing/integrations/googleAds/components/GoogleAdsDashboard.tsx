@@ -39,7 +39,7 @@ export const GoogleAdsDashboard = ({ customerId }: GoogleAdsDashboardProps) => {
       impressions: acc.impressions + metric.impressions,
       clicks: acc.clicks + metric.clicks,
       cost: acc.cost + metric.cost,
-      conversions: acc.conversions + (metric.conversions || 0),
+      conversions: (acc.conversions || 0) + (metric.conversions || 0),
     }),
     { impressions: 0, clicks: 0, cost: 0, conversions: 0 }
   )

@@ -35,7 +35,7 @@ export interface GoogleAdsMetrics {
  * Busca contas de cliente do Google Ads
  * NOTA: Em produção, use a biblioteca oficial @google-ads/api
  */
-export const getCustomerAccounts = async (accessToken: string): Promise<GoogleAdsAccount[]> => {
+export const getCustomerAccounts = async (_accessToken: string): Promise<GoogleAdsAccount[]> => {
   // Esta é uma implementação simplificada
   // Em produção, você deve usar a biblioteca oficial do Google Ads API
   // https://github.com/googleads/google-ads-node
@@ -55,10 +55,10 @@ export const getCustomerAccounts = async (accessToken: string): Promise<GoogleAd
  * Busca campanhas de um cliente
  */
 export const getCampaigns = async (
-  accessToken: string,
-  customerId: string,
-  startDate?: string,
-  endDate?: string
+  _accessToken: string,
+  _customerId: string,
+  _startDate?: string,
+  _endDate?: string
 ): Promise<GoogleAdsCampaign[]> => {
   try {
     // Implementação simplificada - em produção, use a biblioteca oficial
@@ -74,11 +74,11 @@ export const getCampaigns = async (
  * Busca métricas de campanhas
  */
 export const getCampaignMetrics = async (
-  accessToken: string,
-  customerId: string,
-  campaignIds: string[],
-  startDate: string,
-  endDate: string
+  _accessToken: string,
+  _customerId: string,
+  _campaignIds: string[],
+  _startDate: string,
+  _endDate: string
 ): Promise<Record<string, GoogleAdsMetrics>> => {
   try {
     // Implementação simplificada - em produção, use a biblioteca oficial

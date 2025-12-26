@@ -1,9 +1,8 @@
-import { useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { OAuthButton } from '@/features/integrations/components/OAuthButton'
 import { useIntegrations } from '@/features/integrations/hooks/useIntegrations'
-import { generateMetaAdsAuthUrl, exchangeCodeForToken } from '../oauth'
+import { exchangeCodeForToken } from '../oauth'
 import { prepareConnectionForStorage } from '@/lib/integrations/storage'
 import { Timestamp } from 'firebase/firestore'
 import { META_ADS_OAUTH_CONFIG } from '../oauth'
@@ -14,13 +13,11 @@ interface MetaAdsConnectionProps {
 
 export const MetaAdsConnection = ({ onConnected }: MetaAdsConnectionProps) => {
   const { connections, createConnection, deleteConnection } = useIntegrations('meta_ads')
-  const [connecting, setConnecting] = useState(false)
 
   const connection = connections[0]
 
   const handleConnect = async (code: string) => {
     try {
-      setConnecting(true)
       
       // Trocar código por token
       const tokenData = await exchangeCodeForToken(code)
@@ -49,8 +46,6 @@ export const MetaAdsConnection = ({ onConnected }: MetaAdsConnectionProps) => {
     } catch (error: any) {
       console.error('Erro ao conectar Meta Ads:', error)
       throw error
-    } finally {
-      setConnecting(false)
     }
   }
 

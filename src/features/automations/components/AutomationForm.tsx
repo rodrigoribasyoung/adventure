@@ -1,7 +1,7 @@
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Automation, AutomationTrigger, AutomationCondition, AutomationAction } from '../types'
+import { Automation } from '../types'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'

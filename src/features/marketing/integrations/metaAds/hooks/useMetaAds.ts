@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useIntegrations } from '@/features/integrations/hooks/useIntegrations'
 import { getAdAccounts, getCampaigns, getAccountMetrics, MetaAdsAccount, MetaAdsCampaign, MetaAdsMetrics } from '../api'
 import { decryptToken } from '@/lib/integrations/storage'
-import { IntegrationConnection } from '@/features/integrations/types'
 
 export const useMetaAds = () => {
   const { connections, loading: connectionsLoading } = useIntegrations('meta_ads')

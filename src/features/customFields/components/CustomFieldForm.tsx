@@ -9,7 +9,7 @@ const customFieldSchema = z.object({
   entityType: z.enum(['contact', 'company', 'deal']),
   name: z.string().min(1, 'Nome do campo é obrigatório'),
   type: z.enum(['text', 'number', 'date', 'select']),
-  options: z.array(z.string()).optional(),
+  options: z.array(z.string()).default([]),
   required: z.boolean(),
 })
 
@@ -49,7 +49,7 @@ export const CustomFieldForm = ({ customField, onSubmit, onCancel, loading = fal
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'options',
+    name: 'options' as const,
   })
 
   const fieldType = watch('type')

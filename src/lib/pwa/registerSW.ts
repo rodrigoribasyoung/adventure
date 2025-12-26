@@ -44,7 +44,7 @@ export const registerServiceWorker = () => {
 export const installPWA = async (): Promise<boolean> => {
   if ('serviceWorker' in navigator) {
     try {
-      const registration = await navigator.serviceWorker.ready
+      await navigator.serviceWorker.ready
       
       if (!window.matchMedia('(display-mode: standalone)').matches) {
         // Mostrar prompt de instalação (se disponível)

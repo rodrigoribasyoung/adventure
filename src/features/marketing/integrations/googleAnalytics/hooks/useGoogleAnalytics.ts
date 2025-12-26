@@ -5,7 +5,7 @@ import { getProperties, getMetrics, getTopPages, GoogleAnalyticsMetrics, GoogleA
 import { refreshAccessToken } from '../oauth'
 import { format, subDays } from 'date-fns'
 
-export const useGoogleAnalytics = (propertyId?: string) => {
+export const useGoogleAnalytics = (_propertyId?: string) => {
   const { connections } = useIntegrations('google_analytics')
   const [properties, setProperties] = useState<GoogleAnalyticsProperty[]>([])
   const [selectedProperty, setSelectedProperty] = useState<GoogleAnalyticsProperty | null>(null)

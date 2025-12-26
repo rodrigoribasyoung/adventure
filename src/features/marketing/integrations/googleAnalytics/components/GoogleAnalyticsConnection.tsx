@@ -1,9 +1,8 @@
-import { useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { OAuthButton } from '@/features/integrations/components/OAuthButton'
 import { useIntegrations } from '@/features/integrations/hooks/useIntegrations'
-import { generateGoogleAnalyticsAuthUrl, exchangeCodeForToken, GOOGLE_ANALYTICS_OAUTH_CONFIG } from '../oauth'
+import { exchangeCodeForToken, GOOGLE_ANALYTICS_OAUTH_CONFIG } from '../oauth'
 import { prepareConnectionForStorage } from '@/lib/integrations/storage'
 import { Timestamp } from 'firebase/firestore'
 
@@ -13,13 +12,11 @@ interface GoogleAnalyticsConnectionProps {
 
 export const GoogleAnalyticsConnection = ({ onConnected }: GoogleAnalyticsConnectionProps) => {
   const { connections, createConnection, deleteConnection } = useIntegrations('google_analytics')
-  const [connecting, setConnecting] = useState(false)
 
   const connection = connections[0]
 
   const handleConnect = async (code: string) => {
     try {
-      setConnecting(true)
       
       // Trocar código por token
       const tokenData = await exchangeCodeForToken(code)
@@ -48,8 +45,6 @@ export const GoogleAnalyticsConnection = ({ onConnected }: GoogleAnalyticsConnec
     } catch (error: any) {
       console.error('Erro ao conectar Google Analytics:', error)
       throw error
-    } finally {
-      setConnecting(false)
     }
   }
 

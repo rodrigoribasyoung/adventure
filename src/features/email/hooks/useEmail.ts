@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Email, EmailTemplate } from '../types'
+import { Email } from '../types'
 import { createDocument } from '@/lib/firebase/db'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -24,10 +24,11 @@ export const useEmail = () => {
 
       // TODO: Implementar chamada para Firebase Function que envia o email
       // Por enquanto, apenas salva no Firestore como registro
-      const emailData: Omit<Email, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'> = {
+      const emailData: Omit<Email, 'id' | 'createdAt' | 'updatedAt'> = {
         ...data,
         status: 'sent', // Será atualizado pela função backend
         sentAt: undefined, // Será preenchido pela função backend
+        createdBy: currentUser.uid,
       }
 
       await createDocument<Email>('emails', emailData)

@@ -68,7 +68,6 @@ export const EmailComposer = ({
           rows={10}
           className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200 resize-none"
           placeholder="Digite sua mensagem aqui..."
-          error={errors.body?.message}
         />
         {errors.body && (
           <p className="mt-1 text-sm text-red-400">{errors.body.message}</p>
