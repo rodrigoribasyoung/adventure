@@ -51,21 +51,17 @@ export const CustomFieldForm = ({ customField, onSubmit, onCancel, loading = fal
 
   const fieldType = watch('type')
 
-  const { fields, append, remove } = useFieldArray({
+  const optionsFieldArray = useFieldArray<CustomFieldFormData>({
     control,
-    name: 'options',
-  }) as {
-    fields: Array<{ id: string }>
-    append: (value: string) => void
-    remove: (index: number) => void
-  }
+    name: 'options' as any,
+  })
 
   const handleFormSubmit = async (data: CustomFieldFormData) => {
     await onSubmit(data)
   }
 
   const addOption = () => {
-    append('')
+    ;(optionsFieldArray.append as (value: string) => void)('')
   }
 
   return (
@@ -127,7 +123,7 @@ export const CustomFieldForm = ({ customField, onSubmit, onCancel, loading = fal
               + Adicionar Opção
             </Button>
           </div>
-          {fields.map((field, index) => (
+          {optionsFieldArray.fields.map((field, index) => (
             <div key={field.id} className="flex gap-2">
               <Input
                 {...register(`options.${index}` as const)}
@@ -138,14 +134,14 @@ export const CustomFieldForm = ({ customField, onSubmit, onCancel, loading = fal
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => remove(index)}
+                onClick={() => optionsFieldArray.remove(index)}
                 className="text-red-400 hover:text-red-300"
               >
                 Remover
               </Button>
             </div>
           ))}
-          {fields.length === 0 && (
+          {optionsFieldArray.fields.length === 0 && (
             <p className="text-sm text-white/60">
               Nenhuma opção adicionada. Clique em "Adicionar Opção" para criar uma lista.
             </p>
