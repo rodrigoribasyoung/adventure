@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Automation } from './types'
+import { Automation } from '../types'
 import { getDocuments, createDocument, updateDocument, deleteDocument, orderBy } from '@/lib/firebase/db'
 import { useAuth } from '@/contexts/AuthContext'
 

@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Container } from '@/components/layout/Container'
-import { useIntegrations } from '../hooks/useIntegrations'
 import { Toast } from '@/components/ui/Toast'
 import { MetaAdsConnection } from '@/features/marketing/integrations/metaAds/components/MetaAdsConnection'
 import { GoogleAdsConnection } from '@/features/marketing/integrations/googleAds/components/GoogleAdsConnection'

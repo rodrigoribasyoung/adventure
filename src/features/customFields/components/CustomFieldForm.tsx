@@ -9,7 +9,7 @@ const customFieldSchema = z.object({
   entityType: z.enum(['contact', 'company', 'deal']),
   name: z.string().min(1, 'Nome do campo é obrigatório'),
   type: z.enum(['text', 'number', 'date', 'select']),
-  options: z.array(z.string()).default([]),
+  options: z.array(z.string()),
   required: z.boolean(),
 })
 
@@ -47,19 +47,15 @@ export const CustomFieldForm = ({ customField, onSubmit, onCancel, loading = fal
         },
   })
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove } = useFieldArray<CustomFieldFormData, 'options'>({
     control,
-    name: 'options' as const,
+    name: 'options',
   })
 
   const fieldType = watch('type')
 
   const handleFormSubmit = async (data: CustomFieldFormData) => {
-    const submitData = {
-      ...data,
-      options: data.type === 'select' ? data.options : undefined,
-    }
-    await onSubmit(submitData)
+    await onSubmit(data)
   }
 
   const addOption = () => {
