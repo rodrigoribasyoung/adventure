@@ -49,12 +49,16 @@ export const CustomFieldForm = ({ customField, onSubmit, onCancel, loading = fal
     formState: { errors },
   } = form
 
+  const fieldType = watch('type')
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'options',
-  })
-
-  const fieldType = watch('type')
+  }) as {
+    fields: Array<{ id: string }>
+    append: (value: string) => void
+    remove: (index: number) => void
+  }
 
   const handleFormSubmit = async (data: CustomFieldFormData) => {
     await onSubmit(data)
