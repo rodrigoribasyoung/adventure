@@ -82,6 +82,23 @@ src/
 - Cores principais: Vermelho #DA0028 e Azul #042AA1
 - Estilo: Tech minimalista
 
+## Integração WhatsApp
+
+O sistema possui integração com WhatsApp Web através de uma extensão Chrome.
+
+### Documentação
+
+- **Guia Rápido:** [`GUIA_RAPIDO_WHATSAPP.md`](GUIA_RAPIDO_WHATSAPP.md) - Comece aqui!
+- **Próximos Passos:** [`PROXIMOS_PASSOS_WHATSAPP.md`](PROXIMOS_PASSOS_WHATSAPP.md) - Guia detalhado
+- **Deploy Firebase:** [`DEPLOY_FIREBASE.md`](DEPLOY_FIREBASE.md) - Instruções de deploy
+
+### Funcionalidades
+
+- Sidebar no WhatsApp Web para criar/vincular contatos e negociações
+- Seleção e salvamento de mensagens do WhatsApp
+- Botão WhatsApp na página de detalhes da negociação
+- Detecção automática do número de telefone
+
 ## Licença
 
 Proprietário - Adventure Labs

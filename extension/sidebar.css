@@ -1,0 +1,268 @@
+/* Estilos da Sidebar do Adventure CRM */
+
+#adventure-crm-sidebar {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 400px;
+  height: 100vh;
+  background: #0A0E27;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 999999;
+  transition: right 0.3s ease;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#adventure-crm-sidebar.adventure-sidebar-visible {
+  right: 0;
+}
+
+.adventure-sidebar-toggle {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 80px;
+  background: linear-gradient(135deg, #DA0028 0%, #042AA1 100%);
+  border-radius: 8px 0 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000000;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.adventure-sidebar-toggle:hover {
+  width: 45px;
+  box-shadow: -4px 0 15px rgba(218, 0, 40, 0.5);
+}
+
+.adventure-sidebar-toggle svg {
+  color: white;
+}
+
+.adventure-sidebar-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.adventure-sidebar-header {
+  padding: 20px;
+  background: rgba(4, 42, 161, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.adventure-sidebar-header h3 {
+  margin: 0;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.adventure-close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.adventure-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.adventure-sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  color: white;
+}
+
+.adventure-sidebar-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.adventure-sidebar-body::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.adventure-sidebar-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.adventure-sidebar-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.adventure-section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.adventure-section:last-child {
+  border-bottom: none;
+}
+
+.adventure-section h4 {
+  margin: 0 0 12px 0;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.adventure-btn {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+}
+
+.adventure-btn-primary {
+  background: linear-gradient(135deg, #DA0028 0%, #042AA1 100%);
+  color: white;
+}
+
+.adventure-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(218, 0, 40, 0.4);
+}
+
+.adventure-btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.adventure-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.adventure-btn-success {
+  background: #10b981;
+  color: white;
+}
+
+.adventure-btn-success:hover {
+  background: #059669;
+}
+
+.adventure-phone-display {
+  background: rgba(4, 42, 161, 0.2);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.adventure-phone-display p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.adventure-phone-number {
+  font-size: 18px;
+  font-weight: 600;
+  color: #DA0028;
+}
+
+.adventure-form {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.adventure-form h4 {
+  margin: 0 0 20px 0;
+  color: white;
+  font-size: 16px;
+}
+
+.adventure-form-group {
+  margin-bottom: 16px;
+}
+
+.adventure-form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.adventure-form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.adventure-form-group input:focus {
+  outline: none;
+  border-color: #DA0028;
+  box-shadow: 0 0 0 3px rgba(218, 0, 40, 0.1);
+}
+
+.adventure-form-group input[readonly] {
+  background: rgba(255, 255, 255, 0.05);
+  cursor: not-allowed;
+}
+
+.adventure-form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.adventure-form-actions .adventure-btn {
+  flex: 1;
+  margin: 0;
+}
+
+.adventure-loading,
+.adventure-info,
+.adventure-error {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.adventure-error {
+  color: #ef4444;
+}
+
+.adventure-msg-checkbox {
+  width: 18px !important;
+  height: 18px !important;
+  cursor: pointer;
+  accent-color: #DA0028;
+}
+

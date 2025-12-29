@@ -4,6 +4,7 @@ import App from './App.tsx'
 import './styles/globals.css'
 import './styles/theme.css'
 import { registerServiceWorker } from './lib/pwa/registerSW'
+import './lib/utils/getFirebaseToken' // Disponibiliza window.copyFirebaseToken()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

@@ -1,0 +1,10 @@
+Ícones necessários:
+- icon16.png (16x16 pixels)
+- icon48.png (48x48 pixels)  
+- icon128.png (128x128 pixels)
+
+Você pode criar ícones simples ou usar um gerador online de ícones.
+O ícone deve representar a integração WhatsApp/CRM.
+
+Sugestão: Use um ícone que combine o logo do WhatsApp com o logo do Adventure CRM.
+
