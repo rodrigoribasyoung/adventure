@@ -1,114 +1,27 @@
 # Firebase Functions - Adventure CRM WhatsApp Integration
 
-Funções Firebase para comunicação entre a extensão Chrome e o CRM.
+## ⚠️ Status: Não Utilizado
 
-## Configuração
+**As Firebase Functions não são mais necessárias!**
 
-1. Instale as dependências:
-```bash
-cd functions
-npm install
+A integração WhatsApp foi atualizada para usar **REST API do Firestore diretamente**, eliminando a necessidade de Firebase Functions. Isso permite funcionar no plano gratuito do Firebase (Spark).
+
+## 🔄 Migração Realizada
+
+A extensão agora faz requisições HTTP diretamente para:
+```
+https://firestore.googleapis.com/v1/projects/adv-labs/databases/(default)/documents/
 ```
 
-2. Configure o Firebase CLI (se ainda não fez):
-```bash
-npm install -g firebase-tools
-firebase login
-```
+Com autenticação via token Firebase no header `Authorization: Bearer <token>`.
 
-3. Inicialize o projeto (se necessário):
-```bash
-firebase init functions
-```
+## 📚 Documentação Atual
 
-## Deploy
+Para informações sobre a integração WhatsApp atual, consulte:
+- **[Documentação Completa](../docs/WHATSAPP_INTEGRATION.md)**
+- **[Guia de Configuração](../docs/SETUP_GUIDE.md)**
 
-```bash
-cd functions
-npm run build
-firebase deploy --only functions
-```
+## 💡 Nota
 
-## Endpoints
-
-### POST /api/whatsapp/createContact
-Cria um novo contato.
-
-**Headers:**
-- `Authorization: Bearer <firebase-token>`
-
-**Body:**
-```json
-{
-  "name": "Nome do Contato",
-  "email": "email@example.com",
-  "phone": "5511999999999",
-  "userId": "user-id"
-}
-```
-
-### POST /api/whatsapp/createDeal
-Cria uma nova negociação.
-
-**Headers:**
-- `Authorization: Bearer <firebase-token>`
-
-**Body:**
-```json
-{
-  "title": "Título da Negociação",
-  "value": 5000.00,
-  "contactId": "contact-id",
-  "phoneNumber": "5511999999999",
-  "userId": "user-id"
-}
-```
-
-### POST /api/whatsapp/saveMessages
-Salva mensagens selecionadas do WhatsApp.
-
-**Headers:**
-- `Authorization: Bearer <firebase-token>`
-
-**Body:**
-```json
-{
-  "phoneNumber": "5511999999999",
-  "messages": [
-    {
-      "text": "Texto da mensagem",
-      "timestamp": "2024-01-01T00:00:00.000Z"
-    }
-  ],
-  "dealId": "deal-id",
-  "userId": "user-id"
-}
-```
-
-### GET /api/whatsapp/getContacts
-Busca contatos.
-
-**Headers:**
-- `Authorization: Bearer <firebase-token>`
-
-**Query Parameters:**
-- `phone`: Filtrar por telefone
-- `search`: Busca por nome, email ou telefone
-
-### GET /api/whatsapp/getDeals
-Busca negociações.
-
-**Headers:**
-- `Authorization: Bearer <firebase-token>`
-
-**Query Parameters:**
-- `phoneNumber`: Filtrar por número de telefone (via contato)
-- `contactId`: Filtrar por ID do contato
-- `search`: Busca por título
-
-## Autenticação
-
-Todos os endpoints requerem autenticação via token Firebase no header `Authorization: Bearer <token>`.
-
-O token é verificado usando `admin.auth().verifyIdToken()`.
+Este diretório (`functions/`) pode ser removido no futuro, pois não é mais necessário para a integração WhatsApp. As Functions foram substituídas por acesso direto ao Firestore via REST API.
 

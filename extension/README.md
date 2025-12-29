@@ -1,54 +1,54 @@
-# Adventure CRM - Extensão WhatsApp
+# Extensão Chrome - Adventure CRM WhatsApp
 
 Extensão do Chrome para integrar o Adventure CRM com WhatsApp Web.
 
-## Instalação
+## 📋 Visão Geral
 
-1. Abra o Chrome e vá para `chrome://extensions/`
-2. Ative o "Modo do desenvolvedor" (canto superior direito)
-3. Clique em "Carregar sem compactação"
-4. Selecione a pasta `extension/` deste projeto
-5. A extensão será instalada
+Esta extensão injeta uma sidebar no WhatsApp Web que permite:
+- Criar/vincular contatos diretamente do WhatsApp
+- Criar/vincular negociações diretamente do WhatsApp
+- Selecionar e salvar mensagens do WhatsApp no banco de dados
 
-## Configuração
+## 🔧 Arquitetura
 
-1. Faça login no Adventure CRM (aplicação web)
-2. Abra o console do navegador (F12)
-3. Execute o seguinte código para obter seu token Firebase:
+A extensão usa **REST API do Firestore diretamente**, sem necessidade de Firebase Functions. Isso permite funcionar no plano gratuito do Firebase.
 
-```javascript
-firebase.auth().currentUser.getIdToken().then(token => {
-  console.log('Token:', token);
-  navigator.clipboard.writeText(token);
-  console.log('Token copiado para a área de transferência!');
-});
+**Fluxo:**
+```
+WhatsApp Web → Extensão → REST API Firestore → Firestore Database
 ```
 
-4. Clique no ícone da extensão no Chrome
-5. Cole o token no campo "Token Firebase"
-6. Opcionalmente, informe seu User ID
-7. Clique em "Salvar Configuração"
+## 📁 Arquivos Principais
 
-## Uso
+- `manifest.json` - Configuração da extensão
+- `content.js` - Script principal (injeta sidebar, detecta número, faz requisições)
+- `sidebar.css` - Estilos da sidebar
+- `background.js` - Service worker
+- `popup.html/js` - Interface de configuração (token Firebase)
+- `convert-icon.html` - Gerador de ícones PNG
 
-1. Abra o WhatsApp Web (web.whatsapp.com)
-2. Clique no botão flutuante à direita da tela para abrir a sidebar
-3. A sidebar detectará automaticamente o número da conversa atual
-4. Use os botões para:
-   - Criar ou vincular contato
-   - Criar ou vincular negociação
-   - Selecionar e salvar mensagens
+## 🚀 Instalação e Configuração
 
-## Funcionalidades
+Para instalar e configurar a extensão, consulte o [Guia de Configuração](../docs/SETUP_GUIDE.md).
 
-- **Detecção automática de número**: A sidebar detecta o número da conversa atual
-- **Criar/Vincular Contato**: Cria um novo contato ou vincula a um existente
-- **Criar/Vincular Negociação**: Cria uma nova negociação ou vincula a uma existente
-- **Salvar Mensagens**: Selecione mensagens e salve-as no banco de dados vinculadas à negociação
+## 🔑 Autenticação
 
-## Notas
+A extensão usa o token Firebase (ID token) para autenticar requisições ao Firestore. O token:
+- É obtido do CRM via `window.copyFirebaseToken()`
+- É armazenado localmente na extensão
+- Expira após ~1 hora (precisa ser renovado)
 
-- A extensão requer um funil ativo no CRM para criar negociações
-- As mensagens são salvas vinculadas à negociação (se houver)
-- O token Firebase expira periodicamente - você precisará atualizá-lo
+## 📚 Documentação
+
+- **[Guia de Configuração](../docs/SETUP_GUIDE.md)** - Instalação passo a passo
+- **[Solução de Problemas](../docs/TROUBLESHOOTING.md)** - Troubleshooting
+- **[Regras do Firestore](../docs/FIRESTORE_RULES.md)** - Configuração de segurança
+- **[Documentação Completa](../docs/WHATSAPP_INTEGRATION.md)** - Visão geral
+
+## ⚠️ Requisitos
+
+- Chrome ou navegador baseado em Chromium
+- Token Firebase válido
+- Regras do Firestore configuradas
+- Funil ativo no CRM (para criar negociações)
 

@@ -1,7 +1,101 @@
 // Content script para injetar sidebar no WhatsApp Web
 
-// URL das Firebase Functions - ATUALIZE APÓS DEPLOY
-const FIREBASE_FUNCTIONS_URL = 'https://us-central1-adv-labs.cloudfunctions.net'
+// Configuração do Firebase
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCT-lXPqlD0ocUQeEaKavoU7JvbqBE9uSo",
+  authDomain: "adv-labs.firebaseapp.com",
+  projectId: "adv-labs",
+  storageBucket: "adv-labs.firebasestorage.app",
+  messagingSenderId: "227032080106",
+  appId: "1:227032080106:web:b11927d925a3937fe4c193"
+}
+
+// Não precisamos mais do SDK do Firebase - usamos REST API diretamente
+
+// Função auxiliar para fazer requisições ao Firestore REST API
+async function firestoreRequest(method, path, data = null, token) {
+  const projectId = FIREBASE_CONFIG.projectId
+  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${path}`
+  
+  const options = {
+    method,
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  }
+  
+  if (data && (method === 'POST' || method === 'PATCH')) {
+    options.body = JSON.stringify({
+      fields: convertToFirestoreFields(data)
+    })
+  }
+  
+  const response = await fetch(url, options)
+  
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error?.message || 'Erro na requisição')
+  }
+  
+  if (method === 'GET' || method === 'POST') {
+    const result = await response.json()
+    return convertFromFirestoreFields(result)
+  }
+  
+  return null
+}
+
+// Converter objeto para formato Firestore
+function convertToFirestoreFields(obj) {
+  const fields = {}
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === null || value === undefined) continue
+    
+    if (value instanceof Date) {
+      fields[key] = { timestampValue: value.toISOString() }
+    } else if (typeof value === 'string') {
+      fields[key] = { stringValue: value }
+    } else if (typeof value === 'number') {
+      fields[key] = { doubleValue: value }
+    } else if (typeof value === 'boolean') {
+      fields[key] = { booleanValue: value }
+    } else if (Array.isArray(value)) {
+      fields[key] = { arrayValue: { values: value.map(v => convertToFirestoreFields({ item: v }).item) } }
+    } else if (typeof value === 'object') {
+      fields[key] = { mapValue: { fields: convertToFirestoreFields(value) } }
+    }
+  }
+  return fields
+}
+
+// Converter formato Firestore para objeto
+function convertFromFirestoreFields(doc) {
+  if (!doc.fields) return null
+  
+  const obj = {}
+  for (const [key, field] of Object.entries(doc.fields)) {
+    if (field.stringValue !== undefined) {
+      obj[key] = field.stringValue
+    } else if (field.doubleValue !== undefined) {
+      obj[key] = field.doubleValue
+    } else if (field.booleanValue !== undefined) {
+      obj[key] = field.booleanValue
+    } else if (field.timestampValue !== undefined) {
+      obj[key] = new Date(field.timestampValue)
+    } else if (field.arrayValue) {
+      obj[key] = field.arrayValue.values.map(v => {
+        if (v.stringValue) return v.stringValue
+        if (v.doubleValue) return v.doubleValue
+        if (v.booleanValue) return v.booleanValue
+        return v
+      })
+    } else if (field.mapValue) {
+      obj[key] = convertFromFirestoreFields(field.mapValue)
+    }
+  }
+  return { id: doc.name.split('/').pop(), ...obj }
+}
 
 let sidebarContainer = null
 let isSidebarVisible = false
@@ -384,30 +478,44 @@ async function saveSelectedMessages(phoneNumber, token, userId) {
 
   try {
     // Buscar dealId vinculado (se houver)
-    const dealId = await getLinkedDealId(phoneNumber, token)
+    const dealId = await getLinkedDealId(phoneNumber, userId, token)
     
-    const response = await fetch(`${FIREBASE_FUNCTIONS_URL}/api/whatsapp/saveMessages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        phoneNumber,
-        messages,
-        dealId: dealId || null,
-        userId
-      })
-    })
+    // Preparar mensagens para Firestore
+    const messageData = messages.map(msg => ({
+      timestamp: msg.timestamp,
+      from: phoneNumber,
+      to: userId,
+      body: msg.text
+    }))
 
-    if (response.ok) {
-      alert(`${messages.length} mensagem(ns) salva(s) com sucesso!`)
-      // Remover checkboxes
-      document.querySelectorAll('.adventure-msg-checkbox').forEach(cb => cb.remove())
-      document.getElementById('adventure-save-messages').style.display = 'none'
-    } else {
-      throw new Error('Erro ao salvar mensagens')
+    // Buscar conversa existente
+    const searchPath = `whatsappConversations?mask.fieldPaths=phoneNumber&mask.fieldPaths=dealId&filter=and(compositeFilter(andFilter:[fieldFilter(field=fieldPath("phoneNumber"),op=EQUAL,value=stringValue("${phoneNumber}")),fieldFilter(field=fieldPath("dealId"),op=EQUAL,value=stringValue("${dealId || ''}"))]))`
+    
+    try {
+      const existing = await firestoreRequest('GET', searchPath, null, token)
+      // Se encontrou, atualizar (precisa usar PATCH)
+      // Por enquanto, vamos sempre criar nova
+    } catch (e) {
+      // Não encontrou, criar nova
     }
+
+    // Criar nova conversa
+    const conversationData = {
+      dealId: dealId || '',
+      phoneNumber,
+      messages: messageData,
+      saved: true,
+      createdBy: userId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+    
+    await firestoreRequest('POST', 'whatsappConversations', conversationData, token)
+
+    alert(`${messages.length} mensagem(ns) salva(s) com sucesso!`)
+    // Remover checkboxes
+    document.querySelectorAll('.adventure-msg-checkbox').forEach(cb => cb.remove())
+    document.getElementById('adventure-save-messages').style.display = 'none'
   } catch (error) {
     console.error('Erro ao salvar mensagens:', error)
     alert('Erro ao salvar mensagens. Verifique o console.')
@@ -420,26 +528,19 @@ async function handleContactSubmit(phoneNumber, token, userId, isNew) {
   const email = document.getElementById('contact-email').value
 
   try {
-    const response = await fetch(`${FIREBASE_FUNCTIONS_URL}/api/whatsapp/createContact`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        name,
-        email: email || undefined,
-        phone: phoneNumber,
-        userId
-      })
-    })
-
-    if (response.ok) {
-      alert('Contato criado/vincular com sucesso!')
-      loadSidebarContent()
-    } else {
-      throw new Error('Erro ao criar contato')
+    const contactData = {
+      name,
+      email: email || '',
+      phone: phoneNumber,
+      createdBy: userId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     }
+
+    await firestoreRequest('POST', 'contacts', contactData, token)
+    
+    alert('Contato criado com sucesso!')
+    loadSidebarContent()
   } catch (error) {
     console.error('Erro ao criar contato:', error)
     alert('Erro ao criar contato. Verifique o console.')
@@ -452,47 +553,91 @@ async function handleDealSubmit(phoneNumber, token, userId, isNew) {
   const contactId = document.getElementById('deal-contact-id').value || undefined
 
   try {
-    const response = await fetch(`${FIREBASE_FUNCTIONS_URL}/api/whatsapp/createDeal`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        title,
-        value,
-        contactId,
-        phoneNumber,
-        userId
-      })
-    })
-
-    if (response.ok) {
-      alert('Negociação criada/vincular com sucesso!')
-      loadSidebarContent()
-    } else {
-      throw new Error('Erro ao criar negociação')
+    // Buscar funil ativo
+    const funnelsPath = `funnels?mask.fieldPaths=active&mask.fieldPaths=stages&filter=fieldFilter(field=fieldPath("active"),op=EQUAL,value=booleanValue(true))&pageSize=1`
+    const funnelsResult = await firestoreRequest('GET', funnelsPath, null, token)
+    
+    if (!funnelsResult || !funnelsResult.documents || funnelsResult.documents.length === 0) {
+      alert('Nenhum funil ativo encontrado. Crie um funil primeiro no CRM.')
+      return
     }
+
+    const activeFunnel = convertFromFirestoreFields(funnelsResult.documents[0])
+    const firstStage = activeFunnel.stages?.[0]
+
+    if (!firstStage) {
+      alert('Funil não possui estágios.')
+      return
+    }
+
+    // Se phoneNumber fornecido e não tem contactId, buscar ou criar contato
+    let finalContactId = contactId
+    if (phoneNumber && !contactId) {
+      const contactsPath = `contacts?mask.fieldPaths=phone&filter=fieldFilter(field=fieldPath("phone"),op=EQUAL,value=stringValue("${phoneNumber}"))&pageSize=1`
+      try {
+        const contactsResult = await firestoreRequest('GET', contactsPath, null, token)
+        if (contactsResult && contactsResult.documents && contactsResult.documents.length > 0) {
+          finalContactId = contactsResult.documents[0].name.split('/').pop()
+        } else {
+          // Criar contato automaticamente
+          const newContactData = {
+            name: `Contato ${phoneNumber}`,
+            phone: phoneNumber,
+            createdBy: userId,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+          const newContact = await firestoreRequest('POST', 'contacts', newContactData, token)
+          finalContactId = newContact.id
+        }
+      } catch (e) {
+        console.error('Erro ao buscar/criar contato:', e)
+      }
+    }
+
+    const dealData = {
+      title,
+      contactId: finalContactId || '',
+      stage: firstStage.id,
+      value: value || 0,
+      currency: 'BRL',
+      probability: 50,
+      serviceIds: [],
+      status: 'active',
+      createdBy: userId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+
+    await firestoreRequest('POST', 'deals', dealData, token)
+    
+    alert('Negociação criada com sucesso!')
+    loadSidebarContent()
   } catch (error) {
     console.error('Erro ao criar negociação:', error)
     alert('Erro ao criar negociação. Verifique o console.')
   }
 }
 
-async function getLinkedDealId(phoneNumber, token) {
+async function getLinkedDealId(phoneNumber, userId, token) {
   // Buscar deal vinculado a este número
   try {
-    const response = await fetch(`${FIREBASE_FUNCTIONS_URL}/api/whatsapp/getDeals?phoneNumber=${encodeURIComponent(phoneNumber)}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
+    // Buscar contato pelo telefone
+    const contactsPath = `contacts?mask.fieldPaths=phone&filter=fieldFilter(field=fieldPath("phone"),op=EQUAL,value=stringValue("${phoneNumber}"))&pageSize=1`
+    const contactsResult = await firestoreRequest('GET', contactsPath, null, token)
     
-    if (response.ok) {
-      const data = await response.json()
-      if (data.success && data.deals && data.deals.length > 0) {
-        return data.deals[0].id
-      }
+    if (!contactsResult || !contactsResult.documents || contactsResult.documents.length === 0) {
+      return null
+    }
+
+    const contactId = contactsResult.documents[0].name.split('/').pop()
+
+    // Buscar deals vinculados ao contato
+    const dealsPath = `deals?mask.fieldPaths=contactId&filter=fieldFilter(field=fieldPath("contactId"),op=EQUAL,value=stringValue("${contactId}"))&pageSize=1`
+    const dealsResult = await firestoreRequest('GET', dealsPath, null, token)
+
+    if (dealsResult && dealsResult.documents && dealsResult.documents.length > 0) {
+      return dealsResult.documents[0].name.split('/').pop()
     }
   } catch (error) {
     console.error('Erro ao buscar deal:', error)

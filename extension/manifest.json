@@ -10,8 +10,7 @@
   ],
   "host_permissions": [
     "https://web.whatsapp.com/*",
-    "https://*.firebaseapp.com/*",
-    "https://*.cloudfunctions.net/*"
+    "https://firestore.googleapis.com/*"
   ],
   "content_scripts": [
     {

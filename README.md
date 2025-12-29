@@ -84,20 +84,22 @@ src/
 
 ## Integração WhatsApp
 
-O sistema possui integração com WhatsApp Web através de uma extensão Chrome.
+O sistema possui integração com WhatsApp Web através de uma extensão Chrome. A solução é **100% gratuita** e funciona no plano Spark do Firebase.
 
 ### Documentação
 
-- **Guia Rápido:** [`GUIA_RAPIDO_WHATSAPP.md`](GUIA_RAPIDO_WHATSAPP.md) - Comece aqui!
-- **Próximos Passos:** [`PROXIMOS_PASSOS_WHATSAPP.md`](PROXIMOS_PASSOS_WHATSAPP.md) - Guia detalhado
-- **Deploy Firebase:** [`DEPLOY_FIREBASE.md`](DEPLOY_FIREBASE.md) - Instruções de deploy
+- **[Guia de Configuração](docs/SETUP_GUIDE.md)** - Passo a passo completo para configurar
+- **[Solução de Problemas](docs/TROUBLESHOOTING.md)** - Troubleshooting e debug
+- **[Regras do Firestore](docs/FIRESTORE_RULES.md)** - Configuração de segurança
+- **[Documentação Completa](docs/WHATSAPP_INTEGRATION.md)** - Visão geral e arquitetura
 
 ### Funcionalidades
 
-- Sidebar no WhatsApp Web para criar/vincular contatos e negociações
-- Seleção e salvamento de mensagens do WhatsApp
-- Botão WhatsApp na página de detalhes da negociação
-- Detecção automática do número de telefone
+- ✅ Sidebar no WhatsApp Web para criar/vincular contatos e negociações
+- ✅ Seleção e salvamento de mensagens do WhatsApp
+- ✅ Botão WhatsApp na página de detalhes da negociação
+- ✅ Detecção automática do número de telefone
+- ✅ Acesso direto ao Firestore (sem necessidade de Firebase Functions)
 
 ## Licença
 
