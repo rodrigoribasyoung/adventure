@@ -8,6 +8,7 @@ import { useProjects } from '@/hooks/useProjects'
 import { useProject } from '@/contexts/ProjectContext'
 import { Project } from '@/types'
 import { Toast } from '@/components/ui/Toast'
+import { getDocument } from '@/lib/firebase/db'
 
 const ProjectsPage = () => {
   const { projects, loading, createProject, updateProject, deleteProject, refetch } = useProjects()
@@ -75,20 +76,25 @@ const ProjectsPage = () => {
       } else {
         const newProjectId = await createProject(formData)
         
-        // Recarregar projetos
-        await refetch()
-        
-        // Aguardar um pouco para garantir que o estado foi atualizado
-        await new Promise(resolve => setTimeout(resolve, 500))
-        
-        // Buscar o projeto recém-criado na lista atualizada
-        const newProject = projects.find(p => p.id === newProjectId)
-        if (newProject) {
-          setCurrentProject(newProject)
-          setToast({ message: `Projeto "${newProject.name}" criado e selecionado!`, type: 'success', visible: true })
-        } else {
-          setToast({ message: 'Projeto criado com sucesso!', type: 'success', visible: true })
+        // Buscar o projeto recém-criado diretamente do Firestore
+        try {
+          const newProject = await getDocument<Project>('projects', newProjectId)
+          if (newProject) {
+            setCurrentProject(newProject)
+            setToast({ message: `Projeto "${newProject.name}" criado e selecionado!`, type: 'success', visible: true })
+          } else {
+            setToast({ message: 'Projeto criado com sucesso!', type: 'success', visible: true })
+          }
+        } catch (error) {
+          console.error('Erro ao buscar projeto criado:', error)
+          setToast({ message: 'Projeto criado! Recarregando...', type: 'success', visible: true })
+          setTimeout(() => {
+            window.location.reload()
+          }, 1000)
         }
+        
+        // Recarregar lista de projetos em background
+        refetch()
       }
       setIsModalOpen(false)
       setSelectedProject(undefined)

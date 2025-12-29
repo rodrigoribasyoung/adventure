@@ -41,7 +41,31 @@ export const ProjectSelector = () => {
   }
 
   if (projects.length === 0) {
-    return null
+    return (
+      <div className="px-3 py-2 text-white/50 text-sm">
+        Nenhum projeto
+      </div>
+    )
+  }
+  
+  // Se há projetos mas nenhum está selecionado, mostrar aviso
+  if (!currentProject && projects.length > 0) {
+    return (
+      <div className="relative" ref={menuRef}>
+        <button
+          onClick={() => {
+            // Selecionar o primeiro projeto automaticamente
+            if (projects.length > 0) {
+              handleSelectProject(projects[0])
+            }
+          }}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 transition-all text-sm font-medium"
+        >
+          <FiFolder className="w-4 h-4" />
+          <span className="hidden sm:block">Selecionar Projeto</span>
+        </button>
+      </div>
+    )
   }
 
   return (
