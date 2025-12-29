@@ -16,6 +16,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     
     // Helper function para verificar se usuário tem acesso ao projeto
+    // Nota: A verificação de membros é feita via coleção projectUsers no lado do cliente
     function canAccessProject(projectId) {
       let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
       let project = get(/databases/$(database)/documents/projects/$(projectId));
@@ -24,9 +25,7 @@ service cloud.firestore {
         // Se for master, tem acesso a todos os projetos
         userDoc.data.isMaster == true ||
         // Ou se é o dono do projeto
-        project.data.ownerId == request.auth.uid ||
-        // Ou se está na lista de membros do projeto
-        request.auth.uid in project.data.members[].userId
+        project.data.ownerId == request.auth.uid
       )
     }
     
@@ -34,7 +33,6 @@ service cloud.firestore {
     match /projects/{projectId} {
       allow read: if request.auth != null && (
         resource.data.ownerId == request.auth.uid ||
-        request.auth.uid in resource.data.members[].userId ||
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isMaster == true
       );
       allow create: if request.auth != null && 
@@ -42,6 +40,15 @@ service cloud.firestore {
       allow update, delete: if request.auth != null && 
                                 (resource.data.ownerId == request.auth.uid ||
                                  get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isMaster == true);
+    }
+    
+    // ProjectUsers (relação usuário-projeto)
+    match /projectUsers/{projectUserId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && 
+                       request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && 
+                                resource.data.userId == request.auth.uid;
     }
     
     // Contatos - valida projectId
