@@ -11,6 +11,10 @@ Bem-vindo à documentação do Adventure CRM. Aqui você encontra todos os guias
 - **[Solução de Problemas](TROUBLESHOOTING.md)** - Troubleshooting e debug
 - **[Regras do Firestore](FIRESTORE_RULES.md)** - Configuração de segurança
 
+### Configuração Multi-Tenant
+
+- **[Configuração Firebase Multi-Tenant](FIREBASE_MULTI_TENANT_SETUP.md)** - Guia completo para configurar o Firebase Firestore para suportar multi-tenant (projectId)
+
 ## 🚀 Início Rápido
 
 Se você está configurando a integração WhatsApp pela primeira vez:
