@@ -205,6 +205,7 @@ const DealsPage = () => {
         contactId: row.contactId || row.contatoId || '',
         companyId: row.companyId || row.empresaId || undefined,
         value: parseFloat(row.value || row.valor || '0') || 0,
+        currency: 'BRL' as const,
         probability: parseInt(row.probability || row.probabilidade || '50') || 50,
         serviceIds: row.serviceIds || row.servicosIds ? (row.serviceIds || row.servicosIds).split(',').map((id: string) => id.trim()) : [],
         expectedCloseDate: row.expectedCloseDate || row.dataFechamentoEsperada ? 

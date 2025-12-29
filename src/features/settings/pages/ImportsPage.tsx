@@ -5,14 +5,11 @@ import { useCompanies } from '@/features/companies/hooks/useCompanies'
 import { useDeals } from '@/features/deals/hooks/useDeals'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
 import { Timestamp } from 'firebase/firestore'
-import { useAuth } from '@/contexts/AuthContext'
-
 const ImportsPage = () => {
   const { createContact } = useContacts()
   const { createCompany } = useCompanies()
   const { createDeal } = useDeals()
   const { activeFunnel } = useFunnels()
-  const { currentUser } = useAuth()
 
   const handleContactsImport = async (data: any[]) => {
     for (const row of data) {
@@ -74,6 +71,7 @@ const ImportsPage = () => {
         contactId: row.contactId || row.contatoId || '',
         companyId: row.companyId || row.empresaId || undefined,
         value: parseFloat(row.value || row.valor || '0') || 0,
+        currency: 'BRL' as const,
         probability: parseInt(row.probability || row.probabilidade || '50') || 50,
         serviceIds: row.serviceIds || row.servicosIds ? (row.serviceIds || row.servicosIds).split(',').map((id: string) => id.trim()) : [],
         expectedCloseDate: row.expectedCloseDate || row.dataFechamentoEsperada ? 

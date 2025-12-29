@@ -120,7 +120,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
         })
   }, [deal, activeFunnel, form])
 
-  const selectedServiceIds = watch('serviceIds')
+  const selectedServiceIds = watch('serviceIds') || []
   const selectedServices = services.filter(s => selectedServiceIds.includes(s.id))
   const totalValue = selectedServices.reduce((sum, s) => sum + s.price, 0)
   const paymentType = watch('paymentType')
@@ -156,15 +156,15 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
   // Atualizar valor quando serviços mudarem (apenas se não houver valor manual)
   useEffect(() => {
     if (selectedServices.length > 0) {
-      const currentValue = watch('value')
+      const currentValue = watch('value') || 0
       if (currentValue === 0 || Math.abs(currentValue - totalValue) < 0.01) {
         setValue('value', totalValue, { shouldDirty: false })
       }
     }
-  }, [selectedServiceIds, totalValue, setValue, watch])
+  }, [selectedServiceIds, totalValue, setValue, watch, selectedServices.length])
 
   const handleServiceToggle = (serviceId: string) => {
-    const current = watch('serviceIds')
+    const current = watch('serviceIds') || []
     if (current.includes(serviceId)) {
       setValue('serviceIds', current.filter(id => id !== serviceId))
     } else {
@@ -312,7 +312,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
             <label key={service.id} className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
-                checked={selectedServiceIds.includes(service.id)}
+                checked={(selectedServiceIds || []).includes(service.id)}
                 onChange={() => handleServiceToggle(service.id)}
                 className="w-4 h-4 text-primary-red bg-white/5 border-white/10 rounded focus:ring-primary-red/50"
               />

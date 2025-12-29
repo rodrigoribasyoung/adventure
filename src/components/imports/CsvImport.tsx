@@ -156,15 +156,14 @@ export const CsvImport = ({ entityType, onImport, sampleFileName, sampleHeaders,
                 className="hidden"
                 id={`csv-import-${entityType}`}
               />
-              <label htmlFor={`csv-import-${entityType}`}>
-                <Button
-                  variant="primary-red"
-                  as="span"
-                  disabled={loading}
-                >
-                  {loading ? 'Importando...' : '📤 Selecionar e Importar CSV'}
-                </Button>
-              </label>
+              <Button
+                variant="primary-red"
+                disabled={loading}
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {loading ? 'Importando...' : '📤 Selecionar e Importar CSV'}
+              </Button>
             </div>
           </div>
         </div>
