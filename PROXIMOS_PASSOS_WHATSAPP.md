@@ -17,7 +17,7 @@ A extensão precisa de ícones PNG. Use o cursor vermelho da identidade visual:
    - `icon128.png`
 
 **Opção B - Converter online:**
-1. Acesse https://convertio.co/svg-png/ ou https://cloudconvert.com/svg-to-png
+1. Acesse https://convertio.    co/svg-png/ ou https://cloudconvert.com/svg-to-png
 2. Faça upload de: `public/assets/brand/navigation_cursor/navigation-cursor-red.svg`
 3. Configure os tamanhos: 16x16, 48x48, 128x128
 4. Baixe e salve na pasta `extension/`
@@ -103,11 +103,10 @@ Após o deploy, você precisa atualizar a URL das functions no código da extens
    ```
 3. Substitua pela URL real que você obteve no Passo 2.6
 
-**Total de ocorrências a substituir:** 5
-- Linha ~140: `createContact`
-- Linha ~200: `createDeal`
-- Linha ~386: `saveMessages`
-- Linha ~440: `getLinkedDealId` (dentro da função)
+**Apenas 1 ocorrência a substituir:**
+- Linha 4: `const FIREBASE_FUNCTIONS_URL = 'https://us-central1-adv-labs.cloudfunctions.net'`
+
+Substitua pela URL real do seu deploy.
 
 ---
 

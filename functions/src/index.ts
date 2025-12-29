@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import cors from 'cors'
+import { Request, Response } from 'express'
 
 // Inicializar Firebase Admin
 admin.initializeApp()
@@ -18,7 +19,7 @@ async function verifyToken(token: string): Promise<string> {
 }
 
 // Função auxiliar para extrair token do header
-function getTokenFromHeader(req: functions.Request): string {
+function getTokenFromHeader(req: Request): string {
   const authHeader = req.headers.authorization
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     throw new functions.https.HttpsError('unauthenticated', 'Token não fornecido')
@@ -27,7 +28,7 @@ function getTokenFromHeader(req: functions.Request): string {
 }
 
 // Endpoint: Criar contato
-export const createContact = functions.https.onRequest(async (req, res) => {
+export const createContact = functions.https.onRequest(async (req: Request, res: Response) => {
   return corsHandler(req, res, async () => {
     if (req.method !== 'POST') {
       return res.status(405).json({ error: 'Método não permitido' })
@@ -67,7 +68,7 @@ export const createContact = functions.https.onRequest(async (req, res) => {
 })
 
 // Endpoint: Criar negociação
-export const createDeal = functions.https.onRequest(async (req, res) => {
+export const createDeal = functions.https.onRequest(async (req: Request, res: Response) => {
   return corsHandler(req, res, async () => {
     if (req.method !== 'POST') {
       return res.status(405).json({ error: 'Método não permitido' })
@@ -156,7 +157,7 @@ export const createDeal = functions.https.onRequest(async (req, res) => {
 })
 
 // Endpoint: Salvar mensagens
-export const saveMessages = functions.https.onRequest(async (req, res) => {
+export const saveMessages = functions.https.onRequest(async (req: Request, res: Response) => {
   return corsHandler(req, res, async () => {
     if (req.method !== 'POST') {
       return res.status(405).json({ error: 'Método não permitido' })
@@ -222,7 +223,7 @@ export const saveMessages = functions.https.onRequest(async (req, res) => {
 })
 
 // Endpoint: Buscar contatos
-export const getContacts = functions.https.onRequest(async (req, res) => {
+export const getContacts = functions.https.onRequest(async (req: Request, res: Response) => {
   return corsHandler(req, res, async () => {
     if (req.method !== 'GET') {
       return res.status(405).json({ error: 'Método não permitido' })
@@ -269,7 +270,7 @@ export const getContacts = functions.https.onRequest(async (req, res) => {
 })
 
 // Endpoint: Buscar negociações
-export const getDeals = functions.https.onRequest(async (req, res) => {
+export const getDeals = functions.https.onRequest(async (req: Request, res: Response) => {
   return corsHandler(req, res, async () => {
     if (req.method !== 'GET') {
       return res.status(405).json({ error: 'Método não permitido' })
@@ -327,4 +328,3 @@ export const getDeals = functions.https.onRequest(async (req, res) => {
     }
   })
 })
-
