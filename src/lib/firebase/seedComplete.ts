@@ -1,4 +1,4 @@
-import { collection, getDocs, query, limit, Timestamp } from 'firebase/firestore'
+import { collection, getDocs, query, limit, Timestamp, deleteDoc } from 'firebase/firestore'
 import { db } from './config'
 import { createDocument } from './db'
 import { 
@@ -30,9 +30,9 @@ const hasData = async (collectionName: string): Promise<boolean> => {
 const clearCollection = async (collectionName: string) => {
   try {
     const snapshot = await getDocs(collection(db, collectionName))
-    const batch = snapshot.docs.map(doc => doc.ref.delete())
-    await Promise.all(batch)
-    console.log(`[Seed] Coleção ${collectionName} limpa`)
+    const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref))
+    await Promise.all(deletePromises)
+    console.log(`[Seed] Coleção ${collectionName} limpa (${snapshot.docs.length} documentos)`)
   } catch (error) {
     console.error(`[Seed] Erro ao limpar ${collectionName}:`, error)
   }
