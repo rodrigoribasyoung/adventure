@@ -19,7 +19,7 @@ export const Icons = {
   home: FiHome,
   deals: FiBriefcase,
   services: FiSettings,
-  companies: FiBuilding,
+  companies: FiMapPin,
   contacts: FiUsers,
   tasks: FiCheckSquare,
   reports: FiBarChart2,
