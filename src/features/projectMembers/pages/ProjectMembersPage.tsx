@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Container } from '@/components/layout/Container'
-import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { Toast } from '@/components/ui/Toast'

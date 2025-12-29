@@ -122,6 +122,7 @@ export interface Task extends BaseEntity {
   type: string
   status: 'pending' | 'completed'
   dueDate?: Timestamp
+  assignedTo?: string // projectMemberId (responsável/colaborador do projeto)
 }
 
 // Proposal (Proposta)
