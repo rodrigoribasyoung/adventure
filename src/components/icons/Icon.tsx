@@ -3,7 +3,7 @@ import {
   FiHome, 
   FiBriefcase, 
   FiSettings, 
-  FiBuilding, 
+  FiMapPin, 
   FiUsers, 
   FiCheckSquare, 
   FiBarChart2, 
