@@ -366,6 +366,26 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
 
       <div>
         <label className="block text-sm font-medium text-white/90 mb-2">
+          Responsável
+        </label>
+        <select
+          {...register('assignedTo')}
+          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
+        >
+          <option value="">Nenhum responsável</option>
+          {members.filter(m => m.active).map(member => (
+            <option key={member.id} value={member.id}>
+              {member.name} {member.role ? `- ${member.role}` : ''}
+            </option>
+          ))}
+        </select>
+        {errors.assignedTo && (
+          <p className="mt-1 text-sm text-red-400">{errors.assignedTo.message}</p>
+        )}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-white/90 mb-2">
           Forma de Pagamento
         </label>
         <select
