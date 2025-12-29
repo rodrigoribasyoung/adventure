@@ -183,7 +183,7 @@ export const seedCompleteDatabase = async (userId: string, clearExisting: boolea
     const funnel2Id = await createDocument<Funnel>('funnels', {
       name: 'Funil de Vendas Geral',
       description: 'Funil padrão para vendas gerais',
-      type: 'sales',
+      type: 'custom',
       active: true,
       stages: [
         { id: 'lead', name: 'Lead', order: 1, color: '#4285F4', isWonStage: false, isLostStage: false },
