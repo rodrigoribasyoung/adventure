@@ -1,7 +1,7 @@
 import { Funnel, CloseReason } from '@/types'
 
 // Funil padrão para serviços de Martech
-export const DEFAULT_MARTECH_FUNNEL: Omit<Funnel, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'> = {
+export const DEFAULT_MARTECH_FUNNEL: Omit<Funnel, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'projectId'> = {
   name: 'Funil de Vendas Martech',
   description: 'Funil otimizado para vendas de serviços de Marketing Technology',
   type: 'martech',

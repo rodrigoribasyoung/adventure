@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
-import { Button } from '@/components/ui/Button'
 
 export const UserMenu = () => {
   const { userData, signOut } = useAuth()

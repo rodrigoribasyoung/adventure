@@ -72,7 +72,7 @@ export const useProjects = () => {
     }
   }, [currentUser, userData])
 
-  const createProject = async (data: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>) => {
+  const createProject = async (data: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'ownerId'>) => {
     try {
       if (!currentUser) throw new Error('Usuário não autenticado')
       

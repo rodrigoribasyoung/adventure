@@ -202,7 +202,7 @@ const DealsPage = () => {
       await createDeal({
         title,
         stage: stageId,
-        contactId: row.contactId || row.contatoId || '',
+        contactId: row.contactId || row.contatoId || undefined,
         companyId: row.companyId || row.empresaId || undefined,
         value: parseFloat(row.value || row.valor || '0') || 0,
         currency: 'BRL' as const,

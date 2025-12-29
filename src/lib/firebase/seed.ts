@@ -1,7 +1,7 @@
 import { collection, getDocs, query, limit, Timestamp } from 'firebase/firestore'
 import { db } from './config'
 import { createDocument } from './db'
-import { Contact, Company, Service, Deal, Funnel, CloseReason } from '@/types'
+import { Contact, Company, Service, Deal, Funnel, CloseReason, Project } from '@/types'
 import { DEFAULT_MARTECH_FUNNEL, DEFAULT_MARTECH_CLOSE_REASONS } from './martechFunnel'
 
 // Função para verificar se já existem dados
@@ -22,19 +22,32 @@ export const seedDatabase = async (userId: string) => {
 
   try {
     // Verificar se já existem dados
+    const projectsExist = await hasData('projects')
     const contactsExist = await hasData('contacts')
     const companiesExist = await hasData('companies')
     const servicesExist = await hasData('services')
     const funnelsExist = await hasData('funnels')
 
-    if (contactsExist || companiesExist || servicesExist || funnelsExist) {
+    if (projectsExist || contactsExist || companiesExist || servicesExist || funnelsExist) {
       console.log('[Seed] Dados já existem. Pulando seed.')
       return
     }
 
+    // Criar projeto padrão primeiro
+    console.log('[Seed] Criando projeto padrão...')
+    const defaultProjectId = await createDocument<Project>('projects', {
+      name: 'Projeto Padrão',
+      description: 'Projeto padrão criado automaticamente',
+      ownerId: userId,
+      plan: 'basic',
+      active: true,
+      createdBy: userId,
+    })
+
     // Criar empresas primeiro
     console.log('[Seed] Criando empresas...')
     const company1Id = await createDocument<Company>('companies', {
+      projectId: defaultProjectId,
       name: 'Tech Solutions Ltda',
       cnpj: '12.345.678/0001-90',
       email: 'contato@techsolutions.com.br',
@@ -43,6 +56,7 @@ export const seedDatabase = async (userId: string) => {
     })
 
     const company2Id = await createDocument<Company>('companies', {
+      projectId: defaultProjectId,
       name: 'Digital Marketing Agency',
       email: 'hello@digitalmarketing.com.br',
       phone: '(11) 91234-5678',
@@ -52,6 +66,9 @@ export const seedDatabase = async (userId: string) => {
     // Criar contatos
     console.log('[Seed] Criando contatos...')
     const contact1Id = await createDocument<Contact>('contacts', {
+      projectId: defaultProjectId,
+      firstName: 'João',
+      lastName: 'Silva',
       name: 'João Silva',
       email: 'joao.silva@techsolutions.com.br',
       phone: '(11) 99876-5432',
@@ -60,6 +77,9 @@ export const seedDatabase = async (userId: string) => {
     })
 
     const contact2Id = await createDocument<Contact>('contacts', {
+      projectId: defaultProjectId,
+      firstName: 'Maria',
+      lastName: 'Santos',
       name: 'Maria Santos',
       email: 'maria.santos@digitalmarketing.com.br',
       phone: '(11) 97654-3210',
@@ -68,6 +88,9 @@ export const seedDatabase = async (userId: string) => {
     })
 
     const contact3Id = await createDocument<Contact>('contacts', {
+      projectId: defaultProjectId,
+      firstName: 'Pedro',
+      lastName: 'Oliveira',
       name: 'Pedro Oliveira',
       email: 'pedro.oliveira@email.com',
       phone: '(11) 96543-2109',
@@ -77,6 +100,7 @@ export const seedDatabase = async (userId: string) => {
     // Criar serviços
     console.log('[Seed] Criando serviços...')
     const service1Id = await createDocument<Service>('services', {
+      projectId: defaultProjectId,
       name: 'Desenvolvimento de Site',
       description: 'Criação de site institucional responsivo',
       price: 5000.00,
@@ -86,6 +110,7 @@ export const seedDatabase = async (userId: string) => {
     })
 
     const service2Id = await createDocument<Service>('services', {
+      projectId: defaultProjectId,
       name: 'E-commerce Completo',
       description: 'Loja virtual com painel administrativo',
       price: 15000.00,
@@ -95,6 +120,7 @@ export const seedDatabase = async (userId: string) => {
     })
 
     const service3Id = await createDocument<Service>('services', {
+      projectId: defaultProjectId,
       name: 'SEO e Marketing Digital',
       description: 'Otimização para buscadores e campanhas',
       price: 3000.00,
@@ -104,6 +130,7 @@ export const seedDatabase = async (userId: string) => {
     })
 
     const service4Id = await createDocument<Service>('services', {
+      projectId: defaultProjectId,
       name: 'Consultoria em Tecnologia',
       description: 'Consultoria estratégica em tecnologia',
       price: 2500.00,
@@ -116,6 +143,7 @@ export const seedDatabase = async (userId: string) => {
     console.log('[Seed] Criando funil Martech...')
     await createDocument<Funnel>('funnels', {
       ...DEFAULT_MARTECH_FUNNEL,
+      projectId: defaultProjectId,
       createdBy: userId,
     })
 
@@ -131,6 +159,7 @@ export const seedDatabase = async (userId: string) => {
     // Criar negociações
     console.log('[Seed] Criando negociações...')
     await createDocument<Deal>('deals', {
+      projectId: defaultProjectId,
       title: 'Site para Tech Solutions',
       contactId: contact1Id,
       companyId: company1Id,
@@ -144,6 +173,7 @@ export const seedDatabase = async (userId: string) => {
     })
 
     await createDocument<Deal>('deals', {
+      projectId: defaultProjectId,
       title: 'E-commerce Digital Marketing',
       contactId: contact2Id,
       companyId: company2Id,
@@ -158,6 +188,7 @@ export const seedDatabase = async (userId: string) => {
     })
 
     await createDocument<Deal>('deals', {
+      projectId: defaultProjectId,
       title: 'Consultoria Pedro Oliveira',
       contactId: contact3Id,
       stage: 'qualificacao',
@@ -170,6 +201,7 @@ export const seedDatabase = async (userId: string) => {
     })
 
     await createDocument<Deal>('deals', {
+      projectId: defaultProjectId,
       title: 'SEO Tech Solutions',
       contactId: contact1Id,
       companyId: company1Id,

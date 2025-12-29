@@ -65,8 +65,14 @@ const ContactsPage = () => {
 
   const handleContactsImport = async (data: any[]) => {
     for (const row of data) {
+      const fullName = row.name || row.nome || ''
+      const nameParts = fullName.split(' ')
+      const firstName = nameParts[0] || ''
+      const lastName = nameParts.slice(1).join(' ') || undefined
+      
       await createContact({
-        name: row.name || row.nome || '',
+        firstName,
+        lastName,
         email: row.email || undefined,
         phone: row.phone || row.telefone || undefined,
         companyId: row.companyId || row.empresaId || undefined,
