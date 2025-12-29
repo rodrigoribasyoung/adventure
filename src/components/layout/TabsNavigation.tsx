@@ -1,20 +1,21 @@
 import { Link, useLocation } from 'react-router-dom'
+import { Icon } from '@/components/icons/Icon'
 
 interface TabItem {
   label: string
   path: string
-  icon: string
+  icon: keyof typeof import('@/components/icons/Icon').Icons
 }
 
 const tabs: TabItem[] = [
-  { label: 'Início', path: '/', icon: '🏠' },
-  { label: 'Negociações', path: '/deals', icon: '💼' },
-  { label: 'Serviços', path: '/services', icon: '⚙️' },
-  { label: 'Empresas', path: '/companies', icon: '🏢' },
-  { label: 'Contatos', path: '/contacts', icon: '👥' },
-  { label: 'Tarefas', path: '/tasks', icon: '✅' },
-  { label: 'Relatórios', path: '/reports', icon: '📊' },
-  { label: 'Marketing', path: '/marketing', icon: '📈' },
+  { label: 'Início', path: '/', icon: 'home' },
+  { label: 'Negociações', path: '/deals', icon: 'deals' },
+  { label: 'Serviços', path: '/services', icon: 'services' },
+  { label: 'Empresas', path: '/companies', icon: 'companies' },
+  { label: 'Contatos', path: '/contacts', icon: 'contacts' },
+  { label: 'Tarefas', path: '/tasks', icon: 'tasks' },
+  { label: 'Relatórios', path: '/reports', icon: 'reports' },
+  { label: 'Marketing', path: '/marketing', icon: 'marketing' },
 ]
 
 export const TabsNavigation = () => {
@@ -47,7 +48,7 @@ export const TabsNavigation = () => {
                 }
               `}
             >
-              <span className="text-base">{tab.icon}</span>
+              <Icon name={tab.icon} size={18} className={active ? 'text-white' : 'text-white/70'} />
               <span>{tab.label}</span>
             </Link>
           )

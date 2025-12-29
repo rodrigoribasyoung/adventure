@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
+import { FiUser, FiSettings, FiBell, FiCreditCard, FiUsers, FiLogOut } from 'react-icons/fi'
 
 export const UserMenu = () => {
   const { userData, signOut } = useAuth()
@@ -35,11 +36,11 @@ export const UserMenu = () => {
   }
 
   const menuItems = [
-    { label: 'Perfil', path: '/profile', icon: '👤' },
-    { label: 'Configurações', path: '/settings', icon: '⚙️' },
-    { label: 'Notificações', path: '/notifications', icon: '🔔' },
-    { label: 'Gerenciar Plano', path: '/settings/plan', icon: '💳' },
-    { label: 'Usuários', path: '/settings/users', icon: '👥', adminOnly: true },
+    { label: 'Perfil', path: '/profile', icon: FiUser },
+    { label: 'Configurações', path: '/settings', icon: FiSettings },
+    { label: 'Notificações', path: '/notifications', icon: FiBell },
+    { label: 'Gerenciar Plano', path: '/settings/plan', icon: FiCreditCard },
+    { label: 'Usuários', path: '/settings/users', icon: FiUsers, adminOnly: true },
   ]
 
   // Obter iniciais do nome para avatar
@@ -94,7 +95,7 @@ export const UserMenu = () => {
                   }}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-white/80 hover:bg-white/10 hover:text-white transition-all"
                 >
-                  <span className="text-lg">{item.icon}</span>
+                  <item.icon className="w-5 h-5" />
                   <span>{item.label}</span>
                 </button>
               )
@@ -106,7 +107,7 @@ export const UserMenu = () => {
               onClick={handleSignOut}
               className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-red-400 hover:bg-red-500/10 transition-all rounded-lg"
             >
-              <span className="text-lg">🚪</span>
+              <FiLogOut className="w-5 h-5" />
               <span>Sair</span>
             </button>
           </div>

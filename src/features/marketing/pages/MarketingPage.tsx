@@ -9,6 +9,7 @@ import { GoogleAnalyticsConnection } from '../integrations/googleAnalytics/compo
 import { GoogleAnalyticsDashboard } from '../integrations/googleAnalytics/components/GoogleAnalyticsDashboard'
 import { useIntegrations } from '@/features/integrations/hooks/useIntegrations'
 import { Link } from 'react-router-dom'
+import { FiBarChart2 } from 'react-icons/fi'
 
 const MarketingPage = () => {
   const { connections: metaAdsConnections } = useIntegrations('meta_ads')
@@ -37,7 +38,9 @@ const MarketingPage = () => {
         {!hasAnyConnection ? (
           <Card>
             <div className="p-12 text-center">
-              <div className="text-6xl mb-4">📊</div>
+              <div className="mb-4 flex justify-center">
+                <FiBarChart2 className="w-16 h-16 text-primary-red" />
+              </div>
               <h2 className="text-2xl font-semibold text-white mb-2">Conecte suas contas de marketing</h2>
               <p className="text-white/70 mb-6">
                 Conecte suas contas do Meta Ads, Google Ads ou Google Analytics para começar a analisar suas campanhas

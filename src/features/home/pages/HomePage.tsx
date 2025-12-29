@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { FiBriefcase, FiUsers, FiBarChart2 } from 'react-icons/fi'
 
 const HomePage = () => {
   const { userData } = useAuth()
@@ -32,8 +33,8 @@ const HomePage = () => {
             onClick={() => navigate('/deals')}
           >
             <div className="text-center p-8">
-              <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">
-                💼
+              <div className="mb-4 group-hover:scale-110 transition-transform flex justify-center">
+                <FiBriefcase className="w-16 h-16 text-primary-red" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-3">Negócios</h3>
               <p className="text-white/70 mb-6">
@@ -51,8 +52,8 @@ const HomePage = () => {
             onClick={() => navigate('/contacts')}
           >
             <div className="text-center p-8">
-              <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">
-                👥
+              <div className="mb-4 group-hover:scale-110 transition-transform flex justify-center">
+                <FiUsers className="w-16 h-16 text-primary-blue" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-3">Contatos</h3>
               <p className="text-white/70 mb-6">
@@ -70,8 +71,8 @@ const HomePage = () => {
             onClick={() => navigate('/reports')}
           >
             <div className="text-center p-8">
-              <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">
-                📊
+              <div className="mb-4 group-hover:scale-110 transition-transform flex justify-center">
+                <FiBarChart2 className="w-16 h-16 text-primary-red" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-3">Relatórios</h3>
               <p className="text-white/70 mb-6">

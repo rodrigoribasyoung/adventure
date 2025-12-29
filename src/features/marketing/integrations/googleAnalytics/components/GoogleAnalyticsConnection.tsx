@@ -5,6 +5,7 @@ import { useIntegrations } from '@/features/integrations/hooks/useIntegrations'
 import { exchangeCodeForToken, GOOGLE_ANALYTICS_OAUTH_CONFIG } from '../oauth'
 import { prepareConnectionForStorage } from '@/lib/integrations/storage'
 import { Timestamp } from 'firebase/firestore'
+import { FiBarChart2 } from 'react-icons/fi'
 
 interface GoogleAnalyticsConnectionProps {
   onConnected?: () => void
@@ -84,7 +85,9 @@ export const GoogleAnalyticsConnection = ({ onConnected }: GoogleAnalyticsConnec
     <Card>
       <div className="p-6">
         <div className="text-center mb-4">
-          <div className="text-4xl mb-2">📊</div>
+          <div className="mb-2 flex justify-center">
+            <FiBarChart2 className="w-10 h-10 text-primary-red" />
+          </div>
           <h3 className="text-lg font-semibold text-white mb-1">Google Analytics</h3>
           <p className="text-sm text-white/70">
             Conecte sua conta do Google Analytics para visualizar dados de tráfego

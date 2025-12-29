@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useProject } from '@/contexts/ProjectContext'
 import { useProjects } from '@/hooks/useProjects'
 import { Project } from '@/types'
+import { FiFolder, FiSettings } from 'react-icons/fi'
 
 export const ProjectSelector = () => {
   const { currentProject, setCurrentProject, isMaster } = useProject()
@@ -49,7 +50,7 @@ export const ProjectSelector = () => {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-all text-white/80 hover:text-white"
       >
-        <span className="text-lg">📁</span>
+        <FiFolder className="w-4 h-4" />
         <span className="text-sm font-medium hidden sm:block">
           {currentProject?.name || 'Selecione um projeto'}
         </span>
@@ -108,7 +109,7 @@ export const ProjectSelector = () => {
                 }}
                 className="w-full flex items-center gap-2 px-3 py-2.5 text-left text-white/80 hover:bg-white/10 hover:text-white transition-all rounded-lg"
               >
-                <span>⚙️</span>
+                <FiSettings className="w-4 h-4" />
                 <span>Gerenciar Projetos</span>
               </button>
             </div>

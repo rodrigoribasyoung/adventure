@@ -1,16 +1,25 @@
 import { Container } from '@/components/layout/Container'
 import { Card } from '@/components/ui/Card'
 import { Link } from 'react-router-dom'
+import { FiTarget, FiEdit3, FiUsers, FiSettings, FiLink, FiDownload } from 'react-icons/fi'
+
+interface SettingsItem {
+  id: string
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  path: string
+  description: string
+}
 
 const SettingsPage = () => {
 
-  const settingsItems = [
-    { id: 'funnels', label: 'Funis', icon: '🎯', path: '/settings/funnels', description: 'Gerencie seus funis e estágios de vendas' },
-    { id: 'customFields', label: 'Campos Personalizados', icon: '📝', path: '/settings/custom-fields', description: 'Crie campos personalizados para contatos, empresas e negociações' },
-    { id: 'users', label: 'Usuários', icon: '👥', path: '/settings/users', description: 'Gerencie usuários e permissões do sistema' },
-    { id: 'automations', label: 'Automações', icon: '⚙️', path: '/settings/automations', description: 'Configure automações e workflows para agilizar processos' },
-    { id: 'integrations', label: 'Integrações', icon: '🔌', path: '/settings/integrations', description: 'Conecte suas contas de marketing (Meta Ads, Google Ads, Analytics)' },
-    { id: 'imports', label: 'Importações', icon: '📥', path: '/settings/imports', description: 'Importe dados de contatos, empresas e negociações via CSV' },
+  const settingsItems: SettingsItem[] = [
+    { id: 'funnels', label: 'Funis', icon: FiTarget, path: '/settings/funnels', description: 'Gerencie seus funis e estágios de vendas' },
+    { id: 'customFields', label: 'Campos Personalizados', icon: FiEdit3, path: '/settings/custom-fields', description: 'Crie campos personalizados para contatos, empresas e negociações' },
+    { id: 'users', label: 'Usuários', icon: FiUsers, path: '/settings/users', description: 'Gerencie usuários e permissões do sistema' },
+    { id: 'automations', label: 'Automações', icon: FiSettings, path: '/settings/automations', description: 'Configure automações e workflows para agilizar processos' },
+    { id: 'integrations', label: 'Integrações', icon: FiLink, path: '/settings/integrations', description: 'Conecte suas contas de marketing (Meta Ads, Google Ads, Analytics)' },
+    { id: 'imports', label: 'Importações', icon: FiDownload, path: '/settings/imports', description: 'Importe dados de contatos, empresas e negociações via CSV' },
   ]
 
   return (
@@ -26,7 +35,9 @@ const SettingsPage = () => {
             <Link key={item.id} to={item.path}>
               <Card variant="elevated" className="cursor-pointer hover:border-primary-red/50 transition-all h-full">
                 <div className="p-6">
-                  <div className="text-4xl mb-4">{item.icon}</div>
+                  <div className="mb-4">
+                    <item.icon className="w-10 h-10 text-primary-red" />
+                  </div>
                   <h3 className="text-xl font-semibold text-white mb-2">{item.label}</h3>
                   <p className="text-white/70 text-sm">{item.description}</p>
                 </div>
