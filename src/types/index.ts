@@ -29,7 +29,7 @@ export interface Project extends BaseEntity {
   }
 }
 
-// ProjectUser (Usuário do Projeto)
+// ProjectUser (Usuário do Projeto - Cliente da Adventure)
 export interface ProjectUser {
   id: string
   projectId: string
@@ -38,6 +38,16 @@ export interface ProjectUser {
   accessLevel: 'full' | 'limited'
   createdAt: Timestamp
   updatedAt: Timestamp
+}
+
+// ProjectMember (Responsável/Colaborador do Projeto)
+export interface ProjectMember extends BaseEntity {
+  projectId: string // Projeto ao qual pertence
+  name: string // Nome do responsável
+  email?: string // Email (opcional)
+  phone?: string // Telefone (opcional)
+  role?: string // Cargo/função (ex: "Vendedor", "Gerente", etc.)
+  active: boolean
 }
 
 // Contact
@@ -93,7 +103,7 @@ export interface Deal extends BaseEntity {
   probability: number // 0-100
   expectedCloseDate?: Timestamp
   serviceIds: string[]
-  assignedTo?: string // userId
+  assignedTo?: string // projectMemberId (responsável/colaborador do projeto)
   paymentType?: 'cash' | 'installment' // à vista ou à prazo
   paymentMethod?: 'pix' | 'boleto' | 'credit_card' | 'debit_card' | 'bank_transfer' | 'exchange' | 'other' // método de pagamento
   contractUrl?: string // link do contrato (drive ou outro)

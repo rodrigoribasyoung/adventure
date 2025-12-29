@@ -28,6 +28,7 @@ const initialFilters: DealFiltersType = {
   stage: [],
   contactId: '',
   companyId: '',
+  assignedTo: '',
   minValue: null,
   maxValue: null,
   dateFrom: '',

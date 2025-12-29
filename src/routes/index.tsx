@@ -20,6 +20,7 @@ import ImportsPage from '@/features/settings/pages/ImportsPage'
 import MarketingPage from '@/features/marketing/pages/MarketingPage'
 import TasksPage from '@/features/tasks/pages/TasksPage'
 import ProjectsPage from '@/features/projects/pages/ProjectsPage'
+import ProjectMembersPage from '@/features/projectMembers/pages/ProjectMembersPage'
 import { ReactNode } from 'react'
 
 // Componente para proteger rotas privadas
@@ -143,6 +144,14 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <ProjectsPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/project-members',
+    element: (
+      <PrivateRoute>
+        <ProjectMembersPage />
       </PrivateRoute>
     ),
   },

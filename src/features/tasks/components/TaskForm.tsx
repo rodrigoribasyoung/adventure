@@ -5,6 +5,7 @@ import { Task } from '@/types'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { Timestamp as FirestoreTimestamp } from 'firebase/firestore'
+import { useProjectMembers } from '@/features/projectMembers/hooks/useProjectMembers'
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
@@ -12,6 +13,7 @@ const taskSchema = z.object({
   type: z.string().min(1, 'Tipo é obrigatório'),
   dueDate: z.string().optional(),
   status: z.enum(['pending', 'completed']).optional(),
+  assignedTo: z.string().optional(),
 })
 
 type TaskFormData = z.infer<typeof taskSchema>
@@ -38,6 +40,8 @@ const TASK_TYPES = [
 ]
 
 export const TaskForm = ({ task, dealId, onSubmit, onCancel, loading = false }: TaskFormProps) => {
+  const { members } = useProjectMembers()
+  
   const {
     register,
     handleSubmit,
@@ -55,6 +59,7 @@ export const TaskForm = ({ task, dealId, onSubmit, onCancel, loading = false }: 
             ? new Date(task.dueDate.toMillis()).toISOString().split('T')[0]
             : '',
           status: task.status,
+          assignedTo: task.assignedTo || '',
         }
       : {
           status: 'pending',
@@ -131,6 +136,26 @@ export const TaskForm = ({ task, dealId, onSubmit, onCancel, loading = false }: 
         {...register('dueDate')}
         error={errors.dueDate?.message}
       />
+
+      <div>
+        <label className="block text-sm font-medium text-white/90 mb-2">
+          Responsável
+        </label>
+        <select
+          {...register('assignedTo')}
+          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
+        >
+          <option value="">Nenhum responsável</option>
+          {members.filter(m => m.active).map(member => (
+            <option key={member.id} value={member.id}>
+              {member.name} {member.role ? `- ${member.role}` : ''}
+            </option>
+          ))}
+        </select>
+        {errors.assignedTo && (
+          <p className="mt-1 text-sm text-red-400">{errors.assignedTo.message}</p>
+        )}
+      </div>
 
       {task && (
         <div className="flex items-center gap-3">

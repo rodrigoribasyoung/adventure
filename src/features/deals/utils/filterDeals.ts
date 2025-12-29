@@ -50,6 +50,13 @@ export const filterDeals = (deals: Deal[], filters: DealFilters, contacts: Array
       }
     }
 
+    // Filtro por responsável
+    if (filters.assignedTo) {
+      if (deal.assignedTo !== filters.assignedTo) {
+        return false
+      }
+    }
+
     // Filtro por valor mínimo
     if (filters.minValue !== null && filters.minValue !== undefined) {
       if (deal.value < filters.minValue) {

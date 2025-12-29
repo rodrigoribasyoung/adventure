@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/Card'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { useCompanies } from '@/features/companies/hooks/useCompanies'
+import { useProjectMembers } from '@/features/projectMembers/hooks/useProjectMembers'
 
 export interface DealFilters {
   search: string
@@ -12,6 +13,7 @@ export interface DealFilters {
   stage: string[]
   contactId: string
   companyId: string
+  assignedTo: string
   minValue: number | null
   maxValue: number | null
   dateFrom: string
@@ -29,6 +31,7 @@ export const DealFilters = ({ filters, onFiltersChange, onReset }: DealFiltersPr
   const { activeFunnel } = useFunnels()
   const { contacts } = useContacts()
   const { companies } = useCompanies()
+  const { members } = useProjectMembers()
 
   const handleFilterChange = (key: keyof DealFilters, value: any) => {
     onFiltersChange({
@@ -58,6 +61,7 @@ export const DealFilters = ({ filters, onFiltersChange, onReset }: DealFiltersPr
     filters.stage?.length > 0 ||
     filters.contactId ||
     filters.companyId ||
+    filters.assignedTo ||
     filters.minValue !== null ||
     filters.maxValue !== null ||
     filters.dateFrom ||
@@ -88,6 +92,7 @@ export const DealFilters = ({ filters, onFiltersChange, onReset }: DealFiltersPr
                   filters.stage?.length || 0,
                   filters.contactId ? 1 : 0,
                   filters.companyId ? 1 : 0,
+                  filters.assignedTo ? 1 : 0,
                   filters.minValue !== null ? 1 : 0,
                   filters.maxValue !== null ? 1 : 0,
                   filters.dateFrom ? 1 : 0,
@@ -192,6 +197,25 @@ export const DealFilters = ({ filters, onFiltersChange, onReset }: DealFiltersPr
                 {companies.map(company => (
                   <option key={company.id} value={company.id}>
                     {company.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Responsável */}
+            <div>
+              <label className="block text-sm font-medium text-white/90 mb-2">
+                Responsável
+              </label>
+              <select
+                value={filters.assignedTo || ''}
+                onChange={(e) => handleFilterChange('assignedTo', e.target.value || '')}
+                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
+              >
+                <option value="">Todos os responsáveis</option>
+                {members.filter(m => m.active).map(member => (
+                  <option key={member.id} value={member.id}>
+                    {member.name} {member.role ? `- ${member.role}` : ''}
                   </option>
                 ))}
               </select>

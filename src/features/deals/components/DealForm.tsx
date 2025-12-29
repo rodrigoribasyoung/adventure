@@ -11,6 +11,7 @@ import { useCompanies } from '@/features/companies/hooks/useCompanies'
 import { useServices } from '@/features/services/hooks/useServices'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
 import { useCustomFields } from '@/features/customFields/hooks/useCustomFields'
+import { useProjectMembers } from '@/features/projectMembers/hooks/useProjectMembers'
 import { RenderCustomFields } from '@/components/customFields/RenderCustomFields'
 import { ContactForm } from '@/features/contacts/components/ContactForm'
 import { CompanyForm } from '@/features/companies/components/CompanyForm'
@@ -53,6 +54,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
   const { services } = useServices()
   const { activeFunnel } = useFunnels()
   const { customFields } = useCustomFields('deal')
+  const { members } = useProjectMembers()
   
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
