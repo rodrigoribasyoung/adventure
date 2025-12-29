@@ -155,3 +155,4 @@ Após completar os 7 passos acima, a integração estará 100% funcional!
 - Ver [FIRESTORE_RULES.md](FIRESTORE_RULES.md) para detalhes das regras
 - Ver [WHATSAPP_INTEGRATION.md](WHATSAPP_INTEGRATION.md) para visão geral
 
+

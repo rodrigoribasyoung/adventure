@@ -147,3 +147,4 @@ service cloud.firestore {
 - [Guia de Configuração](../docs/SETUP_GUIDE.md)
 - [Solução de Problemas](../docs/TROUBLESHOOTING.md)
 
+

@@ -1,29 +1,55 @@
 import { useState, useEffect } from 'react'
 import { Company } from '@/types'
-import { getDocuments, createDocument, updateDocument, deleteDocument, orderBy } from '@/lib/firebase/db'
+import { getDocuments, createDocument, updateDocument, deleteDocument, orderBy, where } from '@/lib/firebase/db'
 import { useAuth } from '@/contexts/AuthContext'
+import { useProject } from '@/contexts/ProjectContext'
 
 export const useCompanies = () => {
   const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { currentUser } = useAuth()
+  const { currentProject } = useProject()
 
   const fetchCompanies = async () => {
     try {
       setLoading(true)
       setError(null)
+      
+      if (!currentProject) {
+        setCompanies([])
+        setLoading(false)
+        return
+      }
+
       try {
-        const data = await getDocuments<Company>('companies', [orderBy('createdAt', 'desc')])
+        const constraints = [
+          where('projectId', '==', currentProject.id),
+          orderBy('createdAt', 'desc')
+        ]
+        const data = await getDocuments<Company>('companies', constraints)
         setCompanies(data)
       } catch (orderByError) {
         console.warn('orderBy não disponível, buscando sem ordenação:', orderByError)
-        const data = await getDocuments<Company>('companies', [])
-        setCompanies(data.sort((a, b) => {
-          const aTime = a.createdAt?.toMillis() || 0
-          const bTime = b.createdAt?.toMillis() || 0
-          return bTime - aTime
-        }))
+        try {
+          const constraints = [where('projectId', '==', currentProject.id)]
+          const data = await getDocuments<Company>('companies', constraints)
+          setCompanies(data.sort((a, b) => {
+            const aTime = a.createdAt?.toMillis() || 0
+            const bTime = b.createdAt?.toMillis() || 0
+            return bTime - aTime
+          }))
+        } catch (whereError) {
+          const allData = await getDocuments<Company>('companies', [])
+          const filtered = allData
+            .filter(c => c.projectId === currentProject.id)
+            .sort((a, b) => {
+              const aTime = a.createdAt?.toMillis() || 0
+              const bTime = b.createdAt?.toMillis() || 0
+              return bTime - aTime
+            })
+          setCompanies(filtered)
+        }
       }
     } catch (err) {
       setError('Erro ao carregar empresas')
@@ -34,17 +60,22 @@ export const useCompanies = () => {
   }
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser && currentProject) {
       fetchCompanies()
+    } else {
+      setCompanies([])
+      setLoading(false)
     }
-  }, [currentUser])
+  }, [currentUser, currentProject])
 
-  const createCompany = async (data: Omit<Company, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>) => {
+  const createCompany = async (data: Omit<Company, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'projectId'>) => {
     try {
       if (!currentUser) throw new Error('Usuário não autenticado')
+      if (!currentProject) throw new Error('Nenhum projeto selecionado')
       
       const companyData = {
         ...data,
+        projectId: currentProject.id,
         createdBy: currentUser.uid,
       }
       const id = await createDocument<Company>('companies', companyData)

@@ -41,3 +41,4 @@ echo "IMPORTANTE: Anote a URL das functions acima"
 echo "e atualize em extension/content.js (linha 3)"
 echo "========================================"
 
+

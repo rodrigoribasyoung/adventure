@@ -1,49 +1,63 @@
 import { useState, useEffect } from 'react'
 import { Task } from '@/types'
-import { getDocuments, createDocument, updateDocument, deleteDocument, orderBy } from '@/lib/firebase/db'
+import { getDocuments, createDocument, updateDocument, deleteDocument, orderBy, where } from '@/lib/firebase/db'
 import { useAuth } from '@/contexts/AuthContext'
+import { useProject } from '@/contexts/ProjectContext'
 
 export const useTasks = (dealId?: string) => {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { currentUser } = useAuth()
+  const { currentProject } = useProject()
 
   const fetchTasks = async () => {
     try {
       setLoading(true)
       setError(null)
       
+      if (!currentProject) {
+        setTasks([])
+        setLoading(false)
+        return
+      }
+      
       let data: Task[]
       
-      if (dealId) {
-        // Buscar tarefas de uma negociação específica
-        try {
-          data = await getDocuments<Task>('tasks', [orderBy('createdAt', 'desc')])
+      try {
+        const constraints = [
+          where('projectId', '==', currentProject.id),
+          orderBy('createdAt', 'desc')
+        ]
+        data = await getDocuments<Task>('tasks', constraints)
+        
+        if (dealId) {
           data = data.filter(task => task.dealId === dealId)
-        } catch (orderByError) {
-          console.warn('orderBy não disponível, buscando sem ordenação:', orderByError)
+        }
+      } catch (orderByError) {
+        console.warn('orderBy não disponível, buscando sem ordenação:', orderByError)
+        try {
+          const constraints = [where('projectId', '==', currentProject.id)]
+          data = await getDocuments<Task>('tasks', constraints)
+          
+          if (dealId) {
+            data = data.filter(task => task.dealId === dealId)
+          }
+          
+          data = data.sort((a, b) => {
+            const aTime = a.createdAt?.toMillis() || 0
+            const bTime = b.createdAt?.toMillis() || 0
+            return bTime - aTime
+          })
+        } catch (whereError) {
           const allTasks = await getDocuments<Task>('tasks', [])
           data = allTasks
-            .filter(task => task.dealId === dealId)
+            .filter(task => task.projectId === currentProject.id && (!dealId || task.dealId === dealId))
             .sort((a, b) => {
               const aTime = a.createdAt?.toMillis() || 0
               const bTime = b.createdAt?.toMillis() || 0
               return bTime - aTime
             })
-        }
-      } else {
-        // Buscar todas as tarefas
-        try {
-          data = await getDocuments<Task>('tasks', [orderBy('createdAt', 'desc')])
-        } catch (orderByError) {
-          console.warn('orderBy não disponível, buscando sem ordenação:', orderByError)
-          const allTasks = await getDocuments<Task>('tasks', [])
-          data = allTasks.sort((a, b) => {
-            const aTime = a.createdAt?.toMillis() || 0
-            const bTime = b.createdAt?.toMillis() || 0
-            return bTime - aTime
-          })
         }
       }
       
@@ -57,17 +71,22 @@ export const useTasks = (dealId?: string) => {
   }
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser && currentProject) {
       fetchTasks()
+    } else {
+      setTasks([])
+      setLoading(false)
     }
-  }, [currentUser, dealId])
+  }, [currentUser, currentProject, dealId])
 
-  const createTask = async (data: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>) => {
+  const createTask = async (data: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'projectId'>) => {
     try {
       if (!currentUser) throw new Error('Usuário não autenticado')
+      if (!currentProject) throw new Error('Nenhum projeto selecionado')
       
       const taskData = {
         ...data,
+        projectId: currentProject.id,
         status: data.status || 'pending',
         createdBy: currentUser.uid,
       }

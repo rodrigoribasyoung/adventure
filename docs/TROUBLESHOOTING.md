@@ -192,3 +192,4 @@ Se nenhuma das soluções acima funcionou:
 - [Regras do Firestore](FIRESTORE_RULES.md)
 - [Documentação Completa](WHATSAPP_INTEGRATION.md)
 
+

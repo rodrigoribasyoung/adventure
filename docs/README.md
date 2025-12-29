@@ -36,3 +36,4 @@ Se você está configurando a integração WhatsApp pela primeira vez:
 - Não é necessário Firebase Functions (não utilizadas na solução atual)
 - Todas as operações são feitas via REST API do Firestore
 
+

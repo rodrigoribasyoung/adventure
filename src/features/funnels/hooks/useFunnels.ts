@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Funnel } from '@/types'
-import { getDocuments, getDocument, createDocument, updateDocument, deleteDocument, orderBy } from '@/lib/firebase/db'
+import { getDocuments, getDocument, createDocument, updateDocument, deleteDocument, orderBy, where } from '@/lib/firebase/db'
 import { useAuth } from '@/contexts/AuthContext'
+import { useProject } from '@/contexts/ProjectContext'
 
 export const useFunnels = () => {
   const [funnels, setFunnels] = useState<Funnel[]>([])
@@ -9,13 +10,26 @@ export const useFunnels = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { currentUser } = useAuth()
+  const { currentProject } = useProject()
 
   const fetchFunnels = async () => {
     try {
       setLoading(true)
       setError(null)
+      
+      if (!currentProject) {
+        setFunnels([])
+        setActiveFunnel(null)
+        setLoading(false)
+        return
+      }
+
       try {
-        const data = await getDocuments<Funnel>('funnels', [orderBy('createdAt', 'desc')])
+        const constraints = [
+          where('projectId', '==', currentProject.id),
+          orderBy('createdAt', 'desc')
+        ]
+        const data = await getDocuments<Funnel>('funnels', constraints)
         setFunnels(data)
         
         // Encontrar funil ativo
@@ -23,10 +37,19 @@ export const useFunnels = () => {
         setActiveFunnel(active)
       } catch (orderByError) {
         console.warn('orderBy não disponível, buscando sem ordenação:', orderByError)
-        const data = await getDocuments<Funnel>('funnels', [])
-        setFunnels(data)
-        const active = data.find(f => f.active) || data[0] || null
-        setActiveFunnel(active)
+        try {
+          const constraints = [where('projectId', '==', currentProject.id)]
+          const data = await getDocuments<Funnel>('funnels', constraints)
+          setFunnels(data)
+          const active = data.find(f => f.active) || data[0] || null
+          setActiveFunnel(active)
+        } catch (whereError) {
+          const allData = await getDocuments<Funnel>('funnels', [])
+          const filtered = allData.filter(f => f.projectId === currentProject.id)
+          setFunnels(filtered)
+          const active = filtered.find(f => f.active) || filtered[0] || null
+          setActiveFunnel(active)
+        }
       }
     } catch (err) {
       setError('Erro ao carregar funis')
@@ -37,10 +60,14 @@ export const useFunnels = () => {
   }
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser && currentProject) {
       fetchFunnels()
+    } else {
+      setFunnels([])
+      setActiveFunnel(null)
+      setLoading(false)
     }
-  }, [currentUser])
+  }, [currentUser, currentProject])
 
   const getFunnelById = async (id: string): Promise<Funnel | null> => {
     try {
@@ -51,12 +78,14 @@ export const useFunnels = () => {
     }
   }
 
-  const createFunnel = async (data: Omit<Funnel, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>) => {
+  const createFunnel = async (data: Omit<Funnel, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'projectId'>) => {
     try {
       if (!currentUser) throw new Error('Usuário não autenticado')
+      if (!currentProject) throw new Error('Nenhum projeto selecionado')
       
       const funnelData = {
         ...data,
+        projectId: currentProject.id,
         createdBy: currentUser.uid,
       }
       const id = await createDocument<Funnel>('funnels', funnelData)

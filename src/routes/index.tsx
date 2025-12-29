@@ -1,6 +1,8 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
+import WelcomePage from '@/features/auth/pages/WelcomePage'
 import LoginPage from '@/features/auth/pages/LoginPage'
+import HomePage from '@/features/home/pages/HomePage'
 import DashboardPage from '@/features/dashboard/pages/DashboardPage'
 import ContactsPage from '@/features/contacts/pages/ContactsPage'
 import CompaniesPage from '@/features/companies/pages/CompaniesPage'
@@ -16,6 +18,8 @@ import AutomationsPage from '@/features/automations/pages/AutomationsPage'
 import IntegrationsPage from '@/features/integrations/pages/IntegrationsPage'
 import ImportsPage from '@/features/settings/pages/ImportsPage'
 import MarketingPage from '@/features/marketing/pages/MarketingPage'
+import TasksPage from '@/features/tasks/pages/TasksPage'
+import ProjectsPage from '@/features/projects/pages/ProjectsPage'
 import { ReactNode } from 'react'
 
 // Componente para proteger rotas privadas
@@ -31,7 +35,7 @@ const PrivateRoute = ({ children }: { children: ReactNode }) => {
   }
 
   if (!currentUser) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/welcome" replace />
   }
 
   return <>{children}</>
@@ -39,11 +43,23 @@ const PrivateRoute = ({ children }: { children: ReactNode }) => {
 
 export const router = createBrowserRouter([
   {
+    path: '/welcome',
+    element: <WelcomePage />,
+  },
+  {
     path: '/login',
     element: <LoginPage />,
   },
   {
     path: '/',
+    element: (
+      <PrivateRoute>
+        <HomePage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/dashboard',
     element: (
       <PrivateRoute>
         <DashboardPage />
@@ -115,6 +131,22 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    path: '/tasks',
+    element: (
+      <PrivateRoute>
+        <TasksPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/projects',
+    element: (
+      <PrivateRoute>
+        <ProjectsPage />
+      </PrivateRoute>
+    ),
+  },
+  {
     path: '/settings',
     element: (
       <PrivateRoute>
@@ -174,7 +206,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: <Navigate to="/" replace />,
+    element: <Navigate to="/welcome" replace />,
   },
 ])
 

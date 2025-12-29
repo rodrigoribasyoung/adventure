@@ -92,3 +92,4 @@ docs/
 - **Funil ativo:** É necessário ter um funil ativo no CRM para criar negociações.
 - **Plano gratuito:** A solução funciona 100% no plano Spark (gratuito) do Firebase.
 
+

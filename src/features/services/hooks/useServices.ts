@@ -1,29 +1,55 @@
 import { useState, useEffect } from 'react'
 import { Service } from '@/types'
-import { getDocuments, createDocument, updateDocument, deleteDocument, orderBy } from '@/lib/firebase/db'
+import { getDocuments, createDocument, updateDocument, deleteDocument, orderBy, where } from '@/lib/firebase/db'
 import { useAuth } from '@/contexts/AuthContext'
+import { useProject } from '@/contexts/ProjectContext'
 
 export const useServices = () => {
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { currentUser } = useAuth()
+  const { currentProject } = useProject()
 
   const fetchServices = async () => {
     try {
       setLoading(true)
       setError(null)
+      
+      if (!currentProject) {
+        setServices([])
+        setLoading(false)
+        return
+      }
+
       try {
-        const data = await getDocuments<Service>('services', [orderBy('createdAt', 'desc')])
+        const constraints = [
+          where('projectId', '==', currentProject.id),
+          orderBy('createdAt', 'desc')
+        ]
+        const data = await getDocuments<Service>('services', constraints)
         setServices(data)
       } catch (orderByError) {
         console.warn('orderBy não disponível, buscando sem ordenação:', orderByError)
-        const data = await getDocuments<Service>('services', [])
-        setServices(data.sort((a, b) => {
-          const aTime = a.createdAt?.toMillis() || 0
-          const bTime = b.createdAt?.toMillis() || 0
-          return bTime - aTime
-        }))
+        try {
+          const constraints = [where('projectId', '==', currentProject.id)]
+          const data = await getDocuments<Service>('services', constraints)
+          setServices(data.sort((a, b) => {
+            const aTime = a.createdAt?.toMillis() || 0
+            const bTime = b.createdAt?.toMillis() || 0
+            return bTime - aTime
+          }))
+        } catch (whereError) {
+          const allData = await getDocuments<Service>('services', [])
+          const filtered = allData
+            .filter(s => s.projectId === currentProject.id)
+            .sort((a, b) => {
+              const aTime = a.createdAt?.toMillis() || 0
+              const bTime = b.createdAt?.toMillis() || 0
+              return bTime - aTime
+            })
+          setServices(filtered)
+        }
       }
     } catch (err) {
       setError('Erro ao carregar serviços')
@@ -34,17 +60,22 @@ export const useServices = () => {
   }
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser && currentProject) {
       fetchServices()
+    } else {
+      setServices([])
+      setLoading(false)
     }
-  }, [currentUser])
+  }, [currentUser, currentProject])
 
-  const createService = async (data: Omit<Service, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>) => {
+  const createService = async (data: Omit<Service, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'projectId'>) => {
     try {
       if (!currentUser) throw new Error('Usuário não autenticado')
+      if (!currentProject) throw new Error('Nenhum projeto selecionado')
       
       const serviceData = {
         ...data,
+        projectId: currentProject.id,
         currency: 'BRL' as const,
         createdBy: currentUser.uid,
       }

@@ -6,3 +6,4 @@ export const FIREBASE_FUNCTIONS_URL = 'https://us-central1-adv-labs.cloudfunctio
 // Exemplo após deploy:
 // export const FIREBASE_FUNCTIONS_URL = 'https://us-central1-adv-labs.cloudfunctions.net'
 
+

@@ -1,29 +1,56 @@
 import { useState, useEffect } from 'react'
 import { Deal } from '@/types'
-import { getDocuments, createDocument, updateDocument, deleteDocument, orderBy, Timestamp } from '@/lib/firebase/db'
+import { getDocuments, createDocument, updateDocument, deleteDocument, orderBy, where, Timestamp } from '@/lib/firebase/db'
 import { useAuth } from '@/contexts/AuthContext'
+import { useProject } from '@/contexts/ProjectContext'
 
 export const useDeals = () => {
   const [deals, setDeals] = useState<Deal[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { currentUser } = useAuth()
+  const { currentProject } = useProject()
 
   const fetchDeals = async () => {
     try {
       setLoading(true)
       setError(null)
+      
+      if (!currentProject) {
+        setDeals([])
+        setLoading(false)
+        return
+      }
+
       try {
-        const data = await getDocuments<Deal>('deals', [orderBy('createdAt', 'desc')])
+        const constraints = [
+          where('projectId', '==', currentProject.id),
+          orderBy('createdAt', 'desc')
+        ]
+        const data = await getDocuments<Deal>('deals', constraints)
         setDeals(data)
       } catch (orderByError) {
         console.warn('orderBy não disponível, buscando sem ordenação:', orderByError)
-        const data = await getDocuments<Deal>('deals', [])
-        setDeals(data.sort((a, b) => {
-          const aTime = a.createdAt?.toMillis() || 0
-          const bTime = b.createdAt?.toMillis() || 0
-          return bTime - aTime
-        }))
+        try {
+          const constraints = [where('projectId', '==', currentProject.id)]
+          const data = await getDocuments<Deal>('deals', constraints)
+          setDeals(data.sort((a, b) => {
+            const aTime = a.createdAt?.toMillis() || 0
+            const bTime = b.createdAt?.toMillis() || 0
+            return bTime - aTime
+          }))
+        } catch (whereError) {
+          // Fallback: buscar todos e filtrar no cliente
+          const allData = await getDocuments<Deal>('deals', [])
+          const filtered = allData
+            .filter(d => d.projectId === currentProject.id)
+            .sort((a, b) => {
+              const aTime = a.createdAt?.toMillis() || 0
+              const bTime = b.createdAt?.toMillis() || 0
+              return bTime - aTime
+            })
+          setDeals(filtered)
+        }
       }
     } catch (err) {
       setError('Erro ao carregar negociações')
@@ -34,17 +61,22 @@ export const useDeals = () => {
   }
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser && currentProject) {
       fetchDeals()
+    } else {
+      setDeals([])
+      setLoading(false)
     }
-  }, [currentUser])
+  }, [currentUser, currentProject])
 
-  const createDeal = async (data: Omit<Deal, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>) => {
+  const createDeal = async (data: Omit<Deal, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'projectId'>) => {
     try {
       if (!currentUser) throw new Error('Usuário não autenticado')
+      if (!currentProject) throw new Error('Nenhum projeto selecionado')
       
       const dealData = {
         ...data,
+        projectId: currentProject.id,
         currency: 'BRL' as const,
         status: 'active' as const, // Todas as negociações começam como "Em andamento"
         createdBy: currentUser.uid,

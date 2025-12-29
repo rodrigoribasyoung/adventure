@@ -47,3 +47,4 @@ docs/
 └── FIRESTORE_RULES.md        # Regras de segurança
 ```
 
+

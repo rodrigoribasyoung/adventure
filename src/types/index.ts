@@ -13,11 +13,40 @@ export interface User extends BaseEntity {
   email: string
   name: string
   role: 'admin' | 'user'
+  isMaster?: boolean // Se é o usuário master (Adventure)
+}
+
+// Project (Projeto/Cliente)
+export interface Project extends BaseEntity {
+  name: string
+  description?: string
+  ownerId: string // ID do usuário master (Adventure)
+  plan: 'basic' | 'premium' | 'enterprise'
+  active: boolean
+  settings?: {
+    customFields?: CustomField[]
+    funnels?: Funnel[]
+  }
+}
+
+// ProjectUser (Usuário do Projeto)
+export interface ProjectUser {
+  id: string
+  projectId: string
+  userId: string
+  role: 'owner' | 'admin' | 'user' | 'viewer'
+  accessLevel: 'full' | 'limited'
+  createdAt: Timestamp
+  updatedAt: Timestamp
 }
 
 // Contact
 export interface Contact extends BaseEntity {
-  name: string
+  projectId: string // Projeto ao qual pertence
+  firstName: string
+  lastName?: string
+  nickname?: string
+  name: string // Nome completo (gerado automaticamente)
   email?: string
   phone?: string
   companyId?: string
@@ -26,6 +55,7 @@ export interface Contact extends BaseEntity {
 
 // Company
 export interface Company extends BaseEntity {
+  projectId: string // Projeto ao qual pertence
   name: string
   cnpj?: string
   email?: string
@@ -42,6 +72,7 @@ export interface Company extends BaseEntity {
 
 // Service
 export interface Service extends BaseEntity {
+  projectId: string // Projeto ao qual pertence
   name: string
   description?: string
   price: number
@@ -51,9 +82,11 @@ export interface Service extends BaseEntity {
 
 // Deal (Negociação)
 export interface Deal extends BaseEntity {
+  projectId: string // Projeto ao qual pertence
   title: string
-  contactId: string
-  companyId?: string
+  contactId?: string // Opcional (pode ser PF)
+  contactIds?: string[] // Múltiplos contatos
+  companyId?: string // Opcional (pode ser PJ)
   stage: string // funnel stage ID
   value: number
   currency: 'BRL'
@@ -72,6 +105,7 @@ export interface Deal extends BaseEntity {
 
 // Task (Tarefa/Atividade)
 export interface Task extends BaseEntity {
+  projectId: string // Projeto ao qual pertence
   dealId: string
   title: string
   description?: string
@@ -80,8 +114,32 @@ export interface Task extends BaseEntity {
   dueDate?: Timestamp
 }
 
+// Proposal (Proposta)
+export interface Proposal extends BaseEntity {
+  projectId: string // Projeto ao qual pertence
+  dealId: string
+  title: string
+  description: string
+  value: number
+  currency: 'BRL'
+  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired'
+  sentAt?: Timestamp
+  expiresAt?: Timestamp
+  services: ProposalService[]
+  terms?: string
+  notes?: string
+}
+
+export interface ProposalService {
+  serviceId: string
+  quantity: number
+  unitPrice: number
+  discount?: number
+}
+
 // Funnel
 export interface Funnel extends BaseEntity {
+  projectId: string // Projeto ao qual pertence
   name: string
   description?: string
   stages: FunnelStage[]

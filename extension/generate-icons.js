@@ -31,3 +31,4 @@ console.log('OPÇÃO 3: Copiar o SVG diretamente')
 console.log('O SVG já está disponível em: public/assets/brand/navigation_cursor/navigation-cursor-red.svg')
 console.log('Você pode usar este arquivo diretamente se a extensão suportar SVG (mas Chrome requer PNG)')
 
+

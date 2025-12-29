@@ -41,3 +41,4 @@ if (typeof window !== 'undefined') {
   console.log('💡 Dica: Execute window.copyFirebaseToken() no console para copiar seu token Firebase')
 }
 
+
