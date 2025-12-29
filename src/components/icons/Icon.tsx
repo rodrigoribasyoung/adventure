@@ -12,7 +12,11 @@ import {
   FiBell,
   FiCreditCard,
   FiFolder,
-  FiLogOut
+  FiLogOut,
+  FiTarget,
+  FiEdit3,
+  FiLink,
+  FiDownload
 } from 'react-icons/fi'
 
 export const Icons = {
@@ -29,6 +33,11 @@ export const Icons = {
   plan: FiCreditCard,
   folder: FiFolder,
   logout: FiLogOut,
+  target: FiTarget,
+  edit: FiEdit3,
+  link: FiLink,
+  download: FiDownload,
+  project: FiFolder,
 }
 
 interface IconProps {

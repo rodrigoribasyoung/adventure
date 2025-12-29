@@ -44,19 +44,26 @@ export const ProjectProvider = ({ children }: ProjectProviderProps) => {
     const savedProjectId = localStorage.getItem(PROJECT_STORAGE_KEY)
     
     if (savedProjectId) {
-      const savedProject = projects.find(p => p.id === savedProjectId)
+      const savedProject = projects.find(p => p.id === savedProjectId && p.active)
       if (savedProject) {
         setCurrentProjectState(savedProject)
         setLoading(false)
         return
+      } else {
+        // Projeto salvo não existe mais ou está inativo, limpar localStorage
+        localStorage.removeItem(PROJECT_STORAGE_KEY)
       }
     }
 
-    // Se não há projeto salvo, selecionar o primeiro disponível
-    if (projects.length > 0) {
-      const firstProject = projects[0]
+    // Se não há projeto salvo, selecionar o primeiro disponível e ativo
+    const activeProjects = projects.filter(p => p.active)
+    if (activeProjects.length > 0) {
+      const firstProject = activeProjects[0]
       setCurrentProjectState(firstProject)
       localStorage.setItem(PROJECT_STORAGE_KEY, firstProject.id)
+    } else {
+      // Não há projetos ativos
+      setCurrentProjectState(null)
     }
 
     setLoading(false)

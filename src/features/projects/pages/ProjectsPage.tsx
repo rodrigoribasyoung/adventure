@@ -10,7 +10,7 @@ import { Project } from '@/types'
 import { Toast } from '@/components/ui/Toast'
 
 const ProjectsPage = () => {
-  const { projects, loading, createProject, updateProject, deleteProject } = useProjects()
+  const { projects, loading, createProject, updateProject, deleteProject, refetch } = useProjects()
   const { currentProject, setCurrentProject, isMaster } = useProject()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<Project | undefined>()
@@ -27,8 +27,8 @@ const ProjectsPage = () => {
     visible: false,
   })
 
-  // Apenas master pode acessar
-  if (!isMaster) {
+  // Se não for master e já tiver projetos, restringir acesso
+  if (!isMaster && projects.length > 0) {
     return (
       <Container>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -73,8 +73,22 @@ const ProjectsPage = () => {
         await updateProject(selectedProject.id, formData)
         setToast({ message: 'Projeto atualizado com sucesso!', type: 'success', visible: true })
       } else {
-        await createProject(formData)
-        setToast({ message: 'Projeto criado com sucesso!', type: 'success', visible: true })
+        const newProjectId = await createProject(formData)
+        
+        // Recarregar projetos
+        await refetch()
+        
+        // Aguardar um pouco para garantir que o estado foi atualizado
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        // Buscar o projeto recém-criado na lista atualizada
+        const newProject = projects.find(p => p.id === newProjectId)
+        if (newProject) {
+          setCurrentProject(newProject)
+          setToast({ message: `Projeto "${newProject.name}" criado e selecionado!`, type: 'success', visible: true })
+        } else {
+          setToast({ message: 'Projeto criado com sucesso!', type: 'success', visible: true })
+        }
       }
       setIsModalOpen(false)
       setSelectedProject(undefined)
