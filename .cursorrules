@@ -1,0 +1,201 @@
+# Diretrizes de Build e Deploy - Adventure CRM
+
+## 🚨 CHECKLIST OBRIGATÓRIO ANTES DE COMMIT
+
+### 1. Verificação de TypeScript
+- [ ] **SEMPRE** executar `npm run type-check` ou `tsc --noEmit` antes de commitar
+- [ ] Verificar se todos os tipos estão corretos e completos
+- [ ] Garantir que interfaces/tipos importados existem e estão atualizados
+- [ ] Verificar se propriedades opcionais estão marcadas com `?`
+- [ ] Confirmar que tipos de retorno de funções estão corretos
+
+### 2. Imports e Dependências
+- [ ] Remover imports não utilizados (especialmente componentes como `Card`, `Button`, etc.)
+- [ ] Verificar se todos os imports estão corretos e os caminhos existem
+- [ ] Confirmar que hooks customizados estão importados corretamente
+- [ ] Verificar se tipos estão sendo importados de `@/types` quando necessário
+
+### 3. Propriedades de Contextos e Hooks
+- [ ] **CRÍTICO**: Verificar propriedades disponíveis em contextos antes de usar
+  - `ProjectContext` tem: `currentProject`, `setCurrentProject`, `loading`, `isMaster`
+  - **NÃO existe** `loadingProjects` no `ProjectContext`
+- [ ] Verificar se hooks retornam as propriedades esperadas
+- [ ] Confirmar que valores opcionais são tratados com `?.` ou verificações `if`
+
+### 4. Tipos e Interfaces
+- [ ] **SEMPRE** atualizar tipos em `src/types/index.ts` quando adicionar novos campos
+- [ ] Verificar se campos opcionais estão marcados com `?` quando necessário
+- [ ] Confirmar que tipos estendem `BaseEntity` quando apropriado
+- [ ] Verificar se enums estão corretos (ex: `'martech' | 'custom'` para funis)
+
+### 5. Componentes e Props
+- [ ] Verificar se todas as props obrigatórias estão sendo passadas
+- [ ] Confirmar que props opcionais têm valores padrão quando necessário
+- [ ] Verificar se componentes filhos recebem props corretas
+
+### 6. Validação de Dados
+- [ ] Verificar se campos obrigatórios estão validados no schema (Zod)
+- [ ] Confirmar que valores `undefined` são tratados corretamente
+- [ ] Verificar se arrays opcionais são inicializados como `[]` quando necessário
+
+### 7. Ícones e Emojis
+- [ ] **NÃO usar emojis** - sempre usar ícones do `react-icons` ou componente `Icon`
+- [ ] Verificar se ícones importados existem no `react-icons/fi`
+- [ ] Confirmar que ícones estão registrados em `src/components/icons/Icon.tsx`
+
+### 8. Hooks Customizados
+- [ ] Verificar se hooks filtram por `projectId` quando necessário
+- [ ] Confirmar que hooks usam `currentProject` do `ProjectContext` corretamente
+- [ ] Verificar se hooks tratam casos onde `currentProject` é `null`
+
+### 9. Firestore e Database
+- [ ] Verificar se `projectId` está sendo incluído em criações de documentos
+- [ ] Confirmar que queries filtram por `projectId` quando necessário
+- [ ] Verificar se tipos de Timestamp estão corretos
+
+### 10. Rotas e Navegação
+- [ ] Verificar se rotas estão registradas em `src/routes/index.tsx`
+- [ ] Confirmar que componentes de página estão importados corretamente
+- [ ] Verificar se rotas protegidas usam `PrivateRoute`
+
+## 🔍 ERROS COMUNS E COMO EVITAR
+
+### Erro: "Property 'X' does not exist on type 'Y'"
+**Causa**: Propriedade não existe no tipo ou interface
+**Solução**: 
+- Verificar o tipo/interface em `src/types/index.ts`
+- Adicionar a propriedade se necessário
+- Verificar se está usando a propriedade correta (ex: `loading` vs `loadingProjects`)
+
+### Erro: "Module has no exported member 'X'"
+**Causa**: Import incorreto ou membro não existe
+**Solução**:
+- Verificar se o export existe no arquivo
+- Verificar se o caminho do import está correto
+- Verificar se o nome do export está correto
+
+### Erro: "is possibly 'undefined'"
+**Causa**: Valor pode ser undefined mas está sendo usado sem verificação
+**Solução**:
+- Usar optional chaining `?.`
+- Adicionar verificação `if (value)`
+- Usar `|| defaultValue` para valores padrão
+
+### Erro: "Property 'X' is missing in type"
+**Causa**: Propriedade obrigatória não está sendo passada
+**Solução**:
+- Adicionar a propriedade ao objeto
+- Verificar se a propriedade é realmente obrigatória no tipo
+- Marcar como opcional `?` se não for obrigatória
+
+### Erro: "Type 'X' is not assignable to type 'Y'"
+**Causa**: Tipo incompatível
+**Solução**:
+- Verificar se os tipos são compatíveis
+- Usar `as` type assertion apenas se necessário e seguro
+- Verificar se enums estão corretos
+
+## 📋 COMANDOS DE VERIFICAÇÃO
+
+Antes de commitar, execute:
+
+```bash
+# Verificar tipos TypeScript
+npm run type-check
+
+# Ou diretamente
+tsc --noEmit
+
+# Build completo (simula o que o Vercel fará)
+npm run build
+```
+
+## 🎯 PADRÕES DO PROJETO
+
+### Estrutura de Hooks
+```typescript
+export const useFeature = () => {
+  const { currentUser } = useAuth()
+  const { currentProject, loading } = useProject() // SEMPRE usar 'loading', não 'loadingProjects'
+  
+  // Verificar currentProject antes de usar
+  if (!currentProject) {
+    return { data: [], loading: false }
+  }
+  
+  // Filtrar por projectId
+  const constraints = [
+    where('projectId', '==', currentProject.id),
+    orderBy('createdAt', 'desc')
+  ]
+}
+```
+
+### Estrutura de Tipos
+```typescript
+export interface Feature extends BaseEntity {
+  projectId: string // SEMPRE incluir projectId
+  name: string
+  // Campos opcionais com ?
+  description?: string
+  // assignedTo sempre é projectMemberId, não userId
+  assignedTo?: string // projectMemberId
+}
+```
+
+### Estrutura de Formulários
+```typescript
+// SEMPRE validar com Zod
+const schema = z.object({
+  name: z.string().min(1, 'Campo obrigatório'),
+  optionalField: z.string().optional(),
+})
+
+// Tratar valores undefined
+const data = {
+  ...formData,
+  optionalField: formData.optionalField || undefined,
+}
+```
+
+## ⚠️ ATENÇÃO ESPECIAL
+
+### Contextos
+- `ProjectContext`: `currentProject`, `setCurrentProject`, `loading`, `isMaster`
+- **NÃO existe** `loadingProjects` - usar `loading`
+- **NÃO existe** `projects` - buscar via `useProjects()` hook
+
+### Tipos Importantes
+- `Deal.assignedTo` → `projectMemberId` (não `userId`)
+- `Task.assignedTo` → `projectMemberId` (não `userId`)
+- `Funnel.type` → `'martech' | 'custom'` (não `'sales'`)
+
+### Coleções do Firestore
+- Todas as coleções principais precisam de `projectId`
+- Exceções: `users`, `closeReasons` (globais)
+- `projectUsers` → relação usuário-projeto (clientes)
+- `projectMembers` → responsáveis/colaboradores do projeto
+
+## 🚀 ANTES DE PUSH
+
+1. ✅ Executar `npm run type-check`
+2. ✅ Executar `npm run build` localmente
+3. ✅ Verificar console por warnings
+4. ✅ Verificar se não há imports não utilizados
+5. ✅ Verificar se tipos estão completos
+6. ✅ Verificar se contextos estão sendo usados corretamente
+
+## 📝 NOTAS IMPORTANTES
+
+- **NUNCA** commitar código com erros de TypeScript
+- **SEMPRE** verificar tipos antes de usar propriedades de contextos
+- **SEMPRE** incluir `projectId` em criações de documentos
+- **SEMPRE** filtrar por `projectId` em queries
+- **NUNCA** usar emojis - sempre ícones profissionais
+- **SEMPRE** verificar se imports estão corretos e não há não utilizados
+
+---
+
+**Última atualização**: 2024
+**Versão**: 1.0
+
