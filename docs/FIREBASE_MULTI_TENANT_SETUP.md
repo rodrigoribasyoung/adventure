@@ -200,6 +200,15 @@ service cloud.firestore {
                                  get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isMaster == true);
     }
     
+    // ProjectUsers (relação usuário-projeto)
+    match /projectUsers/{projectUserId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && 
+                       request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && 
+                                resource.data.userId == request.auth.uid;
+    }
+    
     // Todas as outras coleções - validação básica
     // O app filtra por projectId no lado do cliente
     match /{collection}/{documentId} {
