@@ -3,6 +3,7 @@ import { Container } from '@/components/layout/Container'
 import { ContactTable } from '../components/ContactTable'
 import { ContactForm } from '../components/ContactForm'
 import { Modal } from '@/components/ui/Modal'
+import { CsvImport } from '@/components/imports/CsvImport'
 import { useContacts } from '../hooks/useContacts'
 import { Contact } from '@/types'
 import { Toast } from '@/components/ui/Toast'
@@ -62,6 +63,17 @@ const ContactsPage = () => {
     }
   }
 
+  const handleContactsImport = async (data: any[]) => {
+    for (const row of data) {
+      await createContact({
+        name: row.name || row.nome || '',
+        email: row.email || undefined,
+        phone: row.phone || row.telefone || undefined,
+        companyId: row.companyId || row.empresaId || undefined,
+      })
+    }
+  }
+
   return (
     <Container>
       <div className="space-y-6">
@@ -69,6 +81,17 @@ const ContactsPage = () => {
           <h1 className="text-3xl font-bold text-white mb-2">Contatos</h1>
           <p className="text-white/70">Gerencie seus contatos</p>
         </div>
+
+        <CsvImport
+          entityType="contacts"
+          onImport={handleContactsImport}
+          sampleFileName="contatos-modelo.csv"
+          sampleHeaders={['name', 'email', 'phone', 'companyId']}
+          sampleData={[
+            ['João Silva', 'joao@example.com', '(11) 98765-4321', ''],
+            ['Maria Santos', 'maria@example.com', '(11) 91234-5678', ''],
+          ]}
+        />
 
         <ContactTable
           contacts={contacts}

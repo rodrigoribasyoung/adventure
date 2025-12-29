@@ -94,7 +94,7 @@ const FunnelsPage = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Funís de Vendas</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">Funis de Vendas</h1>
             <p className="text-white/70">Gerencie seus funis e estágios de vendas</p>
           </div>
           

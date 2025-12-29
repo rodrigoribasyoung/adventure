@@ -9,7 +9,6 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/' },
   { label: 'Negociações', path: '/deals' },
-  { label: 'Funís', path: '/funnels' },
   { label: 'Contatos', path: '/contacts' },
   { label: 'Empresas', path: '/companies' },
   { label: 'Serviços', path: '/services' },

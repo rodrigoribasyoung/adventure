@@ -21,13 +21,13 @@ import { Timestamp as FirestoreTimestamp } from 'firebase/firestore'
 
 const dealSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
-  contactId: z.string().min(1, 'Contato é obrigatório'),
+  contactId: z.string().optional(),
   companyId: z.string().optional(),
   stage: z.string().min(1, 'Estágio é obrigatório'),
-  value: z.number().min(0, 'Valor deve ser maior ou igual a zero'),
-  probability: z.number().min(0).max(100, 'Probabilidade deve estar entre 0 e 100'),
+  value: z.number().min(0, 'Valor deve ser maior ou igual a zero').optional(),
+  probability: z.number().min(0).max(100, 'Probabilidade deve estar entre 0 e 100').optional(),
   expectedCloseDate: z.string().optional(),
-  serviceIds: z.array(z.string()),
+  serviceIds: z.array(z.string()).optional(),
   assignedTo: z.string().optional(),
   paymentType: z.enum(['cash', 'installment']).optional(),
   paymentMethod: z.enum(['pix', 'boleto', 'credit_card', 'debit_card', 'bank_transfer', 'exchange', 'other']).optional(),
@@ -79,6 +79,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
           serviceIds: [],
           probability: 50,
           value: 0,
+          contactId: '',
           stage: activeFunnel?.stages[0]?.id || '',
           customFields: {},
         },
@@ -113,6 +114,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
           serviceIds: [],
           probability: 50,
           value: 0,
+          contactId: '',
           stage: activeFunnel?.stages[0]?.id || '',
           customFields: {},
         })
@@ -184,10 +186,10 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
       
       const submitData: any = {
         title: data.title,
-        contactId: data.contactId,
         stage: data.stage,
-        value: data.value,
-        probability: data.probability,
+        contactId: data.contactId && typeof data.contactId === 'string' && data.contactId.trim() !== '' ? data.contactId : undefined,
+        value: data.value || 0,
+        probability: data.probability || 50,
         serviceIds: data.serviceIds || [],
         companyId: data.companyId && typeof data.companyId === 'string' && data.companyId.trim() !== '' ? data.companyId : undefined,
         assignedTo: data.assignedTo && typeof data.assignedTo === 'string' && data.assignedTo.trim() !== '' ? data.assignedTo : undefined,
@@ -230,7 +232,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="block text-sm font-medium text-white/90">
-            Contato *
+            Contato
           </label>
           <QuickCreateButton onClick={() => setIsContactModalOpen(true)} />
         </div>
@@ -274,7 +276,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
           </p>
           <p className="text-yellow-300/80 text-sm">
             É necessário criar e ativar um funil antes de criar negociações. 
-            <a href="/funnels" className="underline ml-1">Criar funil agora</a>
+            <a href="/settings/funnels" className="underline ml-1">Criar funil agora</a>
           </p>
         </div>
       ) : (
@@ -331,7 +333,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
       </div>
 
       <Input
-        label="Valor Total (R$) *"
+        label="Valor Total (R$)"
         type="number"
         step="0.01"
         min="0"

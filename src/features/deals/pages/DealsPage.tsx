@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Container } from '@/components/layout/Container'
 import { DealKanban } from '../components/DealKanban'
 import { DealListView } from '../components/DealListView'
@@ -8,6 +9,7 @@ import { Modal } from '@/components/ui/Modal'
 import { Card } from '@/components/ui/Card'
 import { DealCloseModal } from '@/components/deals/DealCloseModal'
 import { DealTasksModal } from '../components/DealTasksModal'
+import { CsvImport } from '@/components/imports/CsvImport'
 import { useDeals } from '../hooks/useDeals'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
@@ -16,6 +18,7 @@ import { Deal } from '@/types'
 import { Toast } from '@/components/ui/Toast'
 import { Button } from '@/components/ui/Button'
 import { filterDeals } from '../utils/filterDeals'
+import { Timestamp } from 'firebase/firestore'
 
 type ViewMode = 'kanban' | 'list'
 
@@ -32,6 +35,7 @@ const initialFilters: DealFiltersType = {
 }
 
 const DealsPage = () => {
+  const navigate = useNavigate()
   const { deals, loading, createDeal, updateDeal, deleteDeal, updateDealStage, closeDeal } = useDeals()
   const { activeFunnel } = useFunnels()
   const { contacts } = useContacts()
@@ -62,8 +66,7 @@ const DealsPage = () => {
   }
 
   const handleDealClick = (deal: Deal) => {
-    // TODO: Abrir página de detalhes da negociação
-    handleEdit(deal)
+    navigate(`/deals/${deal.id}`)
   }
 
   const handleOpenTasks = (deal: Deal) => {
@@ -171,6 +174,46 @@ const DealsPage = () => {
     setSortOrder(newSortOrder)
   }
 
+  const handleDealsImport = async (data: any[]) => {
+    if (!activeFunnel) {
+      throw new Error('É necessário ter um funil ativo para importar negociações')
+    }
+
+    const firstStage = activeFunnel.stages[0]
+    if (!firstStage) {
+      throw new Error('Funil não possui estágios')
+    }
+
+    for (const row of data) {
+      const title = row.title || row.titulo || ''
+      const stageName = row.stage || row.estagio || ''
+      
+      // Tentar encontrar o estágio pelo nome
+      let stageId = firstStage.id
+      if (stageName) {
+        const stage = activeFunnel.stages.find(s => 
+          s.name.toLowerCase() === stageName.toLowerCase()
+        )
+        if (stage) {
+          stageId = stage.id
+        }
+      }
+
+      await createDeal({
+        title,
+        stage: stageId,
+        contactId: row.contactId || row.contatoId || '',
+        companyId: row.companyId || row.empresaId || undefined,
+        value: parseFloat(row.value || row.valor || '0') || 0,
+        probability: parseInt(row.probability || row.probabilidade || '50') || 50,
+        serviceIds: row.serviceIds || row.servicosIds ? (row.serviceIds || row.servicosIds).split(',').map((id: string) => id.trim()) : [],
+        expectedCloseDate: row.expectedCloseDate || row.dataFechamentoEsperada ? 
+          Timestamp.fromDate(new Date(row.expectedCloseDate || row.dataFechamentoEsperada)) : 
+          undefined,
+      })
+    }
+  }
+
   return (
     <Container>
       <div className="space-y-6">
@@ -213,6 +256,17 @@ const DealsPage = () => {
           </Card>
         ) : (
           <>
+            <CsvImport
+              entityType="deals"
+              onImport={handleDealsImport}
+              sampleFileName="negociacoes-modelo.csv"
+              sampleHeaders={['title', 'stage', 'contactId', 'value', 'probability']}
+              sampleData={[
+                ['Negociação Exemplo 1', 'Proposta', '', '5000.00', '75'],
+                ['Negociação Exemplo 2', 'Negociação', '', '10000.00', '50'],
+              ]}
+            />
+
             {viewMode === 'list' && (
               <DealFiltersComponent
                 filters={filters}

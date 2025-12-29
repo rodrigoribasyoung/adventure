@@ -10,20 +10,21 @@ interface DealCloseModalProps {
   onClose: () => void
   onConfirm: (status: 'won' | 'lost', closeReason?: string) => Promise<void>
   loading?: boolean
+  initialStatus?: 'won' | 'lost'
 }
 
-export const DealCloseModal = ({ isOpen, deal, onClose, onConfirm, loading }: DealCloseModalProps) => {
-  const [status, setStatus] = useState<'won' | 'lost'>('won')
+export const DealCloseModal = ({ isOpen, deal, onClose, onConfirm, loading, initialStatus = 'won' }: DealCloseModalProps) => {
+  const [status, setStatus] = useState<'won' | 'lost'>(initialStatus)
   const [selectedReason, setSelectedReason] = useState<string>('')
   const { closeReasons, loading: reasonsLoading } = useCloseReasons()
   const [availableReasons, setAvailableReasons] = useState(closeReasons.filter(r => r.type === status))
 
   useEffect(() => {
     if (isOpen && deal) {
-      setStatus('won')
+      setStatus(initialStatus)
       setSelectedReason('')
     }
-  }, [isOpen, deal])
+  }, [isOpen, deal, initialStatus])
 
   useEffect(() => {
     setAvailableReasons(closeReasons.filter(r => r.type === status))

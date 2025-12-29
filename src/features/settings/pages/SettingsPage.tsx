@@ -5,11 +5,12 @@ import { Link } from 'react-router-dom'
 const SettingsPage = () => {
 
   const settingsItems = [
-    { id: 'funnels', label: 'Funís', icon: '🎯', path: '/funnels', description: 'Gerencie seus funis e estágios de vendas' },
+    { id: 'funnels', label: 'Funis', icon: '🎯', path: '/settings/funnels', description: 'Gerencie seus funis e estágios de vendas' },
     { id: 'customFields', label: 'Campos Personalizados', icon: '📝', path: '/settings/custom-fields', description: 'Crie campos personalizados para contatos, empresas e negociações' },
     { id: 'users', label: 'Usuários', icon: '👥', path: '/settings/users', description: 'Gerencie usuários e permissões do sistema' },
     { id: 'automations', label: 'Automações', icon: '⚙️', path: '/settings/automations', description: 'Configure automações e workflows para agilizar processos' },
     { id: 'integrations', label: 'Integrações', icon: '🔌', path: '/settings/integrations', description: 'Conecte suas contas de marketing (Meta Ads, Google Ads, Analytics)' },
+    { id: 'imports', label: 'Importações', icon: '📥', path: '/settings/imports', description: 'Importe dados de contatos, empresas e negociações via CSV' },
   ]
 
   return (

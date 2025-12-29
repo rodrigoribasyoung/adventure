@@ -6,6 +6,7 @@ import ContactsPage from '@/features/contacts/pages/ContactsPage'
 import CompaniesPage from '@/features/companies/pages/CompaniesPage'
 import ServicesPage from '@/features/services/pages/ServicesPage'
 import DealsPage from '@/features/deals/pages/DealsPage'
+import DealDetailPage from '@/features/deals/pages/DealDetailPage'
 import FunnelsPage from '@/features/funnels/pages/FunnelsPage'
 import ReportsPage from '@/features/reports/pages/ReportsPage'
 import CustomFieldsPage from '@/features/customFields/pages/CustomFieldsPage'
@@ -13,6 +14,7 @@ import SettingsPage from '@/features/settings/pages/SettingsPage'
 import UsersPage from '@/features/users/pages/UsersPage'
 import AutomationsPage from '@/features/automations/pages/AutomationsPage'
 import IntegrationsPage from '@/features/integrations/pages/IntegrationsPage'
+import ImportsPage from '@/features/settings/pages/ImportsPage'
 import MarketingPage from '@/features/marketing/pages/MarketingPage'
 import { ReactNode } from 'react'
 
@@ -81,7 +83,15 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/funnels',
+    path: '/deals/:id',
+    element: (
+      <PrivateRoute>
+        <DealDetailPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/settings/funnels',
     element: (
       <PrivateRoute>
         <FunnelsPage />
@@ -141,6 +151,14 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <IntegrationsPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/settings/imports',
+    element: (
+      <PrivateRoute>
+        <ImportsPage />
       </PrivateRoute>
     ),
   },

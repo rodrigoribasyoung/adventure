@@ -117,9 +117,9 @@ export const DealFilters = ({ filters, onFiltersChange, onReset }: DealFiltersPr
               </label>
               <div className="space-y-2">
                 {[
-                  { value: 'active', label: 'Ativa' },
-                  { value: 'won', label: 'Vendida' },
-                  { value: 'lost', label: 'Perdida' },
+                  { value: 'active', label: 'Em Andamento' },
+                  { value: 'won', label: 'Ganho' },
+                  { value: 'lost', label: 'Perda' },
                   { value: 'paused', label: 'Pausada' },
                 ].map((status) => (
                   <label key={status.value} className="flex items-center gap-2 cursor-pointer">
