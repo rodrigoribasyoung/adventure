@@ -9,7 +9,7 @@ export const useProjectMembers = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { currentUser } = useAuth()
-  const { currentProject, loading } = useProject()
+  const { currentProject, loading: projectLoading } = useProject()
 
   const fetchMembers = async () => {
     if (!currentUser || !currentProject) {
@@ -36,7 +36,7 @@ export const useProjectMembers = () => {
   }
 
   useEffect(() => {
-    if (loading) return // Aguardar carregamento do projeto
+    if (projectLoading) return // Aguardar carregamento do projeto
     
     if (currentUser && currentProject) {
       fetchMembers()
@@ -44,7 +44,7 @@ export const useProjectMembers = () => {
       setMembers([])
       setLoading(false)
     }
-  }, [currentUser, currentProject, loading])
+  }, [currentUser, currentProject, projectLoading])
 
   const createMember = async (data: Omit<ProjectMember, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'projectId'>) => {
     try {
