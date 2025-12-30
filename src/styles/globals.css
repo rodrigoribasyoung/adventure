@@ -25,8 +25,13 @@
   }
   
   /* Cursor text para elementos de texto editável */
-  input, textarea, select, [contenteditable], [contenteditable="true"], [type="text"], [type="email"], [type="password"], [type="search"], [type="url"], [type="tel"] {
+  input:not([type="checkbox"]):not([type="radio"]), textarea, select, [contenteditable], [contenteditable="true"], [type="text"], [type="email"], [type="password"], [type="search"], [type="url"], [type="tel"] {
     cursor: url('/assets/brand/navigation_cursor/navigation-cursor-light-text.svg') 1 10, text !important;
+  }
+  
+  /* Cursor pointer para checkboxes e radios */
+  input[type="checkbox"], input[type="radio"], label[for] {
+    cursor: url('/assets/brand/navigation_cursor/navigation-cursor-light-small.svg') 2 2, pointer !important;
   }
   
   /* Cursor move para elementos arrastáveis */
@@ -135,28 +140,53 @@ select {
   color: #ffffff !important;
   font-size: 0.875rem;
   transition: all 0.2s;
+  -webkit-text-fill-color: #ffffff !important;
+  -moz-text-fill-color: #ffffff !important;
 }
 
 select:focus {
   outline: none !important;
   border-color: rgba(255, 255, 255, 0.2) !important;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  -moz-text-fill-color: #ffffff !important;
 }
 
 select:hover {
   border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  -moz-text-fill-color: #ffffff !important;
+}
+
+select:not(:focus):not(:hover) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  -moz-text-fill-color: #ffffff !important;
 }
 
 select option {
   background-color: #071018 !important;
   color: #ffffff !important;
   padding: 0.5rem;
+  -webkit-text-fill-color: #ffffff !important;
+  -moz-text-fill-color: #ffffff !important;
+}
+
+select option:checked {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  -moz-text-fill-color: #ffffff !important;
 }
 
 select option:hover,
-select option:checked,
 select option:focus {
   background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  -moz-text-fill-color: #ffffff !important;
 }
 
 /* Scrollbar moderna com gradiente vermelho para azul */

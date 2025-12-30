@@ -19,7 +19,7 @@ type ContactFormData = z.infer<typeof contactSchema>
 
 interface ContactFormProps {
   contact?: Contact
-  onSubmit: (data: ContactFormData) => Promise<void>
+  onSubmit: (data: { firstName: string; lastName?: string; email?: string; phone?: string; companyId?: string; customFields?: Record<string, any> }) => Promise<void>
   onCancel: () => void
   loading?: boolean
 }
@@ -47,8 +47,14 @@ export const ContactForm = ({ contact, onSubmit, onCancel, loading = false }: Co
   })
 
   const handleFormSubmit = async (data: ContactFormData) => {
+    // Converter name em firstName e lastName
+    const nameParts = data.name.trim().split(' ')
+    const firstName = nameParts[0] || data.name
+    const lastName = nameParts.slice(1).join(' ') || undefined
+    
     await onSubmit({
-      ...data,
+      firstName,
+      lastName,
       email: data.email || undefined,
       phone: data.phone || undefined,
       companyId: data.companyId || undefined,

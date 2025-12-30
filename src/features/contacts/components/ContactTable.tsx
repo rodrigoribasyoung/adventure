@@ -9,9 +9,10 @@ interface ContactTableProps {
   onEdit: (contact: Contact) => void
   onDelete: (id: string) => void
   onCreateNew?: () => void
+  canDelete?: boolean
 }
 
-export const ContactTable = ({ contacts, loading, onEdit, onDelete }: ContactTableProps) => {
+export const ContactTable = ({ contacts, loading, onEdit, onDelete, canDelete = true }: ContactTableProps) => {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(25)
 
@@ -84,17 +85,19 @@ export const ContactTable = ({ contacts, loading, onEdit, onDelete }: ContactTab
                         >
                           Editar
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            if (confirm('Tem certeza que deseja excluir este contato?')) {
-                              onDelete(contact.id)
-                            }
-                          }}
-                        >
-                          Excluir
-                        </Button>
+                        {canDelete && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              if (confirm('Tem certeza que deseja excluir este contato?')) {
+                                onDelete(contact.id)
+                              }
+                            }}
+                          >
+                            Excluir
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>

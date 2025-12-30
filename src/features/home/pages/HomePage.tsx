@@ -1,10 +1,13 @@
-import { Container } from '@/components/layout/Container'
+import { Header } from '@/components/layout/Header'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { FiBriefcase, FiUsers, FiBarChart2 } from 'react-icons/fi'
 import { FeaturesDiagram } from '@/components/home/FeaturesDiagram'
+import { BackgroundManager } from '@/components/common/BackgroundManager'
+import { TypewriterTitle } from '@/components/common/TypewriterTitle'
+import { MarketingInterestForm } from '@/components/home/MarketingInterestForm'
 
 const HomePage = () => {
   const { userData } = useAuth()
@@ -12,16 +15,23 @@ const HomePage = () => {
 
   // Extrair primeiro nome do usuário
   const firstName = userData?.name?.split(' ')[0] || 'Usuário'
+  const headlineText = `Que bom ter você aqui, ${firstName}!`
 
   return (
-    <Container>
+    <div className="min-h-screen bg-background-dark flex flex-col relative">
+      <BackgroundManager />
+      <Header />
+      <main className="flex-1 overflow-y-auto px-8 py-6 relative z-10">
       <div className="max-w-6xl mx-auto">
         {/* Seção 1: Headline de Boas-Vindas e Cards de Ação Rápida */}
         <section className="py-24 mb-32">
           <div className="text-center mb-16">
-            <h1 className="text-3xl text-white/90 mb-3">
-              Que bom ter você aqui, {firstName}!
-            </h1>
+            <TypewriterTitle 
+              text={headlineText} 
+              speed={40} 
+              className="text-3xl text-white/90 mb-3"
+              as="h1"
+            />
             <p className="text-white/60 text-lg">
               Escolha uma opção abaixo para começar
             </p>
@@ -87,10 +97,15 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* Seção 2: Como Funciona */}
+        {/* Seção 2: Visão do Todo */}
         <section className="py-16 mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-xl text-white/90 mb-1.5">Como funciona</h2>
+            <TypewriterTitle 
+              text="Aqui você tem a visão do todo" 
+              speed={35} 
+              className="text-xl text-white/90 mb-1.5"
+              as="h2"
+            />
             <p className="text-white/60 text-sm">
               Explore todas as funcionalidades integradas do CRM
             </p>
@@ -98,7 +113,12 @@ const HomePage = () => {
           <FeaturesDiagram />
         </section>
 
-        {/* Seção 3: Ajuda */}
+        {/* Seção 3: Formulário de Interesse em Marketing */}
+        <section className="py-16 mb-16">
+          <MarketingInterestForm />
+        </section>
+
+        {/* Seção 4: Ajuda */}
         <section className="py-12">
           <Card className="bg-white/5 border-white/10 max-w-3xl mx-auto">
             <div className="text-center p-4">
@@ -134,7 +154,8 @@ const HomePage = () => {
           </Card>
         </section>
       </div>
-    </Container>
+      </main>
+    </div>
   )
 }
 

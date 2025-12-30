@@ -3,6 +3,7 @@ import {
   signInWithPopup, 
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut as firebaseSignOut,
   User 
 } from 'firebase/auth'
@@ -55,6 +56,21 @@ export const signUpWithEmail = async (email: string, password: string): Promise<
       throw new Error('Email inválido')
     } else if (error.code === 'auth/weak-password') {
       throw new Error('Senha muito fraca. Use pelo menos 6 caracteres')
+    }
+    throw error
+  }
+}
+
+export const resetPassword = async (email: string): Promise<void> => {
+  try {
+    await sendPasswordResetEmail(auth, email)
+  } catch (error: any) {
+    console.error('Erro ao enviar email de recuperação:', error)
+    // Traduzir erros comuns do Firebase
+    if (error.code === 'auth/user-not-found') {
+      throw new Error('Usuário não encontrado')
+    } else if (error.code === 'auth/invalid-email') {
+      throw new Error('Email inválido')
     }
     throw error
   }

@@ -10,6 +10,7 @@ import { AdvancedFilter } from '@/components/common/AdvancedFilter'
 import { useAdvancedFilter } from '@/hooks/useAdvancedFilter'
 import { FilterField } from '@/components/common/AdvancedFilter'
 import { Button } from '@/components/ui/Button'
+import { usePermissions } from '@/hooks/usePermissions'
 
 interface CompanyFilters {
   search: string
@@ -19,6 +20,7 @@ interface CompanyFilters {
 
 const CompaniesPage = () => {
   const { companies, loading, createCompany, updateCompany, deleteCompany } = useCompanies()
+  const { canDeleteDealsAndCompanies } = usePermissions()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedCompany, setSelectedCompany] = useState<Company | undefined>()
   const [formLoading, setFormLoading] = useState(false)
@@ -153,6 +155,7 @@ const CompaniesPage = () => {
           onEdit={handleEdit}
           onDelete={handleDelete}
           onCreateNew={handleCreateNew}
+          canDelete={canDeleteDealsAndCompanies}
         />
       </div>
 

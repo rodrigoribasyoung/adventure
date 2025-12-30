@@ -61,7 +61,7 @@ export const FeaturesDiagram = () => {
 
   return (
     <div className="w-full py-16 hidden lg:block bg-[#0a1929]">
-      <div className="max-w-7xl mx-auto px-8 xl:px-12">
+      <div className="max-w-[90rem] mx-auto px-8 xl:px-16">
         <div 
           ref={containerRef}
           className="mind-map__grid grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-12 gap-5 relative"

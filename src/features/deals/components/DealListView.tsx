@@ -20,6 +20,7 @@ interface DealListViewProps {
   selectedDealIds?: Set<string>
   onToggleSelect?: (dealId: string) => void
   onSelectAll?: () => void
+  canDelete?: boolean
 }
 
 export const DealListView = ({ 
@@ -34,7 +35,8 @@ export const DealListView = ({
   loading,
   selectedDealIds = new Set(),
   onToggleSelect,
-  onSelectAll
+  onSelectAll,
+  canDelete = true
 }: DealListViewProps) => {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(25)
@@ -252,18 +254,20 @@ export const DealListView = ({
                     >
                       Editar
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        if (confirm('Tem certeza que deseja excluir esta negociação?')) {
-                          onDelete(deal.id)
-                        }
-                      }}
-                    >
-                      Excluir
-                    </Button>
+                    {canDelete && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (confirm('Tem certeza que deseja excluir esta negociação?')) {
+                            onDelete(deal.id)
+                          }
+                        }}
+                      >
+                        Excluir
+                      </Button>
+                    )}
                   </div>
                 </div>
               </Card>

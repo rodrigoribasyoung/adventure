@@ -1,5 +1,5 @@
 interface LogoProps {
-  variant?: 'dark' | 'white' | 'light' | 'black'
+  variant?: 'dark' | 'white' | 'light' | 'light-2' | 'light-3' | 'black'
   size?: 'sm' | 'md' | 'lg'
   className?: string
 }
@@ -10,6 +10,8 @@ export const Logo = ({ variant = 'white', size = 'md', className = '' }: LogoPro
       dark: '/assets/brand/logo/adventure-dark-1.png',
       white: '/assets/brand/logo/adventure-white-1.png',
       light: '/assets/brand/logo/adventure-light-2.png',
+      'light-2': '/assets/brand/logo/adventure-light-2.png',
+      'light-3': '/assets/brand/logo/adventure-light-3.png',
       black: '/assets/brand/logo/adventure-black-1.png',
     }
     return variants[variant] || variants.white

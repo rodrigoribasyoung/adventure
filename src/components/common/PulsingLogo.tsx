@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Logo } from '@/components/layout/Logo'
 
-export const PulsingLogo = () => {
+interface PulsingLogoProps {
+  variant?: 'dark' | 'white' | 'light' | 'light-2' | 'light-3' | 'black'
+  size?: 'sm' | 'md' | 'lg'
+}
+
+export const PulsingLogo = ({ variant = 'white', size = 'lg' }: PulsingLogoProps) => {
   const [time, setTime] = useState(0)
 
   useEffect(() => {
@@ -50,9 +55,8 @@ export const PulsingLogo = () => {
         }}
       />
       <div className="relative z-10 drop-shadow-2xl">
-        <Logo variant="white" size="lg" />
+        <Logo variant={variant} size={size} />
       </div>
     </div>
   )
 }
-

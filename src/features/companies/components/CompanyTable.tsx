@@ -9,9 +9,10 @@ interface CompanyTableProps {
   onEdit: (company: Company) => void
   onDelete: (id: string) => void
   onCreateNew?: () => void
+  canDelete?: boolean
 }
 
-export const CompanyTable = ({ companies, loading, onEdit, onDelete }: CompanyTableProps) => {
+export const CompanyTable = ({ companies, loading, onEdit, onDelete, canDelete = true }: CompanyTableProps) => {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(25)
 
@@ -90,17 +91,19 @@ export const CompanyTable = ({ companies, loading, onEdit, onDelete }: CompanyTa
                         >
                           Editar
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            if (confirm('Tem certeza que deseja excluir esta empresa?')) {
-                              onDelete(company.id)
-                            }
-                          }}
-                        >
-                          Excluir
-                        </Button>
+                        {canDelete && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              if (confirm('Tem certeza que deseja excluir esta empresa?')) {
+                                onDelete(company.id)
+                              }
+                            }}
+                          >
+                            Excluir
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>

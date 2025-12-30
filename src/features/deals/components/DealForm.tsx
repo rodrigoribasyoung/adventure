@@ -36,6 +36,7 @@ const dealSchema = z.object({
     z.string().url('URL inválida'),
     z.literal('')
   ]).optional(),
+  notes: z.string().optional(),
   customFields: z.record(z.any()).optional(),
 })
 
@@ -75,6 +76,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
             : '',
           serviceIds: deal.serviceIds || [],
           assignedTo: deal.assignedTo || '',
+          notes: deal.notes || '',
           customFields: deal.customFields || {},
         }
       : {
@@ -83,6 +85,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
           value: 0,
           contactId: '',
           stage: activeFunnel?.stages[0]?.id || '',
+          notes: '',
           customFields: {},
         },
   })
@@ -197,6 +200,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
         assignedTo: data.assignedTo && typeof data.assignedTo === 'string' && data.assignedTo.trim() !== '' ? data.assignedTo : undefined,
         paymentType: data.paymentType || undefined,
         paymentMethod: data.paymentMethod || undefined,
+        notes: data.notes && data.notes.trim() !== '' ? data.notes.trim() : undefined,
         customFields: data.customFields && Object.keys(data.customFields).length > 0 ? data.customFields : undefined,
       }
       
@@ -432,6 +436,21 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
         error={errors.contractUrl?.message}
         placeholder="https://drive.google.com/..."
       />
+
+      <div>
+        <label className="block text-sm font-medium text-white/90 mb-2">
+          Anotações
+        </label>
+        <textarea
+          {...register('notes')}
+          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200 resize-none"
+          placeholder="Adicione observações sobre esta negociação..."
+          rows={4}
+        />
+        {errors.notes && (
+          <p className="mt-1 text-sm text-red-400">{errors.notes.message}</p>
+        )}
+      </div>
 
       <RenderCustomFields
         customFields={customFields}

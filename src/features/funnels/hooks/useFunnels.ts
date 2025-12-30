@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Funnel } from '@/types'
+import { Funnel, Deal } from '@/types'
 import { getDocuments, getDocument, createDocument, updateDocument, deleteDocument, orderBy, where } from '@/lib/firebase/db'
 import { useAuth } from '@/contexts/AuthContext'
 import { useProject } from '@/contexts/ProjectContext'
@@ -109,11 +109,30 @@ export const useFunnels = () => {
 
   const deleteFunnel = async (id: string) => {
     try {
+      if (!currentProject) throw new Error('Nenhum projeto selecionado')
+      
+      // Buscar o funil para obter os IDs dos estágios
+      const funnel = await getDocument<Funnel>('funnels', id)
+      if (!funnel) throw new Error('Funil não encontrado')
+      
+      // Buscar negociações que usam algum estágio deste funil
+      const stageIds = funnel.stages.map(s => s.id)
+      const deals = await getDocuments<Deal>('deals', [
+        where('projectId', '==', currentProject.id)
+      ])
+      
+      const dealsUsingFunnel = deals.filter(deal => stageIds.includes(deal.stage))
+      
+      if (dealsUsingFunnel.length > 0) {
+        throw new Error(`Não é possível excluir este funil. Existem ${dealsUsingFunnel.length} negociação(ões) associadas a ele.`)
+      }
+      
       await deleteDocument('funnels', id)
       await fetchFunnels()
-    } catch (err) {
-      setError('Erro ao deletar funil')
-      throw err
+    } catch (err: any) {
+      const errorMessage = err?.message || 'Erro ao deletar funil'
+      setError(errorMessage)
+      throw new Error(errorMessage)
     }
   }
 

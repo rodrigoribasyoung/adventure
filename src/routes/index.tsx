@@ -24,6 +24,7 @@ import ProjectsPage from '@/features/projects/pages/ProjectsPage'
 import ProjectMembersPage from '@/features/projectMembers/pages/ProjectMembersPage'
 import ProposalsPage from '@/features/proposals/pages/ProposalsPage'
 import TenantsPage from '@/features/tenants/pages/TenantsPage'
+import DocumentationPage from '@/features/documentation/pages/DocumentationPage'
 import { ReactNode } from 'react'
 
 // Wrapper para usar useLocation dentro do PrivateRoute
@@ -245,9 +246,15 @@ export const router = createBrowserRouter([
     path: '/help',
     element: (
       <PrivateRoute>
-        <div className="flex items-center justify-center min-h-screen bg-background-dark">
-          <div className="text-white">Help page - Coming soon</div>
-        </div>
+        <DocumentationPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/settings/documentation',
+    element: (
+      <PrivateRoute>
+        <DocumentationPage />
       </PrivateRoute>
     ),
   },

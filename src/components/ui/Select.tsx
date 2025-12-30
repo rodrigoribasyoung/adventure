@@ -6,7 +6,13 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, className = '', children, ...props }, ref) => {
+  ({ label, error, className = '', children, onChange, onBlur, ...props }, ref) => {
+    const forceWhiteColor = (e: React.ChangeEvent<HTMLSelectElement> | React.FocusEvent<HTMLSelectElement> | React.MouseEvent<HTMLSelectElement>) => {
+      const element = e.currentTarget
+      element.style.color = '#ffffff'
+      ;(element.style as any).webkitTextFillColor = '#ffffff'
+    }
+
     return (
       <div className="w-full">
         {label && (
@@ -29,6 +35,22 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               ${error ? 'border-red-500/50 focus:ring-red-500/30' : ''}
               ${className}
             `}
+            style={{ 
+              color: '#ffffff',
+              WebkitTextFillColor: '#ffffff',
+              WebkitAppearance: 'none',
+              MozAppearance: 'none',
+            }}
+            onMouseEnter={forceWhiteColor}
+            onMouseLeave={forceWhiteColor}
+            onChange={(e) => {
+              forceWhiteColor(e)
+              onChange?.(e)
+            }}
+            onBlur={(e) => {
+              forceWhiteColor(e)
+              onBlur?.(e)
+            }}
             {...props}
           >
             {children}
@@ -59,4 +81,3 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
 )
 
 Select.displayName = 'Select'
-

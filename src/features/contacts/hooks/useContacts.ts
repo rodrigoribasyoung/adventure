@@ -93,7 +93,17 @@ export const useContacts = () => {
 
   const updateContact = async (id: string, data: Partial<Omit<Contact, 'id' | 'createdAt' | 'createdBy'>>) => {
     try {
-      await updateDocument<Contact>('contacts', id, data)
+      // Se firstName ou lastName foram alterados, atualizar name também
+      const updateData = { ...data }
+      if (updateData.firstName !== undefined || updateData.lastName !== undefined) {
+        const currentContact = contacts.find(c => c.id === id)
+        if (currentContact) {
+          const firstName = updateData.firstName ?? currentContact.firstName
+          const lastName = updateData.lastName ?? currentContact.lastName
+          updateData.name = `${firstName} ${lastName || ''}`.trim()
+        }
+      }
+      await updateDocument<Contact>('contacts', id, updateData)
       await fetchContacts()
     } catch (err) {
       setError('Erro ao atualizar contato')

@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/lib/firebase/auth'
-import { signInWithGoogle, signInWithEmail, signUpWithEmail, signOut } from '@/lib/firebase/auth'
+import { signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword, signOut } from '@/lib/firebase/auth'
 import { getDocument, createDocument } from '@/lib/firebase/db'
 import { seedDatabase } from '@/lib/firebase/seed'
 import { User } from '@/types'
@@ -13,6 +13,7 @@ interface AuthContextType {
   signIn: () => Promise<void>
   signInWithEmail: (email: string, password: string) => Promise<void>
   signUpWithEmail: (email: string, password: string) => Promise<void>
+  resetPassword: (email: string) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -114,6 +115,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }
 
+  const handleResetPassword = async (email: string) => {
+    try {
+      await resetPassword(email)
+    } catch (error) {
+      console.error('Erro ao resetar senha:', error)
+      throw error
+    }
+  }
+
   const handleSignOut = async () => {
     try {
       await signOut()
@@ -131,6 +141,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signIn: handleSignIn,
     signInWithEmail: handleSignInWithEmail,
     signUpWithEmail: handleSignUpWithEmail,
+    resetPassword: handleResetPassword,
     signOut: handleSignOut,
   }
 

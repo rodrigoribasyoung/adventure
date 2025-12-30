@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Container } from '@/components/layout/Container'
 import { ContactTable } from '../components/ContactTable'
+import { usePermissions } from '@/hooks/usePermissions'
 import { ContactForm } from '../components/ContactForm'
 import { Modal } from '@/components/ui/Modal'
 import { useContacts } from '../hooks/useContacts'
@@ -20,6 +21,7 @@ interface ContactFilters {
 const ContactsPage = () => {
   const { contacts, loading, createContact, updateContact, deleteContact } = useContacts()
   const { companies } = useCompanies()
+  const { canDeleteDealsAndCompanies } = usePermissions()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedContact, setSelectedContact] = useState<Contact | undefined>()
   const [formLoading, setFormLoading] = useState(false)
@@ -142,6 +144,7 @@ const ContactsPage = () => {
           onEdit={handleEdit}
           onDelete={handleDelete}
           onCreateNew={handleCreateNew}
+          canDelete={canDeleteDealsAndCompanies}
         />
       </div>
 

@@ -27,13 +27,13 @@ export const Header = () => {
   // Verificar se a rota atual corresponde a uma aba
   const isActive = (path: string) => {
     if (path === '/') {
-      return location.pathname === '/' || location.pathname === '/dashboard'
+      return location.pathname === '/'
     }
     return location.pathname.startsWith(path)
   }
 
       return (
-        <header className="h-16 bg-background-darker border-b border-white/5 flex items-center justify-between px-4 shadow-lg shadow-black/20">
+        <header className="h-16 bg-background-darker border-b border-white/5 flex items-center justify-between px-4 shadow-lg shadow-black/20 relative z-20">
       <div className="flex items-center gap-4 flex-1 min-w-0">
         <div className="flex items-center gap-3 flex-shrink-0">
           <Logo variant="white" size="md" />

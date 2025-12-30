@@ -111,6 +111,7 @@ export interface Deal extends BaseEntity {
   status?: 'active' | 'won' | 'lost' | 'paused' // Em andamento, Vendiada, Perdida, Pausada
   closeReason?: string // motivo de fechamento (ID do motivo)
   closedAt?: Timestamp // data de fechamento
+  notes?: string // anotações sobre a negociação
   customFields?: Record<string, any>
 }
 

@@ -17,6 +17,7 @@ import { Deal } from '@/types'
 import { Toast } from '@/components/ui/Toast'
 import { Button } from '@/components/ui/Button'
 import { filterDeals } from '../utils/filterDeals'
+import { usePermissions } from '@/hooks/usePermissions'
 
 type ViewMode = 'kanban' | 'list'
 
@@ -36,6 +37,7 @@ const initialFilters: DealFiltersType = {
 const DealsPage = () => {
   const navigate = useNavigate()
   const { deals, loading, createDeal, updateDeal, deleteDeal, updateDealStage, closeDeal } = useDeals()
+  const { canDeleteDealsAndCompanies } = usePermissions()
   const { activeFunnel } = useFunnels()
   const { contacts } = useContacts()
   const { companies } = useCompanies()
@@ -307,6 +309,7 @@ const DealsPage = () => {
                 selectedDealIds={selectedDealIds}
                 onToggleSelect={handleToggleSelect}
                 onSelectAll={handleSelectAll}
+                canDelete={canDeleteDealsAndCompanies}
               />
             )}
           </>

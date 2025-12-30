@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { Funnel } from '@/types'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { getStageColor, updateStagesColors } from '@/utils/stageColors'
 
 const stageSchema = z.object({
   id: z.string(),
@@ -31,19 +32,6 @@ interface FunnelFormProps {
   loading?: boolean
 }
 
-const COLORS = [
-  { value: '#4285F4', label: 'Azul (Google)' },
-  { value: '#34A853', label: 'Verde (Google)' },
-  { value: '#FBBC04', label: 'Amarelo (Google)' },
-  { value: '#EA4335', label: 'Vermelho (Google)' },
-  { value: '#FF9800', label: 'Laranja' },
-  { value: '#9C27B0', label: 'Roxo' },
-  { value: '#10B981', label: 'Verde Sucesso' },
-  { value: '#EF4444', label: 'Vermelho Erro' },
-  { value: '#3B82F6', label: 'Azul' },
-  { value: '#8B5CF6', label: 'Roxo Claro' },
-]
-
 export const FunnelForm = ({ funnel, onSubmit, onCancel, loading = false }: FunnelFormProps) => {
   const {
     register,
@@ -70,7 +58,7 @@ export const FunnelForm = ({ funnel, onSubmit, onCancel, loading = false }: Funn
               id: 'novo',
               name: 'Novo',
               order: 1,
-              color: '#4285F4',
+              color: getStageColor(1, 1),
               isWonStage: false,
               isLostStage: false,
             },
@@ -86,11 +74,13 @@ export const FunnelForm = ({ funnel, onSubmit, onCancel, loading = false }: Funn
 
   const addStage = () => {
     const maxOrder = fields.length > 0 ? Math.max(...fields.map(f => f.order || 0)) : 0
+    const totalStages = fields.length + 1
+    const newOrder = maxOrder + 1
     append({
       id: `stage-${Date.now()}`,
       name: '',
-      order: maxOrder + 1,
-      color: '#4285F4',
+      order: newOrder,
+      color: getStageColor(newOrder, totalStages),
       isWonStage: false,
       isLostStage: false,
     })
@@ -99,11 +89,14 @@ export const FunnelForm = ({ funnel, onSubmit, onCancel, loading = false }: Funn
   const moveStageUp = (index: number) => {
     if (index > 0) {
       move(index, index - 1)
-      // Atualizar ordem após mover
+      // Atualizar ordem e cores após mover
       setTimeout(() => {
         const stages = watch('stages')
+        const totalStages = stages.length
         stages.forEach((_, i) => {
-          setValue(`stages.${i}.order`, i + 1)
+          const newOrder = i + 1
+          setValue(`stages.${i}.order`, newOrder)
+          setValue(`stages.${i}.color`, getStageColor(newOrder, totalStages))
         })
       }, 0)
     }
@@ -112,18 +105,28 @@ export const FunnelForm = ({ funnel, onSubmit, onCancel, loading = false }: Funn
   const moveStageDown = (index: number) => {
     if (index < fields.length - 1) {
       move(index, index + 1)
-      // Atualizar ordem após mover
+      // Atualizar ordem e cores após mover
       setTimeout(() => {
         const stages = watch('stages')
+        const totalStages = stages.length
         stages.forEach((_, i) => {
-          setValue(`stages.${i}.order`, i + 1)
+          const newOrder = i + 1
+          setValue(`stages.${i}.order`, newOrder)
+          setValue(`stages.${i}.color`, getStageColor(newOrder, totalStages))
         })
       }, 0)
     }
   }
 
+  const handleFormSubmit = async (data: FunnelFormData) => {
+    // Garantir que as cores estão atualizadas baseado na ordem final
+    const finalStages = updateStagesColors(data.stages)
+    await onSubmit({ ...data, stages: finalStages })
+  }
+
+  
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <Input
         label="Nome do Funil *"
         {...register('name')}
@@ -205,32 +208,12 @@ export const FunnelForm = ({ funnel, onSubmit, onCancel, loading = false }: Funn
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Input
-                    label="Nome do Estágio *"
-                    {...register(`stages.${index}.name`)}
-                    error={errors.stages?.[index]?.name?.message}
-                    placeholder="Ex: Qualificação"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-white/90 mb-2">
-                    Cor *
-                  </label>
-                  <select
-                    {...register(`stages.${index}.color`)}
-                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
-                  >
-                    {COLORS.map(color => (
-                      <option key={color.value} value={color.value}>
-                        {color.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+              <Input
+                label="Nome do Estágio *"
+                {...register(`stages.${index}.name`)}
+                error={errors.stages?.[index]?.name?.message}
+                placeholder="Ex: Qualificação"
+              />
 
               <input
                 type="hidden"

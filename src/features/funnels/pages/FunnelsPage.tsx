@@ -39,9 +39,13 @@ const FunnelsPage = () => {
         order: index + 1,
       }))
 
+      // Aplicar cores automaticamente baseado na ordem (será feito no backend também)
+      const { updateStagesColors } = await import('@/utils/stageColors')
+      const stagesWithColors = updateStagesColors(stagesWithOrder)
+
       const submitData = {
         ...data,
-        stages: stagesWithOrder,
+        stages: stagesWithColors,
       }
 
       if (selectedFunnel) {

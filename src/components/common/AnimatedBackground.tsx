@@ -33,6 +33,7 @@ export const AnimatedBackground = () => {
   const animationFrameRef = useRef<number>()
   const timeRef = useRef(0)
   const mouseRef = useRef({ x: 0, y: 0, isActive: false })
+  const clickRef = useRef({ isPressed: false, intensity: 0, startTime: 0 })
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -41,40 +42,10 @@ export const AnimatedBackground = () => {
     const ctx = canvas.getContext('2d', { alpha: true })
     if (!ctx) return
 
-    // Configuração do canvas
-    const resizeCanvas = () => {
-      const dpr = window.devicePixelRatio || 1
-      const width = window.innerWidth
-      const height = window.innerHeight
-      
-      canvas.width = width * dpr
-      canvas.height = height * dpr
-      canvas.style.width = `${width}px`
-      canvas.style.height = `${height}px`
-      
-      ctx.scale(dpr, dpr)
-    }
-    resizeCanvas()
-    window.addEventListener('resize', resizeCanvas)
-
-    // Rastreamento de mouse
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseRef.current.x = e.clientX
-      mouseRef.current.y = e.clientY
-      mouseRef.current.isActive = true
-    }
-
-    const handleMouseLeave = () => {
-      mouseRef.current.isActive = false
-    }
-
-    window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('mouseleave', handleMouseLeave)
-
     const centerX = () => window.innerWidth / 2
     const centerY = () => window.innerHeight / 2
 
-    // Partículas orgânicas sutis
+    // Partículas orgânicas sutis - criar antes de resizeCanvas
     const particles: Particle[] = []
     for (let i = 0; i < 80; i++) {
       particles.push({
@@ -93,6 +64,58 @@ export const AnimatedBackground = () => {
     const interactiveParticleIndices = Array.from({ length: 15 }, () => 
       Math.floor(Math.random() * particles.length)
     )
+
+    // Configuração do canvas
+    const resizeCanvas = () => {
+      const dpr = window.devicePixelRatio || 1
+      const width = window.innerWidth
+      const height = window.innerHeight
+      
+      canvas.width = width * dpr
+      canvas.height = height * dpr
+      canvas.style.width = `${width}px`
+      canvas.style.height = `${height}px`
+      
+      ctx.scale(dpr, dpr)
+      
+      // Redistribuir partículas quando o canvas redimensionar (especialmente importante no mobile)
+      particles.forEach(particle => {
+        if (particle.x > width) particle.x = Math.random() * width
+        if (particle.y > height) particle.y = Math.random() * height
+      })
+    }
+    resizeCanvas()
+    window.addEventListener('resize', resizeCanvas)
+
+    // Rastreamento de mouse
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseRef.current.x = e.clientX
+      mouseRef.current.y = e.clientY
+      mouseRef.current.isActive = true
+    }
+
+    const handleMouseLeave = () => {
+      mouseRef.current.isActive = false
+    }
+
+    // Rastreamento de clique
+    const handleMouseDown = (e: MouseEvent) => {
+      clickRef.current.isPressed = true
+      clickRef.current.startTime = Date.now()
+      clickRef.current.intensity = 0
+      mouseRef.current.x = e.clientX
+      mouseRef.current.y = e.clientY
+    }
+
+    const handleMouseUp = () => {
+      clickRef.current.isPressed = false
+      clickRef.current.intensity = 0
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseleave', handleMouseLeave)
+    window.addEventListener('mousedown', handleMouseDown)
+    window.addEventListener('mouseup', handleMouseUp)
 
     // Anéis orbitais suaves
     const orbitalRings: OrbitalRing[] = []
@@ -129,6 +152,20 @@ export const AnimatedBackground = () => {
 
     // Função para desenhar partículas orgânicas
     const drawParticles = (time: number) => {
+      // Atualizar intensidade do clique
+      if (clickRef.current.isPressed) {
+        const elapsed = Date.now() - clickRef.current.startTime
+        // Intensidade aumenta de 0 a 1 ao longo de 1 segundo
+        clickRef.current.intensity = Math.min(1, elapsed / 1000)
+      } else {
+        // Decai suavemente quando solta
+        clickRef.current.intensity = Math.max(0, clickRef.current.intensity - 0.05)
+      }
+
+      // Obter dimensões do canvas uma vez para evitar recálculos
+      const canvasWidth = canvas.clientWidth || window.innerWidth
+      const canvasHeight = canvas.clientHeight || window.innerHeight
+
       particles.forEach((particle, index) => {
         const isInteractive = interactiveParticleIndices.includes(index)
         
@@ -147,7 +184,7 @@ export const AnimatedBackground = () => {
           }
         }
         
-        // Movimento orgânico com seno/cosseno
+        // Movimento orgânico com seno/cosseno - usar valores baseados no canvas
         particle.x += particle.vx + Math.sin(time * 0.001 + particle.x * 0.01) * 0.2
         particle.y += particle.vy + Math.cos(time * 0.001 + particle.y * 0.01) * 0.2
 
@@ -155,17 +192,40 @@ export const AnimatedBackground = () => {
         particle.vx *= 0.95
         particle.vy *= 0.95
 
-        // Wrap around
-        if (particle.x < 0) particle.x = window.innerWidth
-        if (particle.x > window.innerWidth) particle.x = 0
-        if (particle.y < 0) particle.y = window.innerHeight
-        if (particle.y > window.innerHeight) particle.y = 0
+        // Wrap around usando dimensões do canvas para evitar alinhamento vertical no mobile
+        if (particle.x < 0) particle.x = canvasWidth
+        if (particle.x > canvasWidth) particle.x = 0
+        if (particle.y < 0) particle.y = canvasHeight
+        if (particle.y > canvasHeight) particle.y = 0
 
         // Opacidade pulsante suave
         const pulse = (Math.sin(time * 0.002 + particle.x * 0.01) + 1) * 0.5
         const alpha = particle.opacity * (0.5 + pulse * 0.5)
 
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`
+        // Mudança de cor baseada na intensidade do clique
+        let color = `255, 255, 255` // Branco padrão
+        
+        if (clickRef.current.intensity > 0) {
+          const intensity = clickRef.current.intensity
+          // Degradê: branco (0) -> azul (0.5) -> vermelho (1)
+          if (intensity <= 0.5) {
+            // Branco para Azul
+            const t = intensity * 2 // 0 a 1
+            const r = Math.floor(255 * (1 - t))
+            const g = Math.floor(255 * (1 - t))
+            const b = Math.floor(255)
+            color = `${r}, ${g}, ${b}`
+          } else {
+            // Azul para Vermelho
+            const t = (intensity - 0.5) * 2 // 0 a 1
+            const r = Math.floor(255 * t)
+            const g = Math.floor(255 * (1 - t))
+            const b = Math.floor(255 * (1 - t))
+            color = `${r}, ${g}, ${b}`
+          }
+        }
+
+        ctx.fillStyle = `rgba(${color}, ${alpha})`
         ctx.beginPath()
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
         ctx.fill()
@@ -374,6 +434,8 @@ export const AnimatedBackground = () => {
       window.removeEventListener('resize', resizeCanvas)
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseleave', handleMouseLeave)
+      window.removeEventListener('mousedown', handleMouseDown)
+      window.removeEventListener('mouseup', handleMouseUp)
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
       }
