@@ -6,7 +6,6 @@ import { Modal } from '@/components/ui/Modal'
 import { Input } from '@/components/ui/Input'
 import { useProjects } from '@/hooks/useProjects'
 import { useProject } from '@/contexts/ProjectContext'
-import { useAccount } from '@/contexts/AccountContext'
 import { Project } from '@/types'
 import { Toast } from '@/components/ui/Toast'
 import { getDocument } from '@/lib/firebase/db'
@@ -14,7 +13,6 @@ import { getDocument } from '@/lib/firebase/db'
 const ProjectsPage = () => {
   const { projects, loading, createProject, updateProject, deleteProject, refetch } = useProjects()
   const { currentProject, setCurrentProject, isMaster } = useProject()
-  const { currentAccount } = useAccount()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<Project | undefined>()
   const [formLoading, setFormLoading] = useState(false)
@@ -29,25 +27,6 @@ const ProjectsPage = () => {
     type: 'success',
     visible: false,
   })
-
-  // Se for master e não tiver conta selecionada, pedir para selecionar
-  if (isMaster && !currentAccount) {
-    return (
-      <Container>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Card>
-            <div className="text-center py-12">
-              <p className="text-white/70 mb-4">Selecione uma conta</p>
-              <p className="text-white/50 text-sm mb-4">Selecione uma conta no cabeçalho para gerenciar projetos</p>
-              <Button variant="primary-red" onClick={() => window.location.href = '/accounts'}>
-                Gerenciar Contas
-              </Button>
-            </div>
-          </Card>
-        </div>
-      </Container>
-    )
-  }
 
   // Se não for master e já tiver projetos, restringir acesso
   if (!isMaster && projects.length > 0) {

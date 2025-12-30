@@ -68,16 +68,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           } catch (seedError) {
             console.warn('[AuthContext] Erro ao criar dados de teste (pode ignorar):', seedError)
           }
-          
-          // Se for master, garantir que tenha conta e projeto (mesmo que já existam dados)
-          if (userDoc?.isMaster) {
-            try {
-              const { ensureMasterAccountAndProject } = await import('@/lib/firebase/seed')
-              await ensureMasterAccountAndProject(user.uid)
-            } catch (error) {
-              console.warn('[AuthContext] Erro ao garantir conta e projeto (pode ignorar):', error)
-            }
-          }
         } catch (error: any) {
           console.error('[AuthContext] Erro ao buscar/criar dados do usuário:', error)
           console.error('[AuthContext] Código do erro:', error?.code, 'Mensagem:', error?.message)

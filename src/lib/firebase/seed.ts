@@ -1,7 +1,7 @@
 import { collection, getDocs, query, limit, Timestamp } from 'firebase/firestore'
 import { db } from './config'
-import { createDocument, getDocuments } from './db'
-import { Contact, Company, Service, Deal, Funnel, CloseReason, Project, Account } from '@/types'
+import { createDocument } from './db'
+import { Contact, Company, Service, Deal, Funnel, CloseReason, Project } from '@/types'
 import { DEFAULT_MARTECH_FUNNEL, DEFAULT_MARTECH_CLOSE_REASONS } from './martechFunnel'
 
 // Função para verificar se já existem dados
@@ -16,96 +16,26 @@ const hasData = async (collectionName: string): Promise<boolean> => {
   }
 }
 
-// Função para garantir que o usuário master tenha conta e projeto
-export const ensureMasterAccountAndProject = async (userId: string) => {
-  console.log('[Seed] Verificando se usuário master tem conta e projeto...')
-  
-  try {
-    // Buscar todas as contas ativas do usuário
-    const allAccounts = await getDocuments<Account>('accounts', [])
-    const accounts = allAccounts.filter(a => a.ownerId === userId && a.active)
-    
-    let accountId: string
-    
-    if (accounts.length === 0) {
-      // Criar conta padrão
-      console.log('[Seed] Criando conta padrão para usuário master...')
-      accountId = await createDocument<Account>('accounts', {
-        name: 'Conta Padrão',
-        description: 'Conta padrão criada automaticamente',
-        ownerId: userId,
-        plan: 'basic',
-        active: true,
-        createdBy: userId,
-      })
-      console.log('[Seed] Conta criada:', accountId)
-    } else {
-      accountId = accounts[0].id
-      console.log('[Seed] Conta encontrada:', accounts[0].name)
-    }
-    
-    // Buscar todos os projetos e filtrar pela conta
-    const allProjects = await getDocuments<Project>('projects', [])
-    const projects = allProjects.filter(p => p.accountId === accountId && p.active)
-    
-    if (projects.length === 0) {
-      // Criar projeto padrão
-      console.log('[Seed] Criando projeto padrão para a conta...')
-      const projectId = await createDocument<Project>('projects', {
-        accountId: accountId,
-        name: 'Projeto Padrão',
-        description: 'Projeto padrão criado automaticamente',
-        ownerId: userId,
-        plan: 'basic',
-        active: true,
-        createdBy: userId,
-      })
-      console.log('[Seed] Projeto criado:', projectId)
-      console.log('[Seed] Conta e projeto criados com sucesso!')
-    } else {
-      console.log('[Seed] Projeto encontrado:', projects[0].name)
-    }
-  } catch (error) {
-    console.error('[Seed] Erro ao garantir conta e projeto:', error)
-    throw error
-  }
-}
-
 // Criar dados de teste
 export const seedDatabase = async (userId: string) => {
   console.log('[Seed] Iniciando seed do banco de dados...')
 
   try {
     // Verificar se já existem dados
-    const accountsExist = await hasData('accounts')
     const projectsExist = await hasData('projects')
     const contactsExist = await hasData('contacts')
     const companiesExist = await hasData('companies')
     const servicesExist = await hasData('services')
     const funnelsExist = await hasData('funnels')
 
-    if (accountsExist || projectsExist || contactsExist || companiesExist || servicesExist || funnelsExist) {
-      console.log('[Seed] Dados já existem. Pulando seed completo.')
-      // Mas ainda garantir que o usuário master tenha conta e projeto
-      await ensureMasterAccountAndProject(userId)
+    if (projectsExist || contactsExist || companiesExist || servicesExist || funnelsExist) {
+      console.log('[Seed] Dados já existem. Pulando seed.')
       return
     }
-
-    // Criar conta padrão primeiro
-    console.log('[Seed] Criando conta padrão...')
-    const defaultAccountId = await createDocument<Account>('accounts', {
-      name: 'Conta Padrão',
-      description: 'Conta padrão criada automaticamente',
-      ownerId: userId,
-      plan: 'basic',
-      active: true,
-      createdBy: userId,
-    })
 
     // Criar projeto padrão primeiro
     console.log('[Seed] Criando projeto padrão...')
     const defaultProjectId = await createDocument<Project>('projects', {
-      accountId: defaultAccountId,
       name: 'Projeto Padrão',
       description: 'Projeto padrão criado automaticamente',
       ownerId: userId,

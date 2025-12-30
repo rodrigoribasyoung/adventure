@@ -2,14 +2,12 @@ import { useState, useEffect } from 'react'
 import { Project, ProjectUser } from '@/types'
 import { getDocuments, createDocument, updateDocument, deleteDocument, orderBy } from '@/lib/firebase/db'
 import { useAuth } from '@/contexts/AuthContext'
-import { useAccount } from '@/contexts/AccountContext'
 
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { currentUser, userData } = useAuth()
-  const { currentAccount } = useAccount()
 
   const fetchProjects = async () => {
     try {
@@ -74,18 +72,12 @@ export const useProjects = () => {
     }
   }, [currentUser, userData])
 
-  const createProject = async (data: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'ownerId' | 'accountId'>) => {
+  const createProject = async (data: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'ownerId'>) => {
     try {
       if (!currentUser) throw new Error('Usuário não autenticado')
       
-      // Se for master, precisa ter uma conta selecionada
-      if (userData?.isMaster && !currentAccount) {
-        throw new Error('Selecione uma conta antes de criar um projeto')
-      }
-      
       const projectData = {
         ...data,
-        accountId: currentAccount?.id || '', // Se não for master, accountId será vazio (legado)
         ownerId: currentUser.uid,
         createdBy: currentUser.uid,
       }

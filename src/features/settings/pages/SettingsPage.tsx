@@ -1,8 +1,7 @@
 import { Container } from '@/components/layout/Container'
 import { Card } from '@/components/ui/Card'
 import { Link } from 'react-router-dom'
-import { FiTarget, FiEdit3, FiUsers, FiSettings, FiLink, FiDownload, FiBriefcase, FiFolder } from 'react-icons/fi'
-import { useAccount } from '@/contexts/AccountContext'
+import { FiTarget, FiEdit3, FiUsers, FiSettings, FiLink, FiDownload } from 'react-icons/fi'
 
 interface SettingsItem {
   id: string
@@ -13,8 +12,6 @@ interface SettingsItem {
 }
 
 const SettingsPage = () => {
-  const { isMaster } = useAccount()
-
   const settingsItems: SettingsItem[] = [
     { id: 'funnels', label: 'Funis', icon: FiTarget, path: '/settings/funnels', description: 'Gerencie seus funis e estágios de vendas' },
     { id: 'customFields', label: 'Campos Personalizados', icon: FiEdit3, path: '/settings/custom-fields', description: 'Crie campos personalizados para contatos, empresas e negociações' },
@@ -23,14 +20,6 @@ const SettingsPage = () => {
     { id: 'integrations', label: 'Integrações', icon: FiLink, path: '/settings/integrations', description: 'Conecte suas contas de marketing (Meta Ads, Google Ads, Analytics)' },
     { id: 'imports', label: 'Importações', icon: FiDownload, path: '/settings/imports', description: 'Importe dados de contatos, empresas e negociações via CSV' },
   ]
-
-  // Adicionar Contas e Projetos apenas para usuários master
-  if (isMaster) {
-    settingsItems.unshift(
-      { id: 'accounts', label: 'Contas', icon: FiBriefcase, path: '/accounts', description: 'Gerencie as contas (clientes) do sistema' },
-      { id: 'projects', label: 'Projetos', icon: FiFolder, path: '/projects', description: 'Gerencie os projetos dentro das contas' }
-    )
-  }
 
   return (
     <Container>
