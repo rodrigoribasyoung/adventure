@@ -10,7 +10,8 @@ import {
   CloseReason, 
   Project, 
   Task,
-  Proposal
+  Proposal,
+  Account
 } from '@/types'
 import { DEFAULT_MARTECH_FUNNEL, DEFAULT_MARTECH_CLOSE_REASONS } from './martechFunnel'
 
@@ -48,6 +49,7 @@ export const seedCompleteDatabase = async (userId: string, clearExisting: boolea
     // Limpar dados existentes se solicitado
     if (clearExisting) {
       console.log('[Seed] Limpando dados existentes...')
+      await clearCollection('accounts')
       await clearCollection('projects')
       await clearCollection('companies')
       await clearCollection('contacts')
@@ -61,18 +63,33 @@ export const seedCompleteDatabase = async (userId: string, clearExisting: boolea
 
     // Verificar se já existem dados (se não for para limpar)
     if (!clearExisting) {
+      const accountsExist = await hasData('accounts')
       const projectsExist = await hasData('projects')
-      if (projectsExist) {
+      if (accountsExist || projectsExist) {
         console.log('[Seed] Dados já existem. Use clearExisting=true para limpar e recriar.')
         return
       }
     }
 
     // ============================================
-    // 1. CRIAR PROJETOS
+    // 1. CRIAR CONTA
+    // ============================================
+    console.log('[Seed] Criando conta...')
+    const accountId = await createDocument<Account>('accounts', {
+      name: 'Conta Exemplo',
+      description: 'Conta de exemplo para testes',
+      ownerId: userId,
+      plan: 'premium',
+      active: true,
+      createdBy: userId,
+    })
+
+    // ============================================
+    // 2. CRIAR PROJETOS
     // ============================================
     console.log('[Seed] Criando projetos...')
     const project1Id = await createDocument<Project>('projects', {
+      accountId: accountId,
       name: 'Projeto Exemplo 1',
       description: 'Projeto de exemplo para testes',
       ownerId: userId,
@@ -82,6 +99,7 @@ export const seedCompleteDatabase = async (userId: string, clearExisting: boolea
     })
 
     const project2Id = await createDocument<Project>('projects', {
+      accountId: accountId,
       name: 'Projeto Exemplo 2',
       description: 'Segundo projeto de exemplo',
       ownerId: userId,
@@ -91,7 +109,7 @@ export const seedCompleteDatabase = async (userId: string, clearExisting: boolea
     })
 
     // ============================================
-    // 2. CRIAR EMPRESAS
+    // 3. CRIAR EMPRESAS
     // ============================================
     console.log('[Seed] Criando empresas...')
     const companies: string[] = []

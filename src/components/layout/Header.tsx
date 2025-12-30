@@ -1,5 +1,6 @@
 import { Logo } from './Logo'
 import { UserMenu } from './UserMenu'
+import { AccountSelector } from './AccountSelector'
 import { ProjectSelector } from './ProjectSelector'
 
 export const Header = () => {
@@ -10,6 +11,7 @@ export const Header = () => {
       </div>
       
       <div className="flex items-center gap-4">
+        <AccountSelector />
         <ProjectSelector />
         <UserMenu />
       </div>

@@ -16,8 +16,22 @@ export interface User extends BaseEntity {
   isMaster?: boolean // Se é o usuário master (Adventure)
 }
 
-// Project (Projeto/Cliente)
+// Account (Conta/Cliente - Cliente da Adventure)
+export interface Account extends BaseEntity {
+  name: string
+  description?: string
+  ownerId: string // ID do usuário master (Adventure)
+  plan: 'basic' | 'premium' | 'enterprise'
+  active: boolean
+  settings?: {
+    customFields?: CustomField[]
+    funnels?: Funnel[]
+  }
+}
+
+// Project (Projeto dentro de uma Conta)
 export interface Project extends BaseEntity {
+  accountId: string // Conta à qual pertence
   name: string
   description?: string
   ownerId: string // ID do usuário master (Adventure)

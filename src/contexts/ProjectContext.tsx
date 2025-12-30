@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { useAuth } from './AuthContext'
+import { useAccount } from './AccountContext'
 import { Project } from '@/types'
 import { useProjects } from '@/hooks/useProjects'
 
@@ -28,11 +29,17 @@ const PROJECT_STORAGE_KEY = 'adventure_current_project_id'
 
 export const ProjectProvider = ({ children }: ProjectProviderProps) => {
   const { userData } = useAuth()
+  const { currentAccount } = useAccount()
   const { projects, loading: projectsLoading } = useProjects()
   const [currentProject, setCurrentProjectState] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
 
   const isMaster = userData?.isMaster === true
+
+  // Filtrar projetos pela conta atual
+  const availableProjects = currentAccount 
+    ? projects.filter(p => p.accountId === currentAccount.id)
+    : projects
 
   // Carregar projeto salvo do localStorage ou selecionar o primeiro disponível
   useEffect(() => {
@@ -41,10 +48,17 @@ export const ProjectProvider = ({ children }: ProjectProviderProps) => {
       return
     }
 
+    // Se for master e não houver conta selecionada, não mostrar projetos
+    if (isMaster && !currentAccount) {
+      setCurrentProjectState(null)
+      setLoading(false)
+      return
+    }
+
     const savedProjectId = localStorage.getItem(PROJECT_STORAGE_KEY)
     
     if (savedProjectId) {
-      const savedProject = projects.find(p => p.id === savedProjectId && p.active)
+      const savedProject = availableProjects.find(p => p.id === savedProjectId && p.active)
       if (savedProject) {
         setCurrentProjectState(savedProject)
         setLoading(false)
@@ -56,7 +70,7 @@ export const ProjectProvider = ({ children }: ProjectProviderProps) => {
     }
 
     // Se não há projeto salvo, selecionar o primeiro disponível e ativo
-    const activeProjects = projects.filter(p => p.active)
+    const activeProjects = availableProjects.filter(p => p.active)
     if (activeProjects.length > 0) {
       const firstProject = activeProjects[0]
       setCurrentProjectState(firstProject)
@@ -67,7 +81,7 @@ export const ProjectProvider = ({ children }: ProjectProviderProps) => {
     }
 
     setLoading(false)
-  }, [projects, projectsLoading, userData])
+  }, [availableProjects, projectsLoading, userData, isMaster, currentAccount])
 
   const setCurrentProject = (project: Project | null) => {
     setCurrentProjectState(project)

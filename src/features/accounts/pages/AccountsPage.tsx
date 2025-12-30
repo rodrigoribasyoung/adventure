@@ -4,19 +4,17 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { Input } from '@/components/ui/Input'
-import { useProjects } from '@/hooks/useProjects'
-import { useProject } from '@/contexts/ProjectContext'
+import { useAccounts } from '@/hooks/useAccounts'
 import { useAccount } from '@/contexts/AccountContext'
-import { Project } from '@/types'
+import { Account } from '@/types'
 import { Toast } from '@/components/ui/Toast'
 import { getDocument } from '@/lib/firebase/db'
 
-const ProjectsPage = () => {
-  const { projects, loading, createProject, updateProject, deleteProject, refetch } = useProjects()
-  const { currentProject, setCurrentProject, isMaster } = useProject()
-  const { currentAccount } = useAccount()
+const AccountsPage = () => {
+  const { accounts, loading, createAccount, updateAccount, deleteAccount, refetch } = useAccounts()
+  const { currentAccount, setCurrentAccount, isMaster } = useAccount()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedProject, setSelectedProject] = useState<Project | undefined>()
+  const [selectedAccount, setSelectedAccount] = useState<Account | undefined>()
   const [formLoading, setFormLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -30,34 +28,15 @@ const ProjectsPage = () => {
     visible: false,
   })
 
-  // Se for master e não tiver conta selecionada, pedir para selecionar
-  if (isMaster && !currentAccount) {
-    return (
-      <Container>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Card>
-            <div className="text-center py-12">
-              <p className="text-white/70 mb-4">Selecione uma conta</p>
-              <p className="text-white/50 text-sm mb-4">Selecione uma conta no cabeçalho para gerenciar projetos</p>
-              <Button variant="primary-red" onClick={() => window.location.href = '/accounts'}>
-                Gerenciar Contas
-              </Button>
-            </div>
-          </Card>
-        </div>
-      </Container>
-    )
-  }
-
-  // Se não for master e já tiver projetos, restringir acesso
-  if (!isMaster && projects.length > 0) {
+  // Apenas master pode acessar
+  if (!isMaster) {
     return (
       <Container>
         <div className="flex items-center justify-center min-h-[400px]">
           <Card>
             <div className="text-center py-12">
               <p className="text-white/70 mb-4">Acesso restrito</p>
-              <p className="text-white/50 text-sm">Apenas administradores podem gerenciar projetos</p>
+              <p className="text-white/50 text-sm">Apenas usuários master podem gerenciar contas</p>
             </div>
           </Card>
         </div>
@@ -66,7 +45,7 @@ const ProjectsPage = () => {
   }
 
   const handleCreateNew = () => {
-    setSelectedProject(undefined)
+    setSelectedAccount(undefined)
     setFormData({
       name: '',
       description: '',
@@ -76,13 +55,13 @@ const ProjectsPage = () => {
     setIsModalOpen(true)
   }
 
-  const handleEdit = (project: Project) => {
-    setSelectedProject(project)
+  const handleEdit = (account: Account) => {
+    setSelectedAccount(account)
     setFormData({
-      name: project.name,
-      description: project.description || '',
-      plan: project.plan,
-      active: project.active,
+      name: account.name,
+      description: account.description || '',
+      plan: account.plan,
+      active: account.active,
     })
     setIsModalOpen(true)
   }
@@ -91,37 +70,37 @@ const ProjectsPage = () => {
     e.preventDefault()
     try {
       setFormLoading(true)
-      if (selectedProject) {
-        await updateProject(selectedProject.id, formData)
-        setToast({ message: 'Projeto atualizado com sucesso!', type: 'success', visible: true })
+      if (selectedAccount) {
+        await updateAccount(selectedAccount.id, formData)
+        setToast({ message: 'Conta atualizada com sucesso!', type: 'success', visible: true })
       } else {
-        const newProjectId = await createProject(formData)
+        const newAccountId = await createAccount(formData)
         
-        // Buscar o projeto recém-criado diretamente do Firestore
+        // Buscar a conta recém-criada diretamente do Firestore
         try {
-          const newProject = await getDocument<Project>('projects', newProjectId)
-          if (newProject) {
-            setCurrentProject(newProject)
-            setToast({ message: `Projeto "${newProject.name}" criado e selecionado!`, type: 'success', visible: true })
+          const newAccount = await getDocument<Account>('accounts', newAccountId)
+          if (newAccount) {
+            setCurrentAccount(newAccount)
+            setToast({ message: `Conta "${newAccount.name}" criada e selecionada!`, type: 'success', visible: true })
           } else {
-            setToast({ message: 'Projeto criado com sucesso!', type: 'success', visible: true })
+            setToast({ message: 'Conta criada com sucesso!', type: 'success', visible: true })
           }
         } catch (error) {
-          console.error('Erro ao buscar projeto criado:', error)
-          setToast({ message: 'Projeto criado! Recarregando...', type: 'success', visible: true })
+          console.error('Erro ao buscar conta criada:', error)
+          setToast({ message: 'Conta criada! Recarregando...', type: 'success', visible: true })
           setTimeout(() => {
             window.location.reload()
           }, 1000)
         }
         
-        // Recarregar lista de projetos em background
+        // Recarregar lista de contas em background
         refetch()
       }
       setIsModalOpen(false)
-      setSelectedProject(undefined)
+      setSelectedAccount(undefined)
     } catch (error: any) {
-      console.error('[ProjectsPage] Erro ao salvar projeto:', error)
-      const errorMessage = error?.message || 'Erro ao salvar projeto'
+      console.error('[AccountsPage] Erro ao salvar conta:', error)
+      const errorMessage = error?.message || 'Erro ao salvar conta'
       setToast({ message: errorMessage, type: 'error', visible: true })
     } finally {
       setFormLoading(false)
@@ -129,24 +108,24 @@ const ProjectsPage = () => {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.')) {
+    if (!confirm('Tem certeza que deseja excluir esta conta? Esta ação não pode ser desfeita e todos os projetos desta conta também serão afetados.')) {
       return
     }
     try {
-      await deleteProject(id)
-      if (currentProject?.id === id) {
-        setCurrentProject(null)
+      await deleteAccount(id)
+      if (currentAccount?.id === id) {
+        setCurrentAccount(null)
       }
-      setToast({ message: 'Projeto excluído com sucesso!', type: 'success', visible: true })
+      setToast({ message: 'Conta excluída com sucesso!', type: 'success', visible: true })
     } catch (error: any) {
-      console.error('[ProjectsPage] Erro ao excluir projeto:', error)
-      setToast({ message: 'Erro ao excluir projeto', type: 'error', visible: true })
+      console.error('[AccountsPage] Erro ao excluir conta:', error)
+      setToast({ message: 'Erro ao excluir conta', type: 'error', visible: true })
     }
   }
 
-  const handleSelectProject = (project: Project) => {
-    setCurrentProject(project)
-    setToast({ message: `Projeto "${project.name}" selecionado!`, type: 'success', visible: true })
+  const handleSelectAccount = (account: Account) => {
+    setCurrentAccount(account)
+    setToast({ message: `Conta "${account.name}" selecionada!`, type: 'success', visible: true })
   }
 
   return (
@@ -154,69 +133,69 @@ const ProjectsPage = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Projetos</h1>
-            <p className="text-white/70">Gerencie os projetos e clientes do sistema</p>
+            <h1 className="text-3xl font-bold text-white mb-2">Contas</h1>
+            <p className="text-white/70">Gerencie as contas (clientes) do sistema</p>
           </div>
           <Button variant="primary-red" onClick={handleCreateNew}>
-            + Novo Projeto
+            + Nova Conta
           </Button>
         </div>
 
         {loading ? (
           <Card>
             <div className="text-center py-12">
-              <div className="text-white/70">Carregando projetos...</div>
+              <div className="text-white/70">Carregando contas...</div>
             </div>
           </Card>
-        ) : projects.length === 0 ? (
+        ) : accounts.length === 0 ? (
           <Card>
             <div className="text-center py-12">
-              <p className="text-white/70 mb-4">Nenhum projeto cadastrado</p>
+              <p className="text-white/70 mb-4">Nenhuma conta cadastrada</p>
               <Button variant="primary-red" onClick={handleCreateNew}>
-                Criar Primeiro Projeto
+                Criar Primeira Conta
               </Button>
             </div>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
+            {accounts.map((account) => (
               <Card
-                key={project.id}
+                key={account.id}
                 variant="elevated"
                 className={`cursor-pointer transition-all ${
-                  currentProject?.id === project.id
+                  currentAccount?.id === account.id
                     ? 'border-primary-blue border-2'
                     : 'hover:border-primary-red/50'
                 }`}
-                onClick={() => handleSelectProject(project)}
+                onClick={() => handleSelectAccount(account)}
               >
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-1">{project.name}</h3>
-                      {project.description && (
-                        <p className="text-white/70 text-sm">{project.description}</p>
+                      <h3 className="text-xl font-bold text-white mb-1">{account.name}</h3>
+                      {account.description && (
+                        <p className="text-white/70 text-sm">{account.description}</p>
                       )}
                     </div>
-                    {currentProject?.id === project.id && (
+                    {currentAccount?.id === account.id && (
                       <span className="px-2 py-1 bg-primary-blue/20 text-primary-blue text-xs rounded">
-                        Ativo
+                        Ativa
                       </span>
                     )}
                   </div>
 
                   <div className="flex items-center gap-2">
                     <span className={`px-2 py-1 rounded text-xs ${
-                      project.plan === 'basic' ? 'bg-blue-500/20 text-blue-400' :
-                      project.plan === 'premium' ? 'bg-purple-500/20 text-purple-400' :
+                      account.plan === 'basic' ? 'bg-blue-500/20 text-blue-400' :
+                      account.plan === 'premium' ? 'bg-purple-500/20 text-purple-400' :
                       'bg-yellow-500/20 text-yellow-400'
                     }`}>
-                      {project.plan === 'basic' ? 'Básico' : project.plan === 'premium' ? 'Premium' : 'Enterprise'}
+                      {account.plan === 'basic' ? 'Básico' : account.plan === 'premium' ? 'Premium' : 'Enterprise'}
                     </span>
                     <span className={`px-2 py-1 rounded text-xs ${
-                      project.active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                      account.active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
                     }`}>
-                      {project.active ? 'Ativo' : 'Inativo'}
+                      {account.active ? 'Ativa' : 'Inativa'}
                     </span>
                   </div>
 
@@ -226,7 +205,7 @@ const ProjectsPage = () => {
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation()
-                        handleEdit(project)
+                        handleEdit(account)
                       }}
                       className="flex-1"
                     >
@@ -237,7 +216,7 @@ const ProjectsPage = () => {
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation()
-                        handleDelete(project.id)
+                        handleDelete(account.id)
                       }}
                       className="text-red-400 hover:text-red-300"
                     >
@@ -255,20 +234,20 @@ const ProjectsPage = () => {
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false)
-          setSelectedProject(undefined)
+          setSelectedAccount(undefined)
         }}
-        title={selectedProject ? 'Editar Projeto' : 'Novo Projeto'}
+        title={selectedAccount ? 'Editar Conta' : 'Nova Conta'}
         size="md"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-white/90 mb-2">
-              Nome do Projeto *
+              Nome da Conta *
             </label>
             <Input
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Ex: Young Empreendimentos"
+              placeholder="Ex: Cliente ABC"
               required
             />
           </div>
@@ -280,7 +259,7 @@ const ProjectsPage = () => {
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Descrição do projeto..."
+              placeholder="Descrição da conta..."
               className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
               rows={3}
             />
@@ -310,7 +289,7 @@ const ProjectsPage = () => {
               className="w-4 h-4 text-primary-red bg-white/5 border-white/10 rounded focus:ring-primary-red/50"
             />
             <label htmlFor="active" className="text-sm text-white/90">
-              Projeto ativo
+              Conta ativa
             </label>
           </div>
 
@@ -320,7 +299,7 @@ const ProjectsPage = () => {
               variant="ghost"
               onClick={() => {
                 setIsModalOpen(false)
-                setSelectedProject(undefined)
+                setSelectedAccount(undefined)
               }}
               className="flex-1"
             >
@@ -332,7 +311,7 @@ const ProjectsPage = () => {
               disabled={formLoading || !formData.name}
               className="flex-1"
             >
-              {formLoading ? 'Salvando...' : selectedProject ? 'Atualizar' : 'Criar'}
+              {formLoading ? 'Salvando...' : selectedAccount ? 'Atualizar' : 'Criar'}
             </Button>
           </div>
         </form>
@@ -348,5 +327,5 @@ const ProjectsPage = () => {
   )
 }
 
-export default ProjectsPage
+export default AccountsPage
 

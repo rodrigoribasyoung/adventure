@@ -1,7 +1,7 @@
 import { collection, getDocs, query, limit, Timestamp } from 'firebase/firestore'
 import { db } from './config'
 import { createDocument } from './db'
-import { Contact, Company, Service, Deal, Funnel, CloseReason, Project } from '@/types'
+import { Contact, Company, Service, Deal, Funnel, CloseReason, Project, Account } from '@/types'
 import { DEFAULT_MARTECH_FUNNEL, DEFAULT_MARTECH_CLOSE_REASONS } from './martechFunnel'
 
 // Função para verificar se já existem dados
@@ -22,20 +22,33 @@ export const seedDatabase = async (userId: string) => {
 
   try {
     // Verificar se já existem dados
+    const accountsExist = await hasData('accounts')
     const projectsExist = await hasData('projects')
     const contactsExist = await hasData('contacts')
     const companiesExist = await hasData('companies')
     const servicesExist = await hasData('services')
     const funnelsExist = await hasData('funnels')
 
-    if (projectsExist || contactsExist || companiesExist || servicesExist || funnelsExist) {
+    if (accountsExist || projectsExist || contactsExist || companiesExist || servicesExist || funnelsExist) {
       console.log('[Seed] Dados já existem. Pulando seed.')
       return
     }
 
+    // Criar conta padrão primeiro
+    console.log('[Seed] Criando conta padrão...')
+    const defaultAccountId = await createDocument<Account>('accounts', {
+      name: 'Conta Padrão',
+      description: 'Conta padrão criada automaticamente',
+      ownerId: userId,
+      plan: 'basic',
+      active: true,
+      createdBy: userId,
+    })
+
     // Criar projeto padrão primeiro
     console.log('[Seed] Criando projeto padrão...')
     const defaultProjectId = await createDocument<Project>('projects', {
+      accountId: defaultAccountId,
       name: 'Projeto Padrão',
       description: 'Projeto padrão criado automaticamente',
       ownerId: userId,
