@@ -22,7 +22,7 @@ interface ProjectFilters {
 
 const ProjectsPage = () => {
   const { projects, loading, createProject, updateProject, deleteProject, refetch } = useProjects()
-  const { currentProject, setCurrentProject, isMaster } = useProject()
+  const { currentProject, setCurrentProject } = useProject()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<Project | undefined>()
   const [formLoading, setFormLoading] = useState(false)
@@ -96,21 +96,7 @@ const ProjectsPage = () => {
     return true
   })
 
-  // Se não for master e já tiver projetos, restringir acesso
-  if (!isMaster && projects.length > 0) {
-    return (
-      <Container>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Card>
-            <div className="text-center py-12">
-              <p className="text-white/70 mb-4">Acesso restrito</p>
-              <p className="text-white/50 text-sm">Apenas administradores podem gerenciar projetos</p>
-            </div>
-          </Card>
-        </div>
-      </Container>
-    )
-  }
+  // Usuários master têm acesso total - sem restrições
 
   const handleCreateNew = () => {
     setSelectedProject(undefined)

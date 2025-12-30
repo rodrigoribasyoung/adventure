@@ -13,9 +13,21 @@ interface DealKanbanProps {
   onStageChange: (dealId: string, newStage: string) => void
   onOpenTasks?: (deal: Deal) => void
   loading?: boolean
+  selectedDealIds?: Set<string>
+  onToggleSelect?: (dealId: string) => void
+  onSelectAll?: () => void
 }
 
-export const DealKanban = ({ deals, stages, onDealClick, onStageChange, onOpenTasks, loading }: DealKanbanProps) => {
+export const DealKanban = ({ 
+  deals, 
+  stages, 
+  onDealClick, 
+  onStageChange, 
+  onOpenTasks, 
+  loading,
+  selectedDealIds = new Set(),
+  onToggleSelect
+}: DealKanbanProps) => {
   const [draggedDeal, setDraggedDeal] = useState<Deal | null>(null)
 
   const sortedStages = [...stages].sort((a, b) => a.order - b.order)
@@ -76,17 +88,47 @@ export const DealKanban = ({ deals, stages, onDealClick, onStageChange, onOpenTa
             </div>
 
             <div className="space-y-3 min-h-[200px]">
-              {stageDeals.map((deal) => (
-                <Card
-                  key={deal.id}
-                  variant="elevated"
-                  className="cursor-pointer hover:border-primary-red/50 transition-all"
-                  draggable
-                  onDragStart={() => handleDragStart(deal)}
-                  onClick={() => onDealClick(deal)}
-                >
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-white">{deal.title}</h4>
+              {stageDeals.map((deal) => {
+                const isSelected = selectedDealIds.has(deal.id)
+                return (
+                  <Card
+                    key={deal.id}
+                    variant="elevated"
+                    className={`cursor-pointer hover:border-primary-red/50 transition-all ${
+                      isSelected ? 'border-primary-red border-2' : ''
+                    }`}
+                    draggable
+                    onDragStart={() => handleDragStart(deal)}
+                    onClick={(e) => {
+                      if (onToggleSelect && (e.target as HTMLElement).closest('.checkbox-container')) {
+                        e.stopPropagation()
+                        onToggleSelect(deal.id)
+                      } else {
+                        onDealClick(deal)
+                      }
+                    }}
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        {onToggleSelect && (
+                          <div 
+                            className="checkbox-container flex-shrink-0 mt-0.5"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onToggleSelect(deal.id)
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => onToggleSelect(deal.id)}
+                              className="w-4 h-4 rounded border-white/20 bg-white/5 text-primary-red focus:ring-primary-red focus:ring-offset-0 cursor-pointer"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                        )}
+                        <h4 className="font-medium text-white flex-1">{deal.title}</h4>
+                      </div>
                     <p className="text-lg font-bold text-primary-red">
                       {formatCurrency(deal.value, deal.currency)}
                     </p>
@@ -129,7 +171,7 @@ export const DealKanban = ({ deals, stages, onDealClick, onStageChange, onOpenTa
                     )}
                   </div>
                 </Card>
-              ))}
+              )})}
               {stageDeals.length === 0 && (
                 <div className="text-center py-8 text-white/40 text-sm">
                   Nenhuma negociação

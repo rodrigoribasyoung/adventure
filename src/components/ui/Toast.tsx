@@ -15,6 +15,21 @@ export const Toast = ({
   onClose,
   duration = 5000,
 }: ToastProps) => {
+  // Tocar som de notificação quando o toast aparecer
+  useEffect(() => {
+    if (isVisible) {
+      try {
+        const audio = new Audio('/assets/brand/sound effects/notification.mp3')
+        audio.volume = 0.5
+        audio.play().catch(error => {
+          console.log('Erro ao tocar som de notificação:', error)
+        })
+      } catch (error) {
+        console.log('Erro ao tocar som de notificação:', error)
+      }
+    }
+  }, [isVisible])
+
   useEffect(() => {
     if (isVisible && duration > 0) {
       const timer = setTimeout(() => {

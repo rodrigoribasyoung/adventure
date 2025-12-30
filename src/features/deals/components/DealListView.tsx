@@ -17,6 +17,9 @@ interface DealListViewProps {
   sortOrder?: 'asc' | 'desc'
   onSortChange?: (sortBy: 'value' | 'createdAt' | 'title' | 'probability' | 'expectedCloseDate', sortOrder: 'asc' | 'desc') => void
   loading?: boolean
+  selectedDealIds?: Set<string>
+  onToggleSelect?: (dealId: string) => void
+  onSelectAll?: () => void
 }
 
 export const DealListView = ({ 
@@ -28,7 +31,10 @@ export const DealListView = ({
   sortBy = 'createdAt',
   sortOrder = 'desc',
   onSortChange,
-  loading 
+  loading,
+  selectedDealIds = new Set(),
+  onToggleSelect,
+  onSelectAll
 }: DealListViewProps) => {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(25)
@@ -106,30 +112,41 @@ export const DealListView = ({
 
   return (
     <div className="space-y-4">
-      {onSortChange && (
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-white/70">Ordenar por:</span>
-          <select
-            value={sortBy}
-            onChange={(e) => handleSortChange(e.target.value as any)}
-            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50"
-          >
-            <option value="createdAt">Data de Criação</option>
-            <option value="value">Valor</option>
-            <option value="title">Título</option>
-            <option value="probability">Probabilidade</option>
-            <option value="expectedCloseDate">Data de Fechamento</option>
-          </select>
+      <div className="flex items-center justify-between">
+        {onSortChange && (
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-white/70">Ordenar por:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => handleSortChange(e.target.value as any)}
+              className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50"
+            >
+              <option value="createdAt">Data de Criação</option>
+              <option value="value">Valor</option>
+              <option value="title">Título</option>
+              <option value="probability">Probabilidade</option>
+              <option value="expectedCloseDate">Data de Fechamento</option>
+            </select>
 
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onSortChange(sortBy, sortOrder === 'asc' ? 'desc' : 'asc')}
+            >
+              {sortOrder === 'asc' ? '↑ Crescente' : '↓ Decrescente'}
+            </Button>
+          </div>
+        )}
+        {onSelectAll && (
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onSortChange(sortBy, sortOrder === 'asc' ? 'desc' : 'asc')}
+            onClick={onSelectAll}
           >
-            {sortOrder === 'asc' ? '↑ Crescente' : '↓ Decrescente'}
+            {selectedDealIds.size === paginatedDeals.length ? 'Desmarcar Todas' : 'Selecionar Todas'}
           </Button>
-        </div>
-      )}
+        )}
+      </div>
 
       {paginatedDeals.length === 0 ? (
         <Card>
@@ -142,85 +159,115 @@ export const DealListView = ({
       ) : (
         <>
           <div className="space-y-3">
-            {paginatedDeals.map((deal) => (
-            <Card
-              key={deal.id}
-              variant="elevated"
-              className="cursor-pointer hover:border-primary-red/50 transition-all"
-              onClick={() => onDealClick(deal)}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-white mb-2">{deal.title}</h3>
-                  <div className="flex items-center gap-4 text-sm text-white/70">
-                    {deal.expectedCloseDate && (
-                      <span>
-                        Fechamento: {format(deal.expectedCloseDate.toDate(), "dd/MM/yyyy", { locale: ptBR })}
-                      </span>
+            {paginatedDeals.map((deal) => {
+              const isSelected = selectedDealIds.has(deal.id)
+              return (
+              <Card
+                key={deal.id}
+                variant="elevated"
+                className={`cursor-pointer hover:border-primary-red/50 transition-all ${
+                  isSelected ? 'border-primary-red border-2' : ''
+                }`}
+                onClick={(e) => {
+                  if (onToggleSelect && (e.target as HTMLElement).closest('.checkbox-container')) {
+                    e.stopPropagation()
+                    onToggleSelect(deal.id)
+                  } else {
+                    onDealClick(deal)
+                  }
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 flex-1">
+                    {onToggleSelect && (
+                      <div 
+                        className="checkbox-container flex-shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onToggleSelect(deal.id)
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => onToggleSelect(deal.id)}
+                          className="w-4 h-4 rounded border-white/20 bg-white/5 text-primary-red focus:ring-primary-red focus:ring-offset-0 cursor-pointer"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
                     )}
-                    <span>{deal.probability}% de chance</span>
-                    {deal.serviceIds && deal.serviceIds.length > 0 && (
-                      <span>{deal.serviceIds.length} serviço(s)</span>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-white mb-2">{deal.title}</h3>
+                      <div className="flex items-center gap-4 text-sm text-white/70">
+                        {deal.expectedCloseDate && (
+                          <span>
+                            Fechamento: {format(deal.expectedCloseDate.toDate(), "dd/MM/yyyy", { locale: ptBR })}
+                          </span>
+                        )}
+                        <span>{deal.probability}% de chance</span>
+                        {deal.serviceIds && deal.serviceIds.length > 0 && (
+                          <span>{deal.serviceIds.length} serviço(s)</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-right mr-4">
+                    <p className="text-xl font-bold text-primary-red">
+                      {formatCurrency(deal.value, deal.currency)}
+                    </p>
+                    {deal.contractUrl && (
+                      <a
+                        href={deal.contractUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-xs text-primary-blue hover:underline"
+                      >
+                        Ver Contrato
+                      </a>
                     )}
                   </div>
-                </div>
-                
-                <div className="text-right mr-4">
-                  <p className="text-xl font-bold text-primary-red">
-                    {formatCurrency(deal.value, deal.currency)}
-                  </p>
-                  {deal.contractUrl && (
-                    <a
-                      href={deal.contractUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="text-xs text-primary-blue hover:underline"
-                    >
-                      Ver Contrato
-                    </a>
-                  )}
-                </div>
 
-                <div className="flex gap-2">
-                  {onOpenTasks && (
+                  <div className="flex gap-2">
+                    {onOpenTasks && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onOpenTasks(deal)
+                        }}
+                      >
+                        Tarefas
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation()
-                        onOpenTasks(deal)
+                        onEdit(deal)
                       }}
                     >
-                      Tarefas
+                      Editar
                     </Button>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onEdit(deal)
-                    }}
-                  >
-                    Editar
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      if (confirm('Tem certeza que deseja excluir esta negociação?')) {
-                        onDelete(deal.id)
-                      }
-                    }}
-                  >
-                    Excluir
-                  </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (confirm('Tem certeza que deseja excluir esta negociação?')) {
+                          onDelete(deal.id)
+                        }
+                      }}
+                    >
+                      Excluir
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </Card>
-            ))}
+              </Card>
+            )})}
           </div>
 
           {sortedDeals.length > 0 && (

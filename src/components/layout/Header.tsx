@@ -37,34 +37,56 @@ export const Header = () => {
       <div className="flex items-center gap-4 flex-1 min-w-0">
         <div className="flex items-center gap-3 flex-shrink-0">
           <Logo variant="white" size="md" />
-          <span className="text-white/60 text-sm hidden sm:block">CRM</span>
+          <span className="text-white font-bold text-sm hidden sm:block">CRM</span>
         </div>
         
         {/* Abas de navegação - Desktop */}
-        <nav className="hidden lg:flex items-center gap-1 flex-1 overflow-x-auto min-w-0">
-          {tabs.map((tab) => {
-            const active = isActive(tab.path)
-            const isMarketingInactive = tab.path === '/marketing' && !active
-            
-            return (
-              <Link
-                key={tab.path}
-                to={tab.path}
-                className={`
-                  px-3 py-1.5 text-sm transition-all duration-200 whitespace-nowrap rounded
-                  ${
-                    active
-                      ? 'text-white/90 bg-white/10'
-                      : isMarketingInactive
-                      ? 'text-white/30 hover:text-white/50 hover:bg-white/5'
-                      : 'text-white/60 hover:text-white/90 hover:bg-white/5'
-                  }
-                `}
-              >
-                {tab.label}
-              </Link>
-            )
-          })}
+        <nav className="hidden lg:flex items-center flex-1 overflow-x-auto min-w-0 relative">
+          <div className="flex items-center">
+            {tabs.map((tab) => {
+              const active = isActive(tab.path)
+              const isMarketingInactive = tab.path === '/marketing' && !active
+              
+              return (
+                <Link
+                  key={tab.path}
+                  to={tab.path}
+                  className={`
+                    relative px-3 py-1.5 text-sm whitespace-nowrap
+                    transition-all duration-300 ease-out
+                    ${
+                      active
+                        ? 'text-white/90'
+                        : isMarketingInactive
+                        ? 'text-white/30 hover:text-white/50'
+                        : 'text-white/60 hover:text-white/90'
+                    }
+                  `}
+                  style={{
+                    transitionDelay: active ? '0ms' : '50ms'
+                  }}
+                >
+                  {/* Background contínuo */}
+                  <span className={`
+                    absolute inset-0 rounded transition-all duration-300 ease-out
+                    ${
+                      active
+                        ? 'bg-white/10'
+                        : 'bg-transparent hover:bg-white/5'
+                    }
+                  `} />
+                  
+                  {/* Texto */}
+                  <span className="relative z-10">{tab.label}</span>
+                  
+                  {/* Linha inferior para tab ativa */}
+                  {active && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-blue transition-all duration-300" />
+                  )}
+                </Link>
+              )
+            })}
+          </div>
         </nav>
         
         <MobileMenu />

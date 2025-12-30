@@ -16,6 +16,7 @@ import UsersPage from '@/features/users/pages/UsersPage'
 import AutomationsPage from '@/features/automations/pages/AutomationsPage'
 import IntegrationsPage from '@/features/integrations/pages/IntegrationsPage'
 import ImportsPage from '@/features/settings/pages/ImportsPage'
+import ActivityHistoryPage from '@/features/activityHistory/pages/ActivityHistoryPage'
 import MarketingPage from '@/features/marketing/pages/MarketingPage'
 import TasksPage from '@/features/tasks/pages/TasksPage'
 import ProjectsPage from '@/features/projects/pages/ProjectsPage'
@@ -215,6 +216,14 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <ImportsPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/settings/activity-history',
+    element: (
+      <PrivateRoute>
+        <ActivityHistoryPage />
       </PrivateRoute>
     ),
   },

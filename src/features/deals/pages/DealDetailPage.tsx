@@ -13,6 +13,9 @@ import { DealTasksModal } from '../components/DealTasksModal'
 import { DealForm } from '../components/DealForm'
 import { Modal } from '@/components/ui/Modal'
 import { Toast } from '@/components/ui/Toast'
+import { CongratulationsModal } from '@/components/deals/CongratulationsModal'
+import { IceExplosion } from '@/components/animations/IceExplosion'
+import { FireExplosion } from '@/components/animations/FireExplosion'
 import { formatCurrency } from '@/lib/utils/formatCurrency'
 import { formatWhatsAppLink } from '@/lib/utils/whatsapp'
 import { format } from 'date-fns'
@@ -32,6 +35,9 @@ const DealDetailPage = () => {
   const [isTasksModalOpen, setIsTasksModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [formLoading, setFormLoading] = useState(false)
+  const [showIceExplosion, setShowIceExplosion] = useState(false)
+  const [showFireExplosion, setShowFireExplosion] = useState(false)
+  const [showCongratulations, setShowCongratulations] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; visible: boolean }>({
     message: '',
     type: 'success',
@@ -59,6 +65,44 @@ const DealDetailPage = () => {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [navigate, isCloseModalOpen, isTasksModalOpen, isEditModalOpen])
 
+  const playWinSound = () => {
+    try {
+      const audio = new Audio('/assets/brand/sound effects/win.wav')
+      audio.volume = 0.7
+      audio.play().catch(error => {
+        console.log('Erro ao tocar som de ganho:', error)
+      })
+    } catch (error) {
+      console.log('Erro ao tocar som de ganho:', error)
+    }
+  }
+
+  const playLoseSound = () => {
+    try {
+      const audio = new Audio('/assets/brand/sound effects/loss.wav')
+      audio.volume = 0.7
+      audio.play().catch(error => {
+        console.log('Erro ao tocar som de perda:', error)
+      })
+    } catch (error) {
+      console.log('Erro ao tocar som de perda:', error)
+    }
+  }
+
+  const handleWinDeal = () => {
+    if (!deal) return
+    setCloseStatus('won')
+    playWinSound()
+    setShowFireExplosion(true)
+  }
+
+  const handleLoseDeal = () => {
+    if (!deal) return
+    setCloseStatus('lost')
+    playLoseSound()
+    setShowIceExplosion(true)
+  }
+
   const handleCloseDeal = async (status: 'won' | 'lost', closeReason?: string) => {
     if (!deal) return
     
@@ -72,11 +116,19 @@ const DealDetailPage = () => {
       }
       
       await closeDeal(deal.id, status, closeReason)
-      setToast({ 
-        message: `Negociação ${status === 'won' ? 'ganha' : 'perdida'} com sucesso!`, 
-        type: 'success', 
-        visible: true 
-      })
+      
+      if (status === 'won') {
+        // Mostrar modal de parabéns após fechar
+        setTimeout(() => {
+          setShowCongratulations(true)
+        }, 300)
+      } else {
+        // Voltar para página de negociações após fechar
+        setTimeout(() => {
+          navigate('/deals')
+        }, 300)
+      }
+      
       setIsCloseModalOpen(false)
     } catch (error: any) {
       console.error('[DealDetailPage] Erro ao fechar negociação:', error)
@@ -188,23 +240,19 @@ const DealDetailPage = () => {
             {!isClosed && (
               <>
                 <Button
-                  variant="primary-blue"
-                  onClick={() => {
-                    setCloseStatus('won')
-                    setIsCloseModalOpen(true)
-                  }}
-                  className="flex items-center gap-2"
+                  id="win-button"
+                  variant="primary-red"
+                  onClick={handleWinDeal}
+                  className="flex items-center gap-2 relative"
                 >
                   <span>↑</span>
                   Ganho
                 </Button>
                 <Button
-                  variant="primary-red"
-                  onClick={() => {
-                    setCloseStatus('lost')
-                    setIsCloseModalOpen(true)
-                  }}
-                  className="flex items-center gap-2"
+                  id="lose-button"
+                  variant="primary-blue"
+                  onClick={handleLoseDeal}
+                  className="flex items-center gap-2 relative"
                 >
                   <span>↓</span>
                   Perda
@@ -434,6 +482,35 @@ const DealDetailPage = () => {
           loading={formLoading}
         />
       </Modal>
+
+      {/* Animações */}
+      {showIceExplosion && deal && (
+        <IceExplosion
+          onComplete={() => {
+            setShowIceExplosion(false)
+            handleCloseDeal('lost')
+          }}
+        />
+      )}
+      
+      {showFireExplosion && deal && (
+        <FireExplosion
+          onComplete={() => {
+            setShowFireExplosion(false)
+            handleCloseDeal('won')
+          }}
+        />
+      )}
+
+      {/* Modal de Parabéns */}
+      {deal && (
+        <CongratulationsModal
+          isOpen={showCongratulations}
+          dealTitle={deal.title}
+          dealValue={formatCurrency(deal.value, deal.currency)}
+          onClose={() => setShowCongratulations(false)}
+        />
+      )}
 
       <Toast
         message={toast.message}

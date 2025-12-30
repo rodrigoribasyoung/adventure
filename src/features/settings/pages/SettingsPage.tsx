@@ -1,7 +1,7 @@
 import { Container } from '@/components/layout/Container'
 import { Card } from '@/components/ui/Card'
 import { Link } from 'react-router-dom'
-import { FiTarget, FiEdit3, FiUsers, FiSettings, FiLink, FiDownload, FiFolder, FiFileText, FiFile, FiUser } from 'react-icons/fi'
+import { FiTarget, FiEdit3, FiUsers, FiSettings, FiLink, FiDownload, FiFolder, FiFileText, FiFile, FiUser, FiClock } from 'react-icons/fi'
 
 interface SettingsItem {
   id: string
@@ -23,6 +23,7 @@ const SettingsPage = () => {
     { id: 'services', label: 'Serviços', icon: FiFileText, path: '/services', description: 'Gerencie seus serviços e produtos' },
     { id: 'proposals', label: 'Propostas', icon: FiFile, path: '/proposals', description: 'Gerencie propostas comerciais' },
     { id: 'projectMembers', label: 'Responsáveis', icon: FiUser, path: '/project-members', description: 'Gerencie os responsáveis e colaboradores do projeto' },
+    { id: 'activityHistory', label: 'Histórico de Ações', icon: FiClock, path: '/settings/activity-history', description: 'Visualize o histórico de todas as ações realizadas no sistema' },
   ]
 
   return (
@@ -33,16 +34,16 @@ const SettingsPage = () => {
           <p className="text-white/60 text-sm">Gerencie as configurações do sistema</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
           {settingsItems.map((item) => (
             <Link key={item.id} to={item.path}>
               <Card variant="elevated" className="cursor-pointer hover:border-primary-red/50 transition-all h-full">
-                <div className="p-6">
-                  <div className="mb-4">
-                    <item.icon className="w-10 h-10 text-primary-red" />
+                <div className="p-3">
+                  <div className="mb-2">
+                    <item.icon className="w-6 h-6 text-primary-red" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-2">{item.label}</h3>
-                  <p className="text-white/70 text-sm">{item.description}</p>
+                  <h3 className="text-sm font-semibold text-white mb-1">{item.label}</h3>
+                  <p className="text-white/60 text-xs line-clamp-2">{item.description}</p>
                 </div>
               </Card>
             </Link>

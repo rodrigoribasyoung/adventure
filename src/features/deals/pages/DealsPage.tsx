@@ -53,6 +53,49 @@ const DealsPage = () => {
     type: 'success',
     visible: false,
   })
+  const [selectedDealIds, setSelectedDealIds] = useState<Set<string>>(new Set())
+
+  const handleToggleSelect = (dealId: string) => {
+    setSelectedDealIds(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(dealId)) {
+        newSet.delete(dealId)
+      } else {
+        newSet.add(dealId)
+      }
+      return newSet
+    })
+  }
+
+  const handleSelectAll = () => {
+    if (selectedDealIds.size === filteredDeals.length) {
+      setSelectedDealIds(new Set())
+    } else {
+      setSelectedDealIds(new Set(filteredDeals.map(d => d.id)))
+    }
+  }
+
+  const handleDeleteSelected = async () => {
+    if (selectedDealIds.size === 0) return
+    
+    if (!confirm(`Tem certeza que deseja excluir ${selectedDealIds.size} negociação(ões)?`)) {
+      return
+    }
+
+    try {
+      const deletePromises = Array.from(selectedDealIds).map(id => deleteDeal(id))
+      await Promise.all(deletePromises)
+      setToast({ 
+        message: `${selectedDealIds.size} negociação(ões) excluída(s) com sucesso!`, 
+        type: 'success', 
+        visible: true 
+      })
+      setSelectedDealIds(new Set())
+    } catch (error: any) {
+      console.error('[DealsPage] Erro ao excluir negociações:', error)
+      setToast({ message: 'Erro ao excluir negociações', type: 'error', visible: true })
+    }
+  }
 
   const handleCreateNew = () => {
     setSelectedDeal(undefined)
@@ -156,9 +199,14 @@ const DealsPage = () => {
 
   const stages = activeFunnel?.stages || []
 
+  // Filtrar negociações: se houver filtro de status, usar todas; senão, apenas ativas
+  const dealsToFilter = filters.status && filters.status.length > 0
+    ? deals // Se há filtro de status, mostrar todas (incluindo ganhas/perdidas)
+    : deals.filter(deal => deal.status === 'active' || !deal.status) // Senão, apenas ativas
+  
   // Aplicar filtros
   const filteredDeals = filterDeals(
-    deals,
+    dealsToFilter,
     filters,
     contacts.map(c => ({ id: c.id, name: c.name })),
     companies.map(c => ({ id: c.id, name: c.name }))
@@ -201,9 +249,20 @@ const DealsPage = () => {
               </Button>
             </div>
             
-            <Button variant="primary-red" onClick={handleCreateNew}>
-              + Nova Negociação
-            </Button>
+            <div className="flex items-center gap-3">
+              {selectedDealIds.size > 0 && (
+                <Button 
+                  variant="primary-red" 
+                  onClick={handleDeleteSelected}
+                  className="flex items-center gap-2"
+                >
+                  Excluir Selecionadas ({selectedDealIds.size})
+                </Button>
+              )}
+              <Button variant="primary-red" onClick={handleCreateNew}>
+                + Nova Negociação
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -216,13 +275,11 @@ const DealsPage = () => {
           </Card>
         ) : (
           <>
-            {viewMode === 'list' && (
-              <DealFiltersComponent
-                filters={filters}
-                onFiltersChange={setFilters}
-                onReset={handleFiltersReset}
-              />
-            )}
+            <DealFiltersComponent
+              filters={filters}
+              onFiltersChange={setFilters}
+              onReset={handleFiltersReset}
+            />
             
             {viewMode === 'kanban' ? (
               <DealKanban
@@ -232,6 +289,9 @@ const DealsPage = () => {
                 onStageChange={handleStageChange}
                 onOpenTasks={handleOpenTasks}
                 loading={loading}
+                selectedDealIds={selectedDealIds}
+                onToggleSelect={handleToggleSelect}
+                onSelectAll={handleSelectAll}
               />
             ) : (
               <DealListView
@@ -244,6 +304,9 @@ const DealsPage = () => {
                 sortOrder={sortOrder}
                 onSortChange={handleSortChange}
                 loading={loading}
+                selectedDealIds={selectedDealIds}
+                onToggleSelect={handleToggleSelect}
+                onSelectAll={handleSelectAll}
               />
             )}
           </>

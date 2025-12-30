@@ -14,9 +14,14 @@
     font-weight: 400;
   }
   
-  /* Cursor pointer para elementos clicáveis */
+  /* Cursor pointer para elementos clicáveis - muda de cor */
   button, a, [role="button"], .cursor-pointer, [onclick], [data-clickable] {
     cursor: url('/assets/brand/navigation_cursor/navigation-cursor-light-small.svg') 2 2, pointer !important;
+    transition: filter 0.2s ease;
+  }
+  
+  button:hover, a:hover, [role="button"]:hover, .cursor-pointer:hover, [onclick]:hover, [data-clickable]:hover {
+    filter: brightness(1.3) saturate(1.2);
   }
   
   /* Cursor text para elementos de texto editável */
