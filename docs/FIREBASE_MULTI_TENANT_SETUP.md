@@ -15,6 +15,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // Helper function para verificar se usuário é master
+    function isMaster() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isMaster == true;
+    }
+    
     // Helper function para verificar se usuário tem acesso ao projeto
     // Nota: A verificação de membros é feita via coleção projectUsers no lado do cliente
     function canAccessProject(projectId) {
@@ -27,6 +33,18 @@ service cloud.firestore {
         // Ou se é o dono do projeto
         project.data.ownerId == request.auth.uid
       )
+    }
+    
+    // Accounts (Contas) - apenas master pode gerenciar
+    match /accounts/{accountId} {
+      allow read: if request.auth != null && (
+        resource.data.ownerId == request.auth.uid ||
+        isMaster()
+      );
+      allow create: if request.auth != null && 
+                       (request.resource.data.ownerId == request.auth.uid && isMaster());
+      allow update, delete: if request.auth != null && 
+                                (resource.data.ownerId == request.auth.uid && isMaster());
     }
     
     // Projetos
@@ -190,6 +208,24 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // Helper function para verificar se usuário é master
+    function isMaster() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isMaster == true;
+    }
+    
+    // Accounts (Contas) - apenas master pode gerenciar
+    match /accounts/{accountId} {
+      allow read: if request.auth != null && (
+        resource.data.ownerId == request.auth.uid ||
+        isMaster()
+      );
+      allow create: if request.auth != null && 
+                       (request.resource.data.ownerId == request.auth.uid && isMaster());
+      allow update, delete: if request.auth != null && 
+                                (resource.data.ownerId == request.auth.uid && isMaster());
+    }
+    
     // Projetos
     match /projects/{projectId} {
       allow read: if request.auth != null;
@@ -197,7 +233,7 @@ service cloud.firestore {
                        request.resource.data.ownerId == request.auth.uid;
       allow update, delete: if request.auth != null && 
                                 (resource.data.ownerId == request.auth.uid ||
-                                 get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isMaster == true);
+                                 isMaster());
     }
     
     // ProjectUsers (relação usuário-projeto)
@@ -207,6 +243,15 @@ service cloud.firestore {
                        request.resource.data.userId == request.auth.uid;
       allow update, delete: if request.auth != null && 
                                 resource.data.userId == request.auth.uid;
+    }
+    
+    // Usuários
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && 
+                       request.resource.data.createdBy == request.auth.uid;
+      allow update, delete: if request.auth != null && 
+                                (request.auth.uid == userId || isMaster());
     }
     
     // Todas as outras coleções - validação básica
