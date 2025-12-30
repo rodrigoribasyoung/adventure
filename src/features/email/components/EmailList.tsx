@@ -36,7 +36,7 @@ export const EmailList = ({ emails, loading, onEmailClick }: EmailListProps) => 
       case 'failed':
         return 'bg-red-500/20 text-red-400 border-red-500/30'
       case 'draft':
-        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+        return 'bg-purple-500/20 text-purple-400 border-purple-500/30'
       default:
         return 'bg-white/10 text-white/70 border-white/20'
     }

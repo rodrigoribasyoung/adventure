@@ -109,8 +109,8 @@ const ImportsPage = () => {
     <Container>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Importações</h1>
-          <p className="text-white/70">Importe dados de contatos, empresas e negociações via arquivo CSV</p>
+          <h1 className="text-xl text-white/90 mb-1">Importar/Exportar Dados</h1>
+          <p className="text-white/60 text-sm">Importe e exporte dados de contatos, empresas e negociações via arquivo CSV</p>
         </div>
 
         <div className="space-y-6">

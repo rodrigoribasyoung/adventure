@@ -28,7 +28,7 @@ export const RecentDealsList = ({ deals, onDealClick }: RecentDealsListProps) =>
       case 'lost':
         return 'bg-red-500/20 text-red-400'
       case 'paused':
-        return 'bg-yellow-500/20 text-yellow-400'
+        return 'bg-purple-500/20 text-purple-400'
       case 'active':
       default:
         return 'bg-blue-500/20 text-blue-400'

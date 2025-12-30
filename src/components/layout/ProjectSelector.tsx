@@ -59,7 +59,7 @@ export const ProjectSelector = () => {
               handleSelectProject(projects[0])
             }
           }}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 transition-all text-sm font-medium"
+          className="flex items-center gap-2 px-2 py-1 rounded bg-[#1976D2]/10 text-[#1976D2] hover:bg-[#1976D2]/20 transition-all text-xs"
         >
           <FiFolder className="w-4 h-4" />
           <span className="hidden sm:block">Selecionar Projeto</span>
@@ -72,10 +72,10 @@ export const ProjectSelector = () => {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-all text-white/80 hover:text-white"
+        className="flex items-center gap-2 px-2 py-1 rounded hover:bg-white/5 transition-all text-white/70 hover:text-white/90"
       >
-        <FiFolder className="w-4 h-4" />
-        <span className="text-sm font-medium hidden sm:block">
+        <FiFolder className="w-3.5 h-3.5" />
+        <span className="text-xs hidden sm:block">
           {currentProject?.name || 'Selecione um projeto'}
         </span>
         <svg
@@ -89,8 +89,8 @@ export const ProjectSelector = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-background-darker border border-white/20 rounded-lg shadow-lg z-50 overflow-hidden">
-          <div className="p-2">
+        <div className="absolute right-0 mt-2 w-56 bg-background-darker border border-white/10 rounded shadow-lg z-50 overflow-hidden">
+          <div className="p-1.5">
             {projects.map((project) => {
               const isSelected = currentProject?.id === project.id
               return (
@@ -98,25 +98,25 @@ export const ProjectSelector = () => {
                   key={project.id}
                   onClick={() => handleSelectProject(project)}
                   className={`
-                    w-full flex items-center justify-between px-3 py-2.5 rounded-lg
+                    w-full flex items-center justify-between px-2.5 py-1.5 rounded text-sm
                     transition-all text-left
                     ${
                       isSelected
-                        ? 'bg-primary-blue/20 text-white border border-primary-blue/40'
-                        : 'text-white/80 hover:bg-white/10 hover:text-white'
+                        ? 'bg-white/10 text-white border-l-2 border-primary-blue'
+                        : 'text-white/70 hover:bg-white/5 hover:text-white/90'
                     }
                   `}
                 >
                   <div className="flex-1">
-                    <div className="font-medium">{project.name}</div>
+                    <div>{project.name}</div>
                     {project.plan && (
-                      <div className="text-xs text-white/60 mt-1">
+                      <div className="text-xs text-white/50 mt-0.5">
                         Plano: {project.plan === 'basic' ? 'Básico' : project.plan === 'premium' ? 'Premium' : 'Enterprise'}
                       </div>
                     )}
                   </div>
                   {isSelected && (
-                    <span className="text-primary-blue">✓</span>
+                    <span className="text-primary-blue text-xs">✓</span>
                   )}
                 </button>
               )
@@ -124,16 +124,16 @@ export const ProjectSelector = () => {
           </div>
           
           {isMaster && (
-            <div className="border-t border-white/10 p-2">
+            <div className="border-t border-white/5 p-1.5">
               <button
                 onClick={() => {
                   setIsOpen(false)
                   // Navegar para página de projetos (será criada)
                   window.location.href = '/projects'
                 }}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-left text-white/80 hover:bg-white/10 hover:text-white transition-all rounded-lg"
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-left text-sm text-white/70 hover:bg-white/5 hover:text-white/90 transition-all rounded"
               >
-                <FiSettings className="w-4 h-4" />
+                <FiSettings className="w-3.5 h-3.5" />
                 <span>Gerenciar Projetos</span>
               </button>
             </div>

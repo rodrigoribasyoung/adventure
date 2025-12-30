@@ -39,8 +39,8 @@ const DashboardPage = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
-              <p className="text-white/70">Visão geral do seu pipeline de vendas</p>
+              <h1 className="text-xl text-white/90 mb-1">Dashboard</h1>
+              <p className="text-white/60 text-sm">Visão geral do seu pipeline de vendas</p>
             </div>
             <PeriodFilter
               selectedPeriod={period}

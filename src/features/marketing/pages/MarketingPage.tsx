@@ -27,8 +27,8 @@ const MarketingPage = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Marketing</h1>
-            <p className="text-white/70">Análise e relatórios de campanhas de marketing</p>
+            <h1 className="text-xl text-white/90 mb-1">Marketing</h1>
+            <p className="text-white/60 text-sm">Análise e relatórios de campanhas de marketing</p>
           </div>
           <Link to="/settings/integrations">
             <Button variant="primary-red">Gerenciar Integrações</Button>

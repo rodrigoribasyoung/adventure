@@ -3,7 +3,6 @@ import { Container } from '@/components/layout/Container'
 import { CompanyTable } from '../components/CompanyTable'
 import { CompanyForm } from '../components/CompanyForm'
 import { Modal } from '@/components/ui/Modal'
-import { CsvImport } from '@/components/imports/CsvImport'
 import { useCompanies } from '../hooks/useCompanies'
 import { Company } from '@/types'
 import { Toast } from '@/components/ui/Toast'
@@ -126,47 +125,19 @@ const CompaniesPage = () => {
     }
   }
 
-  const handleCompaniesImport = async (data: any[]) => {
-    for (const row of data) {
-      await createCompany({
-        name: row.name || row.nome || '',
-        cnpj: row.cnpj || undefined,
-        email: row.email || undefined,
-        phone: row.phone || row.telefone || undefined,
-        address: row.address || row.endereco ? {
-          street: row.street || row.rua || undefined,
-          city: row.city || row.cidade || undefined,
-          state: row.state || row.estado || undefined,
-          zipCode: row.zipCode || row.cep || undefined,
-          country: row.country || row.pais || 'Brasil',
-        } : undefined,
-      })
-    }
-  }
 
   return (
     <Container>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Empresas</h1>
-            <p className="text-white/70">Gerencie suas empresas</p>
+            <h1 className="text-xl text-white/90 mb-1">Empresas</h1>
+            <p className="text-white/60 text-sm">Gerencie suas empresas</p>
           </div>
           <Button variant="primary-red" onClick={handleCreateNew}>
             + Nova Empresa
           </Button>
         </div>
-
-        <CsvImport
-          entityType="companies"
-          onImport={handleCompaniesImport}
-          sampleFileName="empresas-modelo.csv"
-          sampleHeaders={['name', 'cnpj', 'email', 'phone', 'city', 'state']}
-          sampleData={[
-            ['Tech Solutions Ltda', '12.345.678/0001-90', 'contato@techsolutions.com.br', '(11) 98765-4321', 'São Paulo', 'SP'],
-            ['Digital Marketing Agency', '', 'hello@digitalmarketing.com.br', '(11) 91234-5678', 'Rio de Janeiro', 'RJ'],
-          ]}
-        />
 
         <AdvancedFilter
           filters={filters}

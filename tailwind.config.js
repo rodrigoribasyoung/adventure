@@ -13,8 +13,8 @@ export default {
           blue: '#042AA1',
         },
         background: {
-          DEFAULT: '#0a1929',
-          dark: '#0a1929', // Azul marinho muito escuro
+          DEFAULT: '#071018',
+          dark: '#071018',
           darker: '#071018',
         },
         // Cores do Google para gráficos
@@ -31,9 +31,9 @@ export default {
         'gradient-combined': 'linear-gradient(135deg, #DA0028 0%, #042AA1 100%)',
       },
       boxShadow: {
-        'glow-red': '0 0 20px rgba(218, 0, 40, 0.5)',
-        'glow-blue': '0 0 20px rgba(4, 42, 161, 0.5)',
-        'glow-combined': '0 0 25px rgba(218, 0, 40, 0.4), 0 0 25px rgba(4, 42, 161, 0.4)',
+        'glow-red': '0 0 10px rgba(218, 0, 40, 0.2)',
+        'glow-blue': '0 0 10px rgba(4, 42, 161, 0.2)',
+        'glow-combined': '0 0 12px rgba(218, 0, 40, 0.15), 0 0 12px rgba(4, 42, 161, 0.15)',
       },
       fontFamily: {
         sans: ['Inter', 'Roboto', 'system-ui', 'sans-serif'],

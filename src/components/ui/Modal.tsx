@@ -50,7 +50,7 @@ export const Modal = ({
       {/* Modal */}
       <div
         className={`
-          relative bg-background-darker border border-white/20 rounded-lg shadow-2xl
+          relative bg-background-darker border border-white/10 rounded shadow-lg
           ${sizes[size]} w-full
           max-h-[90vh] overflow-hidden flex flex-col
         `}
@@ -58,8 +58,8 @@ export const Modal = ({
       >
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between p-6 border-b border-white/10">
-            <h2 className="text-xl font-semibold text-white">{title}</h2>
+          <div className="flex items-center justify-between p-4 border-b border-white/5">
+            <h2 className="text-base text-white">{title}</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -72,13 +72,13 @@ export const Modal = ({
         )}
         
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4">
           {children}
         </div>
         
         {/* Footer */}
         {footer && (
-          <div className="p-6 border-t border-white/10">
+          <div className="p-4 border-t border-white/5">
             {footer}
           </div>
         )}

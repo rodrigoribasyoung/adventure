@@ -36,22 +36,22 @@ export const MetricCard = ({
   }
 
   return (
-    <Card variant="elevated" className="hover:border-primary-red/30 transition-all">
+    <Card variant="elevated" className="hover:border-white/20 transition-all">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            {icon && <div className="text-white/70">{icon}</div>}
-            <h3 className="text-white/70 text-sm font-medium">{title}</h3>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            {icon && <div className="text-white/50 text-xs">{icon}</div>}
+            <h3 className="text-white/60 text-xs">{title}</h3>
           </div>
-          <p className="text-3xl font-bold text-white mb-1">
+          <p className="text-xl text-white/90 mb-1">
             {formatValue(value)}
           </p>
           {subtitle && (
-            <p className="text-white/60 text-xs">{subtitle}</p>
+            <p className="text-white/50 text-xs">{subtitle}</p>
           )}
           {trend && (
-            <div className={`flex items-center gap-1 mt-2 text-xs ${
-              trend.isPositive ? 'text-green-400' : 'text-red-400'
+            <div className={`flex items-center gap-1 mt-1.5 text-xs ${
+              trend.isPositive ? 'text-green-400/80' : 'text-red-400/80'
             }`}>
               <span>{trend.isPositive ? '↑' : '↓'}</span>
               <span>{Math.abs(trend.value)}%</span>

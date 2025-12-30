@@ -272,14 +272,14 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
       </div>
 
       {!activeFunnel ? (
-        <div className="p-4 bg-yellow-500/20 border border-yellow-500/50 rounded-lg">
-          <p className="text-yellow-400 text-sm font-medium mb-2 flex items-center gap-2">
+        <div className="p-4 bg-purple-500/20 border border-purple-500/50 rounded-lg">
+          <p className="text-purple-400 text-sm font-medium mb-2 flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             Nenhum funil ativo encontrado
           </p>
-          <p className="text-yellow-300/80 text-sm">
+          <p className="text-purple-300/80 text-sm">
             É necessário criar e ativar um funil antes de criar negociações. 
             <a href="/settings/funnels" className="underline ml-1">Criar funil agora</a>
           </p>

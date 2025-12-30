@@ -65,19 +65,19 @@ export const ProposalList = ({ proposals, loading, onEdit, onDelete }: ProposalL
           <table className="w-full">
             <thead className="bg-white/5 border-b border-white/10">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
                   Título
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
                   Valor
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
                   Data de Criação
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
                   Data de Expiração
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">

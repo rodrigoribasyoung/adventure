@@ -9,7 +9,7 @@ export const Logo = ({ variant = 'white', size = 'md', className = '' }: LogoPro
     const variants: Record<string, string> = {
       dark: '/assets/brand/logo/adventure-dark-1.png',
       white: '/assets/brand/logo/adventure-white-1.png',
-      light: '/assets/brand/logo/adventure-light-1.png',
+      light: '/assets/brand/logo/adventure-light-2.png',
       black: '/assets/brand/logo/adventure-black-1.png',
     }
     return variants[variant] || variants.white

@@ -201,8 +201,8 @@ const ProjectsPage = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Projetos</h1>
-            <p className="text-white/70">Gerencie os projetos e clientes do sistema</p>
+            <h1 className="text-xl text-white/90 mb-1">Projetos</h1>
+            <p className="text-white/60 text-sm">Gerencie os projetos e clientes do sistema</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1">

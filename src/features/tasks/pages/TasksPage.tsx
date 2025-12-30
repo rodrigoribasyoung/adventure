@@ -184,8 +184,8 @@ const TasksPage = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Tarefas</h1>
-            <p className="text-white/70">Gerencie suas tarefas e atividades</p>
+            <h1 className="text-xl text-white/90 mb-1">Tarefas</h1>
+            <p className="text-white/60 text-sm">Gerencie suas tarefas e atividades</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1">

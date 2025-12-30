@@ -64,7 +64,7 @@ export const AdvancedFilter = <T extends Record<string, any>>({
       case 'text':
         return (
           <div key={field.key}>
-            <label className="block text-sm font-medium text-white/90 mb-2">
+            <label className="block text-xs text-white/70 mb-1.5">
               {field.label}
             </label>
             <Input
@@ -79,7 +79,7 @@ export const AdvancedFilter = <T extends Record<string, any>>({
       case 'number':
         return (
           <div key={field.key}>
-            <label className="block text-sm font-medium text-white/90 mb-2">
+            <label className="block text-xs text-white/70 mb-1.5">
               {field.label}
             </label>
             <Input
@@ -96,7 +96,7 @@ export const AdvancedFilter = <T extends Record<string, any>>({
       case 'date':
         return (
           <div key={field.key}>
-            <label className="block text-sm font-medium text-white/90 mb-2">
+            <label className="block text-xs text-white/70 mb-1.5">
               {field.label}
             </label>
             <Input
@@ -110,7 +110,7 @@ export const AdvancedFilter = <T extends Record<string, any>>({
       case 'select':
         return (
           <div key={field.key}>
-            <label className="block text-sm font-medium text-white/90 mb-2">
+            <label className="block text-xs text-white/70 mb-1.5">
               {field.label}
             </label>
             <select
@@ -131,7 +131,7 @@ export const AdvancedFilter = <T extends Record<string, any>>({
       case 'multiselect':
         return (
           <div key={field.key}>
-            <label className="block text-sm font-medium text-white/90 mb-2">
+            <label className="block text-xs text-white/70 mb-1.5">
               {field.label}
             </label>
             <div className="space-y-2 max-h-40 overflow-y-auto">

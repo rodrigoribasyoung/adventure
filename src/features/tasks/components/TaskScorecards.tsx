@@ -56,13 +56,13 @@ export const TaskScorecards = ({ tasks }: TaskScorecardsProps) => {
         </div>
       </Card>
 
-      <Card variant="elevated" className="border-yellow-500/30">
+      <Card variant="elevated" className="border-purple-500/30">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-yellow-500/20 rounded-lg">
-            <FiClock className="w-6 h-6 text-yellow-400" />
+          <div className="p-3 bg-purple-500/20 rounded-lg">
+            <FiClock className="w-6 h-6 text-purple-400" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-yellow-400 mb-1">{pendingCount}</p>
+            <p className="text-2xl font-bold text-purple-400 mb-1">{pendingCount}</p>
             <p className="text-sm text-white/70">Pendentes</p>
           </div>
         </div>

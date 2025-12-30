@@ -1,7 +1,7 @@
 import { Container } from '@/components/layout/Container'
 import { Card } from '@/components/ui/Card'
 import { Link } from 'react-router-dom'
-import { FiTarget, FiEdit3, FiUsers, FiSettings, FiLink, FiDownload } from 'react-icons/fi'
+import { FiTarget, FiEdit3, FiUsers, FiSettings, FiLink, FiDownload, FiFolder, FiFileText, FiFile, FiUser } from 'react-icons/fi'
 
 interface SettingsItem {
   id: string
@@ -18,15 +18,19 @@ const SettingsPage = () => {
     { id: 'users', label: 'Usuários', icon: FiUsers, path: '/settings/users', description: 'Gerencie usuários e permissões do sistema' },
     { id: 'automations', label: 'Automações', icon: FiSettings, path: '/settings/automations', description: 'Configure automações e workflows para agilizar processos' },
     { id: 'integrations', label: 'Integrações', icon: FiLink, path: '/settings/integrations', description: 'Conecte suas contas de marketing (Meta Ads, Google Ads, Analytics)' },
-    { id: 'imports', label: 'Importações', icon: FiDownload, path: '/settings/imports', description: 'Importe dados de contatos, empresas e negociações via CSV' },
+    { id: 'imports', label: 'Importar/Exportar Dados', icon: FiDownload, path: '/settings/imports', description: 'Importe e exporte dados de contatos, empresas e negociações via CSV' },
+    { id: 'projects', label: 'Projetos', icon: FiFolder, path: '/projects', description: 'Gerencie os projetos e clientes do sistema' },
+    { id: 'services', label: 'Serviços', icon: FiFileText, path: '/services', description: 'Gerencie seus serviços e produtos' },
+    { id: 'proposals', label: 'Propostas', icon: FiFile, path: '/proposals', description: 'Gerencie propostas comerciais' },
+    { id: 'projectMembers', label: 'Responsáveis', icon: FiUser, path: '/project-members', description: 'Gerencie os responsáveis e colaboradores do projeto' },
   ]
 
   return (
     <Container>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Configurações</h1>
-          <p className="text-white/70">Gerencie as configurações do sistema</p>
+          <h1 className="text-xl text-white/90 mb-1">Configurações</h1>
+          <p className="text-white/60 text-sm">Gerencie as configurações do sistema</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

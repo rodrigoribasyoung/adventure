@@ -61,16 +61,16 @@ export const TaskTable = ({ tasks, loading, onEdit, onDelete, onToggleStatus }: 
           <table className="w-full">
             <thead className="bg-white/5 border-b border-white/10">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
                   Título
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
                   Tipo
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
                   Data de Vencimento
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
                   Status
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
@@ -119,7 +119,7 @@ export const TaskTable = ({ tasks, loading, onEdit, onDelete, onToggleStatus }: 
                             ? 'bg-green-500/20 text-green-400'
                             : isOverdue
                             ? 'bg-red-500/20 text-red-400'
-                            : 'bg-yellow-500/20 text-yellow-400'
+                            : 'bg-purple-500/20 text-purple-400'
                         }`}
                       >
                         {task.status === 'completed' ? 'Concluída' : isOverdue ? 'Atrasada' : 'Pendente'}

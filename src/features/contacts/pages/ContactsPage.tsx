@@ -3,7 +3,6 @@ import { Container } from '@/components/layout/Container'
 import { ContactTable } from '../components/ContactTable'
 import { ContactForm } from '../components/ContactForm'
 import { Modal } from '@/components/ui/Modal'
-import { CsvImport } from '@/components/imports/CsvImport'
 import { useContacts } from '../hooks/useContacts'
 import { Contact } from '@/types'
 import { Toast } from '@/components/ui/Toast'
@@ -115,46 +114,19 @@ const ContactsPage = () => {
     }
   }
 
-  const handleContactsImport = async (data: any[]) => {
-    for (const row of data) {
-      const fullName = row.name || row.nome || ''
-      const nameParts = fullName.split(' ')
-      const firstName = nameParts[0] || ''
-      const lastName = nameParts.slice(1).join(' ') || undefined
-      
-      await createContact({
-        firstName,
-        lastName,
-        email: row.email || undefined,
-        phone: row.phone || row.telefone || undefined,
-        companyId: row.companyId || row.empresaId || undefined,
-      })
-    }
-  }
 
   return (
     <Container>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Contatos</h1>
-            <p className="text-white/70">Gerencie seus contatos</p>
+            <h1 className="text-xl text-white/90 mb-1">Contatos</h1>
+            <p className="text-white/60 text-sm">Gerencie seus contatos</p>
           </div>
           <Button variant="primary-red" onClick={handleCreateNew}>
             + Novo Contato
           </Button>
         </div>
-
-        <CsvImport
-          entityType="contacts"
-          onImport={handleContactsImport}
-          sampleFileName="contatos-modelo.csv"
-          sampleHeaders={['name', 'email', 'phone', 'companyId']}
-          sampleData={[
-            ['João Silva', 'joao@example.com', '(11) 98765-4321', ''],
-            ['Maria Santos', 'maria@example.com', '(11) 91234-5678', ''],
-          ]}
-        />
 
         <AdvancedFilter
           filters={filters}

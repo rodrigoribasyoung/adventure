@@ -58,12 +58,12 @@ export const UserMenu = () => {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-all"
+        className="flex items-center gap-2 px-2 py-1 rounded hover:bg-white/5 transition-all"
       >
-        <div className="w-8 h-8 rounded-full bg-gradient-combined flex items-center justify-center text-white text-sm font-semibold">
+        <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white text-xs">
           {avatarText}
         </div>
-        <span className="text-white/80 text-sm hidden sm:block">
+        <span className="text-white/70 text-xs hidden sm:block">
           {userData?.name || 'Usuário'}
         </span>
         <svg
@@ -77,13 +77,13 @@ export const UserMenu = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-background-darker border border-white/20 rounded-lg shadow-lg z-50 overflow-hidden">
-          <div className="p-4 border-b border-white/10">
-            <p className="text-white font-semibold">{userData?.name || 'Usuário'}</p>
-            <p className="text-white/70 text-sm">{userData?.email}</p>
+        <div className="absolute right-0 mt-2 w-48 bg-background-darker border border-white/10 rounded shadow-lg z-50 overflow-hidden">
+          <div className="p-3 border-b border-white/5">
+            <p className="text-white text-sm">{userData?.name || 'Usuário'}</p>
+            <p className="text-white/60 text-xs">{userData?.email}</p>
           </div>
           
-          <div className="py-2">
+          <div className="py-1">
             {menuItems.map((item) => {
               // Verificar se é admin only (por enquanto mostrar todos)
               return (
@@ -93,21 +93,21 @@ export const UserMenu = () => {
                     navigate(item.path)
                     setIsOpen(false)
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-white/80 hover:bg-white/10 hover:text-white transition-all"
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-sm text-white/70 hover:bg-white/5 hover:text-white transition-all"
                 >
-                  <item.icon className="w-5 h-5" />
+                  <item.icon className="w-4 h-4" />
                   <span>{item.label}</span>
                 </button>
               )
             })}
           </div>
 
-          <div className="border-t border-white/10 p-2">
+          <div className="border-t border-white/5 p-1">
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-red-400 hover:bg-red-500/10 transition-all rounded-lg"
+              className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-sm text-red-400/80 hover:bg-red-500/10 transition-all rounded"
             >
-              <FiLogOut className="w-5 h-5" />
+              <FiLogOut className="w-4 h-4" />
               <span>Sair</span>
             </button>
           </div>

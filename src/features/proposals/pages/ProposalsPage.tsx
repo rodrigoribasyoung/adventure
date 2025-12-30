@@ -173,8 +173,8 @@ const ProposalsPage = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Propostas</h1>
-            <p className="text-white/70">Gerencie suas propostas comerciais</p>
+            <h1 className="text-xl text-white/90 mb-1">Propostas</h1>
+            <p className="text-white/60 text-sm">Gerencie suas propostas comerciais</p>
           </div>
           <Button variant="primary-red" onClick={handleCreateNew}>
             + Nova Proposta

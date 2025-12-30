@@ -9,7 +9,6 @@ import { Modal } from '@/components/ui/Modal'
 import { Card } from '@/components/ui/Card'
 import { DealCloseModal } from '@/components/deals/DealCloseModal'
 import { DealTasksModal } from '../components/DealTasksModal'
-import { CsvImport } from '@/components/imports/CsvImport'
 import { useDeals } from '../hooks/useDeals'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
@@ -175,54 +174,14 @@ const DealsPage = () => {
     setSortOrder(newSortOrder)
   }
 
-  const handleDealsImport = async (data: any[]) => {
-    if (!activeFunnel) {
-      throw new Error('É necessário ter um funil ativo para importar negociações')
-    }
-
-    const firstStage = activeFunnel.stages[0]
-    if (!firstStage) {
-      throw new Error('Funil não possui estágios')
-    }
-
-    for (const row of data) {
-      const title = row.title || row.titulo || ''
-      const stageName = row.stage || row.estagio || ''
-      
-      // Tentar encontrar o estágio pelo nome
-      let stageId = firstStage.id
-      if (stageName) {
-        const stage = activeFunnel.stages.find(s => 
-          s.name.toLowerCase() === stageName.toLowerCase()
-        )
-        if (stage) {
-          stageId = stage.id
-        }
-      }
-
-      await createDeal({
-        title,
-        stage: stageId,
-        contactId: row.contactId || row.contatoId || undefined,
-        companyId: row.companyId || row.empresaId || undefined,
-        value: parseFloat(row.value || row.valor || '0') || 0,
-        currency: 'BRL' as const,
-        probability: parseInt(row.probability || row.probabilidade || '50') || 50,
-        serviceIds: row.serviceIds || row.servicosIds ? (row.serviceIds || row.servicosIds).split(',').map((id: string) => id.trim()) : [],
-        expectedCloseDate: row.expectedCloseDate || row.dataFechamentoEsperada ? 
-          Timestamp.fromDate(new Date(row.expectedCloseDate || row.dataFechamentoEsperada)) : 
-          undefined,
-      })
-    }
-  }
 
   return (
     <Container>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Negociações</h1>
-            <p className="text-white/70">Gerencie seu pipeline de vendas</p>
+            <h1 className="text-xl text-white/90 mb-1">Negociações</h1>
+            <p className="text-white/60 text-sm">Gerencie seu pipeline de vendas</p>
           </div>
           
           <div className="flex items-center gap-4">
@@ -258,17 +217,6 @@ const DealsPage = () => {
           </Card>
         ) : (
           <>
-            <CsvImport
-              entityType="deals"
-              onImport={handleDealsImport}
-              sampleFileName="negociacoes-modelo.csv"
-              sampleHeaders={['title', 'stage', 'contactId', 'value', 'probability']}
-              sampleData={[
-                ['Negociação Exemplo 1', 'Proposta', '', '5000.00', '75'],
-                ['Negociação Exemplo 2', 'Negociação', '', '10000.00', '50'],
-              ]}
-            />
-
             {viewMode === 'list' && (
               <DealFiltersComponent
                 filters={filters}

@@ -16,7 +16,7 @@ const ReportsPage = () => {
     <Container>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Relatórios</h1>
+          <h1 className="text-xl text-white/90 mb-1">Relatórios</h1>
           <p className="text-white/70">Análise e insights do seu pipeline de vendas</p>
         </div>
 

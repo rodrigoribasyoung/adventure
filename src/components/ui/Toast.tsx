@@ -28,14 +28,14 @@ export const Toast = ({
   if (!isVisible) return null
 
   const typeStyles = {
-    success: 'bg-green-500/20 border-green-500 text-green-400',
+    success: 'bg-blue-500/20 border-blue-500 text-blue-400',
     error: 'bg-red-500/20 border-red-500 text-red-400',
     info: 'bg-blue-500/20 border-blue-500 text-blue-400',
-    warning: 'bg-yellow-500/20 border-yellow-500 text-yellow-400',
+    warning: 'bg-purple-500/20 border-purple-500 text-purple-400',
   }
 
   return (
-    <div className="fixed top-4 right-4 z-50 animate-slide-in">
+    <div className="fixed bottom-4 right-4 z-50 animate-slide-in">
       <div
         className={`
           px-4 py-3 rounded-lg border backdrop-blur-sm shadow-lg

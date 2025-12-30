@@ -32,7 +32,7 @@ export const TabsNavigation = () => {
   }
 
   return (
-    <nav className="bg-background-darker border-b border-white/10 overflow-x-auto">
+    <nav className="hidden lg:flex bg-background-darker border-b border-white/5 overflow-x-auto">
       <div className="flex items-center gap-1 px-4">
         {tabs.map((tab) => {
           const active = isActive(tab.path)
@@ -43,29 +43,18 @@ export const TabsNavigation = () => {
               key={tab.path}
               to={tab.path}
               className={`
-                flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all duration-200
+                px-4 py-2 text-sm transition-all duration-200
                 whitespace-nowrap
                 ${
                   active
-                    ? 'text-white border-b-2 border-primary-red bg-white/5'
+                    ? 'text-white/90 border-b-2 border-primary-blue'
                     : isMarketingInactive
                     ? 'text-white/30 hover:text-white/50 hover:bg-white/5'
-                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                    : 'text-white/60 hover:text-white/90 hover:bg-white/5'
                 }
               `}
             >
-              <Icon 
-                name={tab.icon} 
-                size={18} 
-                className={
-                  active 
-                    ? 'text-white' 
-                    : isMarketingInactive 
-                    ? 'text-white/30' 
-                    : 'text-white/70'
-                } 
-              />
-              <span>{tab.label}</span>
+              {tab.label}
             </Link>
           )
         })}

@@ -14,9 +14,9 @@ export const Card = ({
   ...props
 }: CardProps) => {
   const variants = {
-    default: 'bg-white/5 border border-white/10',
-    elevated: 'bg-white/10 border border-white/20 shadow-lg',
-    outlined: 'bg-transparent border border-white/20',
+    default: 'bg-white/5 border border-white/5',
+    elevated: 'bg-white/5 border border-white/10',
+    outlined: 'bg-transparent border border-white/10',
   }
   
   const glowClass = glow ? 'glow-blue' : ''
@@ -24,7 +24,7 @@ export const Card = ({
   return (
     <div
       className={`
-        rounded-lg p-6
+        rounded p-3
         ${variants[variant]}
         ${glowClass}
         ${className}

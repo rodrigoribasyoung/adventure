@@ -172,7 +172,7 @@ const DealDetailPage = () => {
                 <span className={`px-3 py-1 rounded-full text-sm ${
                   deal.status === 'won' ? 'bg-green-500/20 text-green-400 border border-green-500/40' :
                   deal.status === 'lost' ? 'bg-red-500/20 text-red-400 border border-red-500/40' :
-                  deal.status === 'paused' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/40' :
+                  deal.status === 'paused' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/40' :
                   'bg-blue-500/20 text-blue-400 border border-blue-500/40'
                 }`}>
                   {deal.status === 'won' ? 'Ganho' :
