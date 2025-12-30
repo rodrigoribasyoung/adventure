@@ -7,6 +7,16 @@ import { CsvImport } from '@/components/imports/CsvImport'
 import { useCompanies } from '../hooks/useCompanies'
 import { Company } from '@/types'
 import { Toast } from '@/components/ui/Toast'
+import { AdvancedFilter } from '@/components/common/AdvancedFilter'
+import { useAdvancedFilter } from '@/hooks/useAdvancedFilter'
+import { FilterField } from '@/components/common/AdvancedFilter'
+import { Button } from '@/components/ui/Button'
+
+interface CompanyFilters {
+  search: string
+  city: string
+  state: string
+}
 
 const CompaniesPage = () => {
   const { companies, loading, createCompany, updateCompany, deleteCompany } = useCompanies()
@@ -17,6 +27,59 @@ const CompaniesPage = () => {
     message: '',
     type: 'success',
     visible: false,
+  })
+
+  const initialFilters: CompanyFilters = {
+    search: '',
+    city: '',
+    state: '',
+  }
+
+  const { filters, setFilters, resetFilters } = useAdvancedFilter<CompanyFilters>({
+    initialFilters,
+    persistKey: 'companies_filters',
+  })
+
+  const filterFields: FilterField[] = [
+    {
+      key: 'city',
+      label: 'Cidade',
+      type: 'text',
+      placeholder: 'Buscar por cidade...',
+    },
+    {
+      key: 'state',
+      label: 'Estado',
+      type: 'text',
+      placeholder: 'Buscar por estado...',
+    },
+  ]
+
+  const filteredCompanies = companies.filter(company => {
+    // Busca por texto
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase()
+      const matchesSearch = 
+        company.name.toLowerCase().includes(searchLower) ||
+        company.email?.toLowerCase().includes(searchLower) ||
+        company.cnpj?.includes(searchLower) ||
+        company.phone?.includes(searchLower)
+      if (!matchesSearch) return false
+    }
+
+    // Filtro por cidade
+    if (filters.city) {
+      const cityLower = filters.city.toLowerCase()
+      if (!company.address?.city?.toLowerCase().includes(cityLower)) return false
+    }
+
+    // Filtro por estado
+    if (filters.state) {
+      const stateLower = filters.state.toLowerCase()
+      if (!company.address?.state?.toLowerCase().includes(stateLower)) return false
+    }
+
+    return true
   })
 
   const handleCreateNew = () => {
@@ -84,9 +147,14 @@ const CompaniesPage = () => {
   return (
     <Container>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Empresas</h1>
-          <p className="text-white/70">Gerencie suas empresas</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Empresas</h1>
+            <p className="text-white/70">Gerencie suas empresas</p>
+          </div>
+          <Button variant="primary-red" onClick={handleCreateNew}>
+            + Nova Empresa
+          </Button>
         </div>
 
         <CsvImport
@@ -100,8 +168,16 @@ const CompaniesPage = () => {
           ]}
         />
 
+        <AdvancedFilter
+          filters={filters}
+          onFiltersChange={setFilters}
+          onReset={resetFilters}
+          searchPlaceholder="Buscar por nome, email, CNPJ ou telefone..."
+          fields={filterFields}
+        />
+
         <CompanyTable
-          companies={companies}
+          companies={filteredCompanies}
           loading={loading}
           onEdit={handleEdit}
           onDelete={handleDelete}

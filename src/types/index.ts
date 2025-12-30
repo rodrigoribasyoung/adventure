@@ -47,6 +47,7 @@ export interface ProjectMember extends BaseEntity {
   email?: string // Email (opcional)
   phone?: string // Telefone (opcional)
   role?: string // Cargo/função (ex: "Vendedor", "Gerente", etc.)
+  functionLevel?: 'vendedor' | 'gerente' | 'diretor' | 'coordenador' | 'analista' | string // Nível de função
   active: boolean
 }
 

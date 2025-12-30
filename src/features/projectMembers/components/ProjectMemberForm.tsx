@@ -10,6 +10,7 @@ const memberSchema = z.object({
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   phone: z.string().optional(),
   role: z.string().optional(),
+  functionLevel: z.string().optional(),
   active: z.boolean().default(true),
 })
 
@@ -35,6 +36,7 @@ export const ProjectMemberForm = ({ member, onSubmit, onCancel, loading = false 
           email: member.email || '',
           phone: member.phone || '',
           role: member.role || '',
+          functionLevel: member.functionLevel || '',
           active: member.active,
         }
       : {
@@ -72,6 +74,23 @@ export const ProjectMemberForm = ({ member, onSubmit, onCancel, loading = false 
         {...register('role')}
         error={errors.role?.message}
       />
+
+      <div>
+        <label className="block text-sm font-medium text-white/90 mb-2">
+          Nível de Função
+        </label>
+        <select
+          {...register('functionLevel')}
+          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
+        >
+          <option value="">Selecione um nível</option>
+          <option value="vendedor">Vendedor</option>
+          <option value="analista">Analista</option>
+          <option value="coordenador">Coordenador</option>
+          <option value="gerente">Gerente</option>
+          <option value="diretor">Diretor</option>
+        </select>
+      </div>
 
       <div className="flex items-center gap-2">
         <input

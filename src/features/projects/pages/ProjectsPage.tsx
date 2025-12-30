@@ -9,6 +9,16 @@ import { useProject } from '@/contexts/ProjectContext'
 import { Project } from '@/types'
 import { Toast } from '@/components/ui/Toast'
 import { getDocument } from '@/lib/firebase/db'
+import { AdvancedFilter } from '@/components/common/AdvancedFilter'
+import { useAdvancedFilter } from '@/hooks/useAdvancedFilter'
+import { FilterField } from '@/components/common/AdvancedFilter'
+import { ProjectTable } from '../components/ProjectTable'
+
+interface ProjectFilters {
+  search: string
+  plan: string[]
+  active: string
+}
 
 const ProjectsPage = () => {
   const { projects, loading, createProject, updateProject, deleteProject, refetch } = useProjects()
@@ -16,6 +26,7 @@ const ProjectsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<Project | undefined>()
   const [formLoading, setFormLoading] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -26,6 +37,63 @@ const ProjectsPage = () => {
     message: '',
     type: 'success',
     visible: false,
+  })
+
+  const initialFilters: ProjectFilters = {
+    search: '',
+    plan: [],
+    active: '',
+  }
+
+  const { filters, setFilters, resetFilters } = useAdvancedFilter<ProjectFilters>({
+    initialFilters,
+    persistKey: 'projects_filters',
+  })
+
+  const filterFields: FilterField[] = [
+    {
+      key: 'plan',
+      label: 'Plano',
+      type: 'multiselect',
+      options: [
+        { value: 'basic', label: 'Básico' },
+        { value: 'premium', label: 'Premium' },
+        { value: 'enterprise', label: 'Enterprise' },
+      ],
+    },
+    {
+      key: 'active',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { value: 'true', label: 'Ativo' },
+        { value: 'false', label: 'Inativo' },
+      ],
+    },
+  ]
+
+  const filteredProjects = projects.filter(project => {
+    // Busca por texto
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase()
+      const matchesSearch = 
+        project.name.toLowerCase().includes(searchLower) ||
+        project.description?.toLowerCase().includes(searchLower)
+      if (!matchesSearch) return false
+    }
+
+    // Filtro por plano
+    if (filters.plan && filters.plan.length > 0) {
+      if (!filters.plan.includes(project.plan)) return false
+    }
+
+    // Filtro por status
+    if (filters.active) {
+      const isActive = filters.active === 'true'
+      if (project.active !== isActive) return false
+    }
+
+    return true
   })
 
   // Se não for master e já tiver projetos, restringir acesso
@@ -136,10 +204,36 @@ const ProjectsPage = () => {
             <h1 className="text-3xl font-bold text-white mb-2">Projetos</h1>
             <p className="text-white/70">Gerencie os projetos e clientes do sistema</p>
           </div>
-          <Button variant="primary-red" onClick={handleCreateNew}>
-            + Novo Projeto
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1">
+              <Button
+                variant={viewMode === 'grid' ? 'primary-red' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+              >
+                Grade
+              </Button>
+              <Button
+                variant={viewMode === 'table' ? 'primary-red' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('table')}
+              >
+                Tabela
+              </Button>
+            </div>
+            <Button variant="primary-red" onClick={handleCreateNew}>
+              + Novo Projeto
+            </Button>
+          </div>
         </div>
+
+        <AdvancedFilter
+          filters={filters}
+          onFiltersChange={setFilters}
+          onReset={resetFilters}
+          searchPlaceholder="Buscar por nome ou descrição..."
+          fields={filterFields}
+        />
 
         {loading ? (
           <Card>
@@ -147,18 +241,31 @@ const ProjectsPage = () => {
               <div className="text-white/70">Carregando projetos...</div>
             </div>
           </Card>
-        ) : projects.length === 0 ? (
+        ) : filteredProjects.length === 0 ? (
           <Card>
             <div className="text-center py-12">
-              <p className="text-white/70 mb-4">Nenhum projeto cadastrado</p>
-              <Button variant="primary-red" onClick={handleCreateNew}>
-                Criar Primeiro Projeto
-              </Button>
+              <p className="text-white/70 mb-4">
+                {projects.length === 0 ? 'Nenhum projeto cadastrado' : 'Nenhum projeto encontrado com os filtros aplicados'}
+              </p>
+              {projects.length === 0 && (
+                <Button variant="primary-red" onClick={handleCreateNew}>
+                  Criar Primeiro Projeto
+                </Button>
+              )}
             </div>
           </Card>
+        ) : viewMode === 'table' ? (
+          <ProjectTable
+            projects={filteredProjects}
+            loading={loading}
+            currentProjectId={currentProject?.id}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onSelect={handleSelectProject}
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
+            {filteredProjects.map((project) => (
               <Card
                 key={project.id}
                 variant="elevated"

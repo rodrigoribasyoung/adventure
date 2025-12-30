@@ -1,24 +1,28 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Contact } from '@/types'
-import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { Pagination } from '@/components/ui/Pagination'
 
 interface ContactTableProps {
   contacts: Contact[]
   loading: boolean
   onEdit: (contact: Contact) => void
   onDelete: (id: string) => void
-  onCreateNew: () => void
+  onCreateNew?: () => void
 }
 
-export const ContactTable = ({ contacts, loading, onEdit, onDelete, onCreateNew }: ContactTableProps) => {
-  const [searchTerm, setSearchTerm] = useState('')
+export const ContactTable = ({ contacts, loading, onEdit, onDelete }: ContactTableProps) => {
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(25)
 
-  const filteredContacts = contacts.filter((contact) =>
-    contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contact.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contact.phone?.includes(searchTerm)
-  )
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [contacts.length])
+
+  const totalPages = Math.ceil(contacts.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedContacts = contacts.slice(startIndex, endIndex)
 
   if (loading) {
     return (
@@ -30,51 +34,33 @@ export const ContactTable = ({ contacts, loading, onEdit, onDelete, onCreateNew 
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <Input
-          placeholder="Buscar contatos..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md"
-        />
-        <Button variant="primary-red" onClick={onCreateNew}>
-          + Novo Contato
-        </Button>
-      </div>
-
-      {filteredContacts.length === 0 ? (
+      {contacts.length === 0 ? (
         <div className="bg-background-darker border border-white/10 rounded-lg p-12 text-center">
-          <p className="text-white/70 mb-4">
-            {searchTerm ? 'Nenhum contato encontrado' : 'Nenhum contato cadastrado'}
-          </p>
-          {!searchTerm && (
-            <Button variant="primary-blue" onClick={onCreateNew}>
-              Criar Primeiro Contato
-            </Button>
-          )}
+          <p className="text-white/70 mb-4">Nenhum contato cadastrado</p>
         </div>
       ) : (
-        <div className="bg-background-darker border border-white/10 rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-white/5 border-b border-white/10">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
-                    Nome
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
-                    Telefone
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/10">
-                {filteredContacts.map((contact) => (
+        <>
+          <div className="bg-background-darker border border-white/10 rounded-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-white/5 border-b border-white/10">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                      Nome
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                      Telefone
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {paginatedContacts.map((contact) => (
                   <tr
                     key={contact.id}
                     className="hover:bg-white/5 transition-colors cursor-pointer"
@@ -113,10 +99,25 @@ export const ContactTable = ({ contacts, loading, onEdit, onDelete, onCreateNew 
                     </td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+
+          {contacts.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={contacts.length}
+              onItemsPerPageChange={(newItemsPerPage) => {
+                setItemsPerPage(newItemsPerPage)
+                setCurrentPage(1)
+              }}
+            />
+          )}
+        </>
       )}
     </div>
   )

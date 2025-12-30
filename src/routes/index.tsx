@@ -20,6 +20,7 @@ import MarketingPage from '@/features/marketing/pages/MarketingPage'
 import TasksPage from '@/features/tasks/pages/TasksPage'
 import ProjectsPage from '@/features/projects/pages/ProjectsPage'
 import ProjectMembersPage from '@/features/projectMembers/pages/ProjectMembersPage'
+import ProposalsPage from '@/features/proposals/pages/ProposalsPage'
 import { ReactNode } from 'react'
 
 // Wrapper para usar useLocation dentro do PrivateRoute
@@ -158,6 +159,14 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <ProjectMembersPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/proposals',
+    element: (
+      <PrivateRoute>
+        <ProposalsPage />
       </PrivateRoute>
     ),
   },

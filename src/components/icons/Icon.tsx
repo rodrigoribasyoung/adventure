@@ -16,7 +16,8 @@ import {
   FiTarget,
   FiEdit3,
   FiLink,
-  FiDownload
+  FiDownload,
+  FiFile
 } from 'react-icons/fi'
 
 export const Icons = {
@@ -38,6 +39,7 @@ export const Icons = {
   link: FiLink,
   download: FiDownload,
   project: FiFolder,
+  proposals: FiFile,
 }
 
 interface IconProps {

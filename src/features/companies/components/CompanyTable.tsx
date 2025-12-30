@@ -1,24 +1,28 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Company } from '@/types'
-import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { Pagination } from '@/components/ui/Pagination'
 
 interface CompanyTableProps {
   companies: Company[]
   loading: boolean
   onEdit: (company: Company) => void
   onDelete: (id: string) => void
-  onCreateNew: () => void
+  onCreateNew?: () => void
 }
 
-export const CompanyTable = ({ companies, loading, onEdit, onDelete, onCreateNew }: CompanyTableProps) => {
-  const [searchTerm, setSearchTerm] = useState('')
+export const CompanyTable = ({ companies, loading, onEdit, onDelete }: CompanyTableProps) => {
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(25)
 
-  const filteredCompanies = companies.filter((company) =>
-    company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    company.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    company.cnpj?.includes(searchTerm)
-  )
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [companies.length])
+
+  const totalPages = Math.ceil(companies.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedCompanies = companies.slice(startIndex, endIndex)
 
   if (loading) {
     return (
@@ -30,54 +34,36 @@ export const CompanyTable = ({ companies, loading, onEdit, onDelete, onCreateNew
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <Input
-          placeholder="Buscar empresas..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md"
-        />
-        <Button variant="primary-red" onClick={onCreateNew}>
-          + Nova Empresa
-        </Button>
-      </div>
-
-      {filteredCompanies.length === 0 ? (
+      {companies.length === 0 ? (
         <div className="bg-background-darker border border-white/10 rounded-lg p-12 text-center">
-          <p className="text-white/70 mb-4">
-            {searchTerm ? 'Nenhuma empresa encontrada' : 'Nenhuma empresa cadastrada'}
-          </p>
-          {!searchTerm && (
-            <Button variant="primary-blue" onClick={onCreateNew}>
-              Criar Primeira Empresa
-            </Button>
-          )}
+          <p className="text-white/70 mb-4">Nenhuma empresa cadastrada</p>
         </div>
       ) : (
-        <div className="bg-background-darker border border-white/10 rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-white/5 border-b border-white/10">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
-                    Nome
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
-                    CNPJ
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
-                    Telefone
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/10">
-                {filteredCompanies.map((company) => (
+        <>
+          <div className="bg-background-darker border border-white/10 rounded-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-white/5 border-b border-white/10">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                      Nome
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                      CNPJ
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                      Telefone
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {paginatedCompanies.map((company) => (
                   <tr
                     key={company.id}
                     className="hover:bg-white/5 transition-colors cursor-pointer"
@@ -119,10 +105,25 @@ export const CompanyTable = ({ companies, loading, onEdit, onDelete, onCreateNew
                     </td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+
+          {companies.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={companies.length}
+              onItemsPerPageChange={(newItemsPerPage) => {
+                setItemsPerPage(newItemsPerPage)
+                setCurrentPage(1)
+              }}
+            />
+          )}
+        </>
       )}
     </div>
   )

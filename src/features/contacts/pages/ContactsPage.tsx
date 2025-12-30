@@ -7,9 +7,20 @@ import { CsvImport } from '@/components/imports/CsvImport'
 import { useContacts } from '../hooks/useContacts'
 import { Contact } from '@/types'
 import { Toast } from '@/components/ui/Toast'
+import { AdvancedFilter } from '@/components/common/AdvancedFilter'
+import { useAdvancedFilter } from '@/hooks/useAdvancedFilter'
+import { FilterField } from '@/components/common/AdvancedFilter'
+import { Button } from '@/components/ui/Button'
+import { useCompanies } from '@/features/companies/hooks/useCompanies'
+
+interface ContactFilters {
+  search: string
+  companyId: string
+}
 
 const ContactsPage = () => {
   const { contacts, loading, createContact, updateContact, deleteContact } = useContacts()
+  const { companies } = useCompanies()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedContact, setSelectedContact] = useState<Contact | undefined>()
   const [formLoading, setFormLoading] = useState(false)
@@ -17,6 +28,47 @@ const ContactsPage = () => {
     message: '',
     type: 'success',
     visible: false,
+  })
+
+  const initialFilters: ContactFilters = {
+    search: '',
+    companyId: '',
+  }
+
+  const { filters, setFilters, resetFilters } = useAdvancedFilter<ContactFilters>({
+    initialFilters,
+    persistKey: 'contacts_filters',
+  })
+
+  const filterFields: FilterField[] = [
+    {
+      key: 'companyId',
+      label: 'Empresa',
+      type: 'select',
+      options: [
+        { value: '', label: 'Todas as empresas' },
+        ...companies.map(c => ({ value: c.id, label: c.name })),
+      ],
+    },
+  ]
+
+  const filteredContacts = contacts.filter(contact => {
+    // Busca por texto
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase()
+      const matchesSearch = 
+        contact.name.toLowerCase().includes(searchLower) ||
+        contact.email?.toLowerCase().includes(searchLower) ||
+        contact.phone?.includes(searchLower)
+      if (!matchesSearch) return false
+    }
+
+    // Filtro por empresa
+    if (filters.companyId) {
+      if (contact.companyId !== filters.companyId) return false
+    }
+
+    return true
   })
 
   const handleCreateNew = () => {
@@ -83,9 +135,14 @@ const ContactsPage = () => {
   return (
     <Container>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Contatos</h1>
-          <p className="text-white/70">Gerencie seus contatos</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Contatos</h1>
+            <p className="text-white/70">Gerencie seus contatos</p>
+          </div>
+          <Button variant="primary-red" onClick={handleCreateNew}>
+            + Novo Contato
+          </Button>
         </div>
 
         <CsvImport
@@ -99,8 +156,16 @@ const ContactsPage = () => {
           ]}
         />
 
+        <AdvancedFilter
+          filters={filters}
+          onFiltersChange={setFilters}
+          onReset={resetFilters}
+          searchPlaceholder="Buscar por nome, email ou telefone..."
+          fields={filterFields}
+        />
+
         <ContactTable
-          contacts={contacts}
+          contacts={filteredContacts}
           loading={loading}
           onEdit={handleEdit}
           onDelete={handleDelete}

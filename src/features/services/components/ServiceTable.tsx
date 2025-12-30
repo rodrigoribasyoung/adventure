@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Service } from '@/types'
-import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { Pagination } from '@/components/ui/Pagination'
 import { formatCurrency } from '@/lib/utils/formatCurrency'
 
 interface ServiceTableProps {
@@ -9,16 +9,21 @@ interface ServiceTableProps {
   loading: boolean
   onEdit: (service: Service) => void
   onDelete: (id: string) => void
-  onCreateNew: () => void
+  onCreateNew?: () => void
 }
 
-export const ServiceTable = ({ services, loading, onEdit, onDelete, onCreateNew }: ServiceTableProps) => {
-  const [searchTerm, setSearchTerm] = useState('')
+export const ServiceTable = ({ services, loading, onEdit, onDelete }: ServiceTableProps) => {
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(25)
 
-  const filteredServices = services.filter((service) =>
-    service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [services.length])
+
+  const totalPages = Math.ceil(services.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedServices = services.slice(startIndex, endIndex)
 
   if (loading) {
     return (
@@ -30,54 +35,36 @@ export const ServiceTable = ({ services, loading, onEdit, onDelete, onCreateNew 
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <Input
-          placeholder="Buscar serviços..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md"
-        />
-        <Button variant="primary-red" onClick={onCreateNew}>
-          + Novo Serviço
-        </Button>
-      </div>
-
-      {filteredServices.length === 0 ? (
+      {services.length === 0 ? (
         <div className="bg-background-darker border border-white/10 rounded-lg p-12 text-center">
-          <p className="text-white/70 mb-4">
-            {searchTerm ? 'Nenhum serviço encontrado' : 'Nenhum serviço cadastrado'}
-          </p>
-          {!searchTerm && (
-            <Button variant="primary-blue" onClick={onCreateNew}>
-              Criar Primeiro Serviço
-            </Button>
-          )}
+          <p className="text-white/70 mb-4">Nenhum serviço cadastrado</p>
         </div>
       ) : (
-        <div className="bg-background-darker border border-white/10 rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-white/5 border-b border-white/10">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
-                    Nome
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
-                    Descrição
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
-                    Preço
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/10">
-                {filteredServices.map((service) => (
+        <>
+          <div className="bg-background-darker border border-white/10 rounded-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-white/5 border-b border-white/10">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                      Nome
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                      Descrição
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                      Preço
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {paginatedServices.map((service) => (
                   <tr
                     key={service.id}
                     className="hover:bg-white/5 transition-colors cursor-pointer"
@@ -131,10 +118,25 @@ export const ServiceTable = ({ services, loading, onEdit, onDelete, onCreateNew 
                     </td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+
+          {services.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={services.length}
+              onItemsPerPageChange={(newItemsPerPage) => {
+                setItemsPerPage(newItemsPerPage)
+                setCurrentPage(1)
+              }}
+            />
+          )}
+        </>
       )}
     </div>
   )

@@ -9,13 +9,15 @@ interface TabItem {
 
 const tabs: TabItem[] = [
   { label: 'Início', path: '/', icon: 'home' },
-  { label: 'Negociações', path: '/deals', icon: 'deals' },
-  { label: 'Serviços', path: '/services', icon: 'services' },
+  { label: 'Dashboard', path: '/dashboard', icon: 'reports' },
+  { label: 'Projetos', path: '/projects', icon: 'project' },
   { label: 'Empresas', path: '/companies', icon: 'companies' },
   { label: 'Contatos', path: '/contacts', icon: 'contacts' },
+  { label: 'Negociações', path: '/deals', icon: 'deals' },
   { label: 'Tarefas', path: '/tasks', icon: 'tasks' },
-  { label: 'Relatórios', path: '/reports', icon: 'reports' },
-  { label: 'Marketing', path: '/marketing', icon: 'marketing' },
+  { label: 'Serviços', path: '/services', icon: 'services' },
+  { label: 'Propostas', path: '/proposals', icon: 'proposals' },
+  { label: 'Responsáveis', path: '/project-members', icon: 'contacts' },
 ]
 
 export const TabsNavigation = () => {
