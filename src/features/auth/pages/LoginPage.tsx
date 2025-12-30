@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
-import { Logo } from '@/components/layout/Logo'
+import { AnimatedBackground } from '@/components/common/AnimatedBackground'
+import { PulsingLogo } from '@/components/common/PulsingLogo'
 import { Button } from '@/components/ui/Button'
 
 const LoginPage = () => {
@@ -23,19 +24,23 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background-dark flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
+      <AnimatedBackground />
+      
+      <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <Logo variant="white" size="lg" className="mx-auto mb-6" />
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <div className="mb-6 flex justify-center">
+            <PulsingLogo />
+          </div>
+          <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
             CRM Adventure Labs
           </h1>
-          <p className="text-white/70">
+          <p className="text-white/70 drop-shadow">
             Faça login para continuar
           </p>
         </div>
         
-        <div className="bg-background-darker border border-white/20 rounded-lg p-8">
+        <div className="bg-black/40 backdrop-blur-sm border border-white/20 rounded-lg p-8 shadow-2xl">
           <Button
             variant="combined"
             size="lg"
