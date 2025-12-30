@@ -6,19 +6,56 @@
   body {
     @apply bg-background-dark text-white;
     font-family: 'Inter', 'Roboto', system-ui, sans-serif;
-    cursor: url('/assets/brand/navigation_cursor/navigation-cursor-red-small.svg') 0 0, auto;
+    cursor: url('/assets/brand/navigation_cursor/navigation-cursor-light-small.svg') 2 2, auto;
   }
   
-  button, a, [role="button"], .cursor-pointer {
-    cursor: url('/assets/brand/navigation_cursor/navigation-cursor-red-small.svg') 0 0, pointer;
+  /* Cursor pointer para elementos clicáveis */
+  button, a, [role="button"], .cursor-pointer, [onclick], [data-clickable] {
+    cursor: url('/assets/brand/navigation_cursor/navigation-cursor-light-small.svg') 2 2, pointer !important;
   }
   
-  input, textarea, select, [contenteditable], [contenteditable="true"] {
-    cursor: url('/assets/brand/navigation_cursor/navigation-cursor-text-red.svg') 1 10, text;
+  /* Cursor text para elementos de texto editável */
+  input, textarea, select, [contenteditable], [contenteditable="true"], [type="text"], [type="email"], [type="password"], [type="search"], [type="url"], [type="tel"] {
+    cursor: url('/assets/brand/navigation_cursor/navigation-cursor-light-text.svg') 1 10, text !important;
   }
   
-  button:disabled, a:disabled {
-    cursor: not-allowed;
+  /* Cursor move para elementos arrastáveis */
+  [draggable="true"], .cursor-move {
+    cursor: url('/assets/brand/navigation_cursor/navigation-cursor-light-small.svg') 2 2, move !important;
+  }
+  
+  /* Cursor resize para elementos redimensionáveis */
+  .resize, [style*="resize"] {
+    cursor: url('/assets/brand/navigation_cursor/navigation-cursor-light-small.svg') 2 2, nwse-resize !important;
+  }
+  
+  /* Cursor not-allowed para elementos desabilitados */
+  button:disabled, a:disabled, [disabled], .disabled {
+    cursor: not-allowed !important;
+  }
+  
+  /* Cursor wait para elementos carregando */
+  .loading, [aria-busy="true"] {
+    cursor: wait !important;
+  }
+  
+  /* Cursor help para elementos com ajuda */
+  [title], [data-tooltip], .help {
+    cursor: help !important;
+  }
+  
+  /* Cursor crosshair para seleção precisa */
+  .crosshair, canvas {
+    cursor: crosshair !important;
+  }
+  
+  /* Cursor grab para elementos que podem ser pegos */
+  .grab, [data-grab] {
+    cursor: grab !important;
+  }
+  
+  .grab:active, [data-grab]:active {
+    cursor: grabbing !important;
   }
 }
 

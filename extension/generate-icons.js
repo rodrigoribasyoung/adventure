@@ -32,3 +32,4 @@ console.log('O SVG já está disponível em: public/assets/brand/navigation_curs
 console.log('Você pode usar este arquivo diretamente se a extensão suportar SVG (mas Chrome requer PNG)')
 
 
+

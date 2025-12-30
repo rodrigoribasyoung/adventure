@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { soundEffects } from '@/lib/utils/soundEffects'
 
 interface Particle {
   x: number
@@ -32,6 +33,7 @@ export const AnimatedBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationFrameRef = useRef<number>()
   const timeRef = useRef(0)
+  const mouseRef = useRef({ x: 0, y: 0, isActive: false })
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -43,14 +45,32 @@ export const AnimatedBackground = () => {
     // Configuração do canvas
     const resizeCanvas = () => {
       const dpr = window.devicePixelRatio || 1
-      canvas.width = window.innerWidth * dpr
-      canvas.height = window.innerHeight * dpr
+      const width = window.innerWidth
+      const height = window.innerHeight
+      
+      canvas.width = width * dpr
+      canvas.height = height * dpr
+      canvas.style.width = `${width}px`
+      canvas.style.height = `${height}px`
+      
       ctx.scale(dpr, dpr)
-      canvas.style.width = `${window.innerWidth}px`
-      canvas.style.height = `${window.innerHeight}px`
     }
     resizeCanvas()
     window.addEventListener('resize', resizeCanvas)
+
+    // Rastreamento de mouse
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseRef.current.x = e.clientX
+      mouseRef.current.y = e.clientY
+      mouseRef.current.isActive = true
+    }
+
+    const handleMouseLeave = () => {
+      mouseRef.current.isActive = false
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseleave', handleMouseLeave)
 
     const centerX = () => window.innerWidth / 2
     const centerY = () => window.innerHeight / 2
@@ -69,6 +89,11 @@ export const AnimatedBackground = () => {
         maxLife: 1,
       })
     }
+
+    // Algumas partículas que seguem o cursor (apenas algumas para não atrapalhar)
+    const interactiveParticleIndices = Array.from({ length: 15 }, () => 
+      Math.floor(Math.random() * particles.length)
+    )
 
     // Anéis orbitais suaves
     const orbitalRings: OrbitalRing[] = []
@@ -105,10 +130,31 @@ export const AnimatedBackground = () => {
 
     // Função para desenhar partículas orgânicas
     const drawParticles = (time: number) => {
-      particles.forEach((particle) => {
+      particles.forEach((particle, index) => {
+        const isInteractive = interactiveParticleIndices.includes(index)
+        
+        if (isInteractive && mouseRef.current.isActive) {
+          // Partículas interativas seguem o cursor suavemente (muito leve)
+          const dx = mouseRef.current.x - particle.x
+          const dy = mouseRef.current.y - particle.y
+          const distance = Math.sqrt(dx * dx + dy * dy)
+          
+          // Apenas se estiver dentro de um raio maior (mais suave)
+          if (distance < 400) {
+            // Força de atração muito reduzida para movimento mais lento
+            const attraction = 0.003 * (1 - distance / 400)
+            particle.vx += dx * attraction
+            particle.vy += dy * attraction
+          }
+        }
+        
         // Movimento orgânico com seno/cosseno
         particle.x += particle.vx + Math.sin(time * 0.001 + particle.x * 0.01) * 0.2
         particle.y += particle.vy + Math.cos(time * 0.001 + particle.y * 0.01) * 0.2
+
+        // Suavizar velocidade (friction mais forte para movimento mais lento)
+        particle.vx *= 0.95
+        particle.vy *= 0.95
 
         // Wrap around
         if (particle.x < 0) particle.x = window.innerWidth
@@ -234,6 +280,19 @@ export const AnimatedBackground = () => {
       )
       ctx.fillStyle = centerGradient
       ctx.fillRect(0, 0, window.innerWidth, window.innerHeight)
+
+      // Gradiente muito sutil no cursor (efeito bem leve)
+      if (mouseRef.current.isActive) {
+        const cursorGradient = createGradient(
+          mouseRef.current.x,
+          mouseRef.current.y,
+          200,
+          'rgba(255, 255, 255, 0.008)',
+          'rgba(255, 255, 255, 0)'
+        )
+        ctx.fillStyle = cursorGradient
+        ctx.fillRect(0, 0, window.innerWidth, window.innerHeight)
+      }
     }
 
     // Função para desenhar linhas de conexão sutis
@@ -258,14 +317,50 @@ export const AnimatedBackground = () => {
           }
         }
       }
+
+      // Linhas muito sutis do cursor para partículas próximas (efeito bem leve)
+      if (mouseRef.current.isActive) {
+        const mouseX = mouseRef.current.x
+        const mouseY = mouseRef.current.y
+        let connectionCount = 0
+        
+        particles.forEach((particle, index) => {
+          if (interactiveParticleIndices.includes(index)) {
+            const dx = mouseX - particle.x
+            const dy = mouseY - particle.y
+            const distance = Math.sqrt(dx * dx + dy * dy)
+            
+            // Raio maior e opacidade muito reduzida
+            if (distance < 250) {
+              const opacity = (1 - distance / 250) * 0.03
+              ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`
+              ctx.lineWidth = 0.3
+              ctx.beginPath()
+              ctx.moveTo(mouseX, mouseY)
+              ctx.lineTo(particle.x, particle.y)
+              ctx.stroke()
+              
+              connectionCount++
+            }
+          }
+        })
+        
+        // Som sutil quando há conexões (limitado para não ser excessivo)
+        if (connectionCount > 0 && Math.random() < 0.02) {
+          soundEffects.particle()
+        }
+      }
     }
 
     // Loop de animação suave
     const animate = (currentTime: number) => {
       timeRef.current = currentTime
 
-      // Limpar canvas com fade suave
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
+      // Limpar canvas completamente
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight)
+      
+      // Preencher com preto sólido
+      ctx.fillStyle = '#000000'
       ctx.fillRect(0, 0, window.innerWidth, window.innerHeight)
 
       // Desenhar elementos
@@ -380,6 +475,8 @@ export const AnimatedBackground = () => {
 
     return () => {
       window.removeEventListener('resize', resizeCanvas)
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseleave', handleMouseLeave)
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
       }
@@ -390,7 +487,7 @@ export const AnimatedBackground = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-full h-full"
+      className="fixed inset-0 w-full h-full pointer-events-none"
       style={{ zIndex: 0 }}
     />
   )

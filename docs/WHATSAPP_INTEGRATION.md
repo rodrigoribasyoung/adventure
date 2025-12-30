@@ -93,3 +93,4 @@ docs/
 - **Plano gratuito:** A solução funciona 100% no plano Spark (gratuito) do Firebase.
 
 
+

@@ -156,3 +156,4 @@ Após completar os 7 passos acima, a integração estará 100% funcional!
 - Ver [WHATSAPP_INTEGRATION.md](WHATSAPP_INTEGRATION.md) para visão geral
 
 
+

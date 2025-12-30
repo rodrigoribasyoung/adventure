@@ -1,4 +1,5 @@
 import { ButtonHTMLAttributes, ReactNode } from 'react'
+import { soundEffects } from '@/lib/utils/soundEffects'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary-red' | 'primary-blue' | 'combined' | 'secondary' | 'ghost'
@@ -12,8 +13,23 @@ export const Button = ({
   children,
   className = '',
   disabled,
+  onClick,
+  onMouseEnter,
   ...props
 }: ButtonProps) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!disabled) {
+      soundEffects.click()
+    }
+    onClick?.(e)
+  }
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!disabled) {
+      soundEffects.hover()
+    }
+    onMouseEnter?.(e)
+  }
   const baseStyles = 'font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
   
   const variants = {
@@ -34,6 +50,8 @@ export const Button = ({
     <button
       className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
       disabled={disabled}
+      onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
       {...props}
     >
       {children}

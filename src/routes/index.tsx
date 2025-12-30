@@ -1,7 +1,6 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { createBrowserRouter, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import WelcomePage from '@/features/auth/pages/WelcomePage'
-import LoginPage from '@/features/auth/pages/LoginPage'
 import HomePage from '@/features/home/pages/HomePage'
 import DashboardPage from '@/features/dashboard/pages/DashboardPage'
 import ContactsPage from '@/features/contacts/pages/ContactsPage'
@@ -23,33 +22,40 @@ import ProjectsPage from '@/features/projects/pages/ProjectsPage'
 import ProjectMembersPage from '@/features/projectMembers/pages/ProjectMembersPage'
 import { ReactNode } from 'react'
 
-// Componente para proteger rotas privadas
-const PrivateRoute = ({ children }: { children: ReactNode }) => {
+// Wrapper para usar useLocation dentro do PrivateRoute
+const PrivateRouteWrapper = ({ children }: { children: ReactNode }) => {
+  const location = useLocation()
   const { currentUser, loading } = useAuth()
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background-dark">
-        <div className="text-white">Carregando...</div>
+        <div className="text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>LOADING...</div>
       </div>
     )
   }
 
   if (!currentUser) {
-    return <Navigate to="/welcome" replace />
+    // Salvar a rota de destino para redirecionar após login
+    const destination = location.pathname + location.search
+    if (destination !== '/login') {
+      sessionStorage.setItem('loginRedirect', destination)
+    }
+    return <Navigate to="/login" replace />
   }
 
   return <>{children}</>
 }
 
+// Componente para proteger rotas privadas
+const PrivateRoute = ({ children }: { children: ReactNode }) => {
+  return <PrivateRouteWrapper>{children}</PrivateRouteWrapper>
+}
+
 export const router = createBrowserRouter([
   {
-    path: '/welcome',
-    element: <WelcomePage />,
-  },
-  {
     path: '/login',
-    element: <LoginPage />,
+    element: <WelcomePage />,
   },
   {
     path: '/',
@@ -215,7 +221,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: <Navigate to="/welcome" replace />,
+    element: <Navigate to="/login" replace />,
   },
 ])
 
