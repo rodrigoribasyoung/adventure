@@ -1,14 +1,23 @@
 import { useState, useRef, useEffect } from 'react'
 import { useProject } from '@/contexts/ProjectContext'
 import { useProjects } from '@/hooks/useProjects'
+import { useAccount } from '@/contexts/AccountContext'
 import { Project } from '@/types'
 import { FiFolder, FiSettings } from 'react-icons/fi'
 
 export const ProjectSelector = () => {
-  const { currentProject, setCurrentProject, isMaster } = useProject()
-  const { projects, loading } = useProjects()
+  const { currentProject, setCurrentProject, isMaster, loading: projectContextLoading } = useProject()
+  const { currentAccount } = useAccount()
+  const { projects: allProjects, loading: projectsLoading } = useProjects()
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+
+  // Filtrar projetos pela conta atual (igual ao ProjectContext)
+  const projects = currentAccount 
+    ? allProjects.filter(p => p.accountId === currentAccount.id)
+    : allProjects
+
+  const loading = projectsLoading || projectContextLoading
 
   // Fechar menu ao clicar fora
   useEffect(() => {
@@ -30,6 +39,21 @@ export const ProjectSelector = () => {
   const handleSelectProject = (project: Project) => {
     setCurrentProject(project)
     setIsOpen(false)
+  }
+
+  // Se for master e não houver conta selecionada, mostrar mensagem
+  if (isMaster && !currentAccount) {
+    return (
+      <div className="relative" ref={menuRef}>
+        <button
+          onClick={() => window.location.href = '/accounts'}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 transition-all text-sm font-medium"
+        >
+          <FiFolder className="w-4 h-4" />
+          <span className="hidden sm:block">Selecione uma Conta</span>
+        </button>
+      </div>
+    )
   }
 
   if (loading) {
