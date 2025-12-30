@@ -3,371 +3,282 @@ import { useEffect, useRef } from 'react'
 interface Particle {
   x: number
   y: number
-  z: number
+  vx: number
+  vy: number
   size: number
-  speed: number
+  opacity: number
+  life: number
+  maxLife: number
 }
 
-interface FloatingLogo {
-  x: number
-  y: number
-  z: number
-  size: number
-  rotation: number
-  opacity: number
+interface OrbitalRing {
+  radius: number
+  angle: number
   speed: number
+  opacity: number
+  color: string
 }
 
-interface FloatingPlane {
+interface Wave {
   x: number
   y: number
-  z: number
-  rotationX: number
-  rotationY: number
-  rotationZ: number
+  radius: number
+  maxRadius: number
   opacity: number
-  type: 'code' | 'chart'
-  content: string[]
-  chartData?: number[]
+  speed: number
 }
 
 export const AnimatedBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationFrameRef = useRef<number>()
-  const logoImageRef = useRef<HTMLImageElement | null>(null)
-
-  // Cores
-  const RED = '#DA0028'
-  const BLUE = '#042AA1'
-  const BLACK = '#000000'
+  const timeRef = useRef(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { alpha: true })
     if (!ctx) return
-
-    // Carregar imagem do logo
-    const logoImage = new Image()
-    logoImage.src = '/assets/brand/logo/adventure-white-1.png'
-    logoImageRef.current = logoImage
 
     // Configuração do canvas
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
+      const dpr = window.devicePixelRatio || 1
+      canvas.width = window.innerWidth * dpr
+      canvas.height = window.innerHeight * dpr
+      ctx.scale(dpr, dpr)
+      canvas.style.width = `${window.innerWidth}px`
+      canvas.style.height = `${window.innerHeight}px`
     }
     resizeCanvas()
     window.addEventListener('resize', resizeCanvas)
 
-    // Configuração 3D
-    const FOV = 1000
-    let centerX = canvas.width / 2
-    let centerY = canvas.height / 2
-    let cameraZ = 0
-    const gridSpacing = 100
+    const centerX = () => window.innerWidth / 2
+    const centerY = () => window.innerHeight / 2
 
-    // Partículas
+    // Partículas orgânicas sutis
     const particles: Particle[] = []
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 80; i++) {
       particles.push({
-        x: (Math.random() - 0.5) * 2000,
-        y: (Math.random() - 0.5) * 2000,
-        z: Math.random() * 2000,
-        size: Math.random() * 2 + 1,
-        speed: Math.random() * 2 + 1,
-      })
-    }
-
-    // Logos flutuantes
-    const floatingLogos: FloatingLogo[] = []
-    for (let i = 0; i < 8; i++) {
-      floatingLogos.push({
-        x: (Math.random() - 0.5) * 3000,
-        y: (Math.random() - 0.5) * 3000,
-        z: Math.random() * 2000 + 500,
-        size: Math.random() * 40 + 20,
-        rotation: Math.random() * Math.PI * 2,
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        size: Math.random() * 1.5 + 0.5,
         opacity: Math.random() * 0.3 + 0.1,
-        speed: Math.random() * 0.5 + 0.2,
+        life: Math.random(),
+        maxLife: 1,
       })
     }
 
-    // Planos flutuantes com código/gráficos
-    const floatingPlanes: FloatingPlane[] = []
-    const codeSnippets = [
-      ['const data = {', '  users: 1250,', '  revenue: "$2.5M"', '}'],
-      ['function analyze() {', '  return metrics', '}'],
-      ['<Component>', '  <Data />', '</Component>'],
-      ['export const API = {', '  endpoint: "/data"', '}'],
-    ]
-
+    // Anéis orbitais suaves
+    const orbitalRings: OrbitalRing[] = []
     for (let i = 0; i < 6; i++) {
-      const isChart = Math.random() > 0.5
-      const chartData = isChart
-        ? Array.from({ length: 8 }, () => Math.random())
-        : undefined
-
-      floatingPlanes.push({
-        x: (Math.random() - 0.5) * 4000,
-        y: (Math.random() - 0.5) * 4000,
-        z: Math.random() * 3000 + 1000,
-        rotationX: Math.random() * Math.PI * 2,
-        rotationY: Math.random() * Math.PI * 2,
-        rotationZ: Math.random() * Math.PI * 2,
-        opacity: 0.2,
-        type: isChart ? 'chart' : 'code',
-        content: codeSnippets[Math.floor(Math.random() * codeSnippets.length)],
-        chartData,
+      orbitalRings.push({
+        radius: 100 + i * 80,
+        angle: Math.random() * Math.PI * 2,
+        speed: (Math.random() - 0.5) * 0.002,
+        opacity: 0.08 - i * 0.01,
+        color: i % 2 === 0 ? '#DA0028' : '#042AA1',
       })
     }
 
-    // Função para projetar ponto 3D para 2D
-    const project = (x: number, y: number, z: number) => {
-      const scale = FOV / (FOV + z + cameraZ)
-      return {
-        x: centerX + x * scale,
-        y: centerY + y * scale,
-        scale,
-      }
+    // Ondas suaves
+    const waves: Wave[] = []
+    for (let i = 0; i < 3; i++) {
+      waves.push({
+        x: centerX() + (Math.random() - 0.5) * 200,
+        y: centerY() + (Math.random() - 0.5) * 200,
+        radius: Math.random() * 50,
+        maxRadius: 200 + Math.random() * 300,
+        opacity: 0.15,
+        speed: 0.3 + Math.random() * 0.2,
+      })
     }
 
-    // Atualizar centro quando redimensionar
-    const updateCenter = () => {
-      centerX = canvas.width / 2
-      centerY = canvas.height / 2
+    // Gradientes suaves
+    const createGradient = (x: number, y: number, radius: number, color1: string, color2: string) => {
+      const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius)
+      gradient.addColorStop(0, color1)
+      gradient.addColorStop(1, color2)
+      return gradient
     }
 
-    // Função para desenhar grid
-    const drawGrid = () => {
-      const gridLines = 20
-      const halfGrid = (gridLines * gridSpacing) / 2
-
-      for (let i = -gridLines; i <= gridLines; i++) {
-        const color = i % 2 === 0 ? RED : BLUE
-        const alpha = Math.max(0, 1 - (Math.abs(i) / gridLines) * 0.5)
-
-        // Linhas horizontais
-        const z1 = -halfGrid
-        const z2 = halfGrid
-        const y = i * gridSpacing
-
-        const p1 = project(-halfGrid, y, z1)
-        const p2 = project(halfGrid, y, z1)
-        const p3 = project(-halfGrid, y, z2)
-        const p4 = project(halfGrid, y, z2)
-
-        ctx.strokeStyle = color
-        ctx.globalAlpha = alpha * 0.6
-        ctx.lineWidth = 1
-
-        ctx.beginPath()
-        ctx.moveTo(p1.x, p1.y)
-        ctx.lineTo(p2.x, p2.y)
-        ctx.stroke()
-
-        ctx.beginPath()
-        ctx.moveTo(p3.x, p3.y)
-        ctx.lineTo(p4.x, p4.y)
-        ctx.stroke()
-
-        // Linhas verticais
-        const x = i * gridSpacing
-        const p5 = project(x, -halfGrid, z1)
-        const p6 = project(x, halfGrid, z1)
-        const p7 = project(x, -halfGrid, z2)
-        const p8 = project(x, halfGrid, z2)
-
-        ctx.beginPath()
-        ctx.moveTo(p5.x, p5.y)
-        ctx.lineTo(p6.x, p6.y)
-        ctx.stroke()
-
-        ctx.beginPath()
-        ctx.moveTo(p7.x, p7.y)
-        ctx.lineTo(p8.x, p8.y)
-        ctx.stroke()
-      }
-
-      // Linhas de profundidade (perspectiva)
-      for (let i = -gridLines; i <= gridLines; i++) {
-        const color = i % 2 === 0 ? RED : BLUE
-        const x = i * gridSpacing
-        const y1 = -halfGrid
-        const y2 = halfGrid
-
-        const p1 = project(x, y1, -halfGrid)
-        const p2 = project(x, y2, -halfGrid)
-        const p3 = project(x, y1, halfGrid)
-        const p4 = project(x, y2, halfGrid)
-
-        ctx.strokeStyle = color
-        ctx.globalAlpha = 0.3
-        ctx.lineWidth = 1
-
-        ctx.beginPath()
-        ctx.moveTo(p1.x, p1.y)
-        ctx.lineTo(p3.x, p3.y)
-        ctx.stroke()
-
-        ctx.beginPath()
-        ctx.moveTo(p2.x, p2.y)
-        ctx.lineTo(p4.x, p4.y)
-        ctx.stroke()
-      }
-    }
-
-    // Função para desenhar partículas
-    const drawParticles = () => {
+    // Função para desenhar partículas orgânicas
+    const drawParticles = (time: number) => {
       particles.forEach((particle) => {
-        particle.z -= particle.speed
+        // Movimento orgânico com seno/cosseno
+        particle.x += particle.vx + Math.sin(time * 0.001 + particle.x * 0.01) * 0.2
+        particle.y += particle.vy + Math.cos(time * 0.001 + particle.y * 0.01) * 0.2
 
-        if (particle.z < 0) {
-          particle.z = 2000
-          particle.x = (Math.random() - 0.5) * 2000
-          particle.y = (Math.random() - 0.5) * 2000
-        }
+        // Wrap around
+        if (particle.x < 0) particle.x = window.innerWidth
+        if (particle.x > window.innerWidth) particle.x = 0
+        if (particle.y < 0) particle.y = window.innerHeight
+        if (particle.y > window.innerHeight) particle.y = 0
 
-        const proj = project(particle.x, particle.y, particle.z)
-        const alpha = Math.max(0, 1 - particle.z / 2000)
+        // Opacidade pulsante suave
+        const pulse = (Math.sin(time * 0.002 + particle.x * 0.01) + 1) * 0.5
+        const alpha = particle.opacity * (0.5 + pulse * 0.5)
 
-        ctx.fillStyle = '#FFFFFF'
-        ctx.globalAlpha = alpha * 0.8
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`
         ctx.beginPath()
-        ctx.arc(proj.x, proj.y, particle.size * proj.scale, 0, Math.PI * 2)
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
         ctx.fill()
       })
     }
 
-    // Função para desenhar logos flutuantes
-    const drawFloatingLogos = () => {
-      if (!logoImageRef.current || !logoImage.complete) return
+    // Função para desenhar anéis orbitais
+    const drawOrbitalRings = (time: number) => {
+      orbitalRings.forEach((ring, i) => {
+        ring.angle += ring.speed
 
-      floatingLogos.forEach((logo) => {
-        logo.z -= logo.speed
-        logo.rotation += 0.01
+        const cx = centerX()
+        const cy = centerY()
+        const radius = ring.radius + Math.sin(time * 0.0005 + i) * 10
 
-        if (logo.z < 0) {
-          logo.z = 2000
-          logo.x = (Math.random() - 0.5) * 3000
-          logo.y = (Math.random() - 0.5) * 3000
+        // Gradiente suave no anel
+        const gradient = ctx.createLinearGradient(
+          cx - radius,
+          cy - radius,
+          cx + radius,
+          cy + radius
+        )
+        gradient.addColorStop(0, `${ring.color}00`)
+        gradient.addColorStop(0.5, `${ring.color}${Math.floor(ring.opacity * 255).toString(16).padStart(2, '0')}`)
+        gradient.addColorStop(1, `${ring.color}00`)
+
+        ctx.strokeStyle = gradient
+        ctx.lineWidth = 1
+        ctx.globalAlpha = ring.opacity
+        ctx.beginPath()
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+        ctx.stroke()
+
+        // Pontos brilhantes no anel
+        const pointAngle = ring.angle
+        const pointX = cx + Math.cos(pointAngle) * radius
+        const pointY = cy + Math.sin(pointAngle) * radius
+        const pointGradient = createGradient(pointX, pointY, 15, ring.color, `${ring.color}00`)
+        ctx.fillStyle = pointGradient
+        ctx.beginPath()
+        ctx.arc(pointX, pointY, 3, 0, Math.PI * 2)
+        ctx.fill()
+      })
+      ctx.globalAlpha = 1
+    }
+
+    // Função para desenhar ondas suaves
+    const drawWaves = () => {
+      waves.forEach((wave) => {
+        wave.radius += wave.speed
+        wave.opacity = Math.max(0, wave.opacity - 0.002)
+
+        if (wave.radius > wave.maxRadius || wave.opacity <= 0) {
+          wave.x = centerX() + (Math.random() - 0.5) * 200
+          wave.y = centerY() + (Math.random() - 0.5) * 200
+          wave.radius = Math.random() * 50
+          wave.opacity = 0.15
         }
 
-        const proj = project(logo.x, logo.y, logo.z)
-        const alpha = Math.max(0, Math.min(logo.opacity, 1 - logo.z / 2000))
+        const gradient = createGradient(
+          wave.x,
+          wave.y,
+          wave.radius,
+          `rgba(218, 0, 40, ${wave.opacity * 0.3})`,
+          `rgba(4, 42, 161, ${wave.opacity * 0.3})`
+        )
 
-        if (alpha > 0.01 && proj.scale > 0) {
-          ctx.save()
-          ctx.globalAlpha = alpha
-          ctx.translate(proj.x, proj.y)
-          ctx.rotate(logo.rotation)
-          ctx.scale(proj.scale, proj.scale)
-
-          const logoSize = logo.size
-          const aspectRatio = logoImage.width / logoImage.height
-          const width = logoSize
-          const height = logoSize / aspectRatio
-
-          ctx.drawImage(
-            logoImage,
-            -width / 2,
-            -height / 2,
-            width,
-            height
-          )
-
-          ctx.restore()
-        }
+        ctx.strokeStyle = gradient
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.arc(wave.x, wave.y, wave.radius, 0, Math.PI * 2)
+        ctx.stroke()
       })
     }
 
-    // Função para desenhar planos flutuantes
-    const drawFloatingPlanes = () => {
-      floatingPlanes.forEach((plane) => {
-        plane.z -= 0.5
-        plane.rotationX += 0.002
-        plane.rotationY += 0.003
+    // Função para desenhar gradientes de fundo suaves
+    const drawBackgroundGradients = (time: number) => {
+      const cx = centerX()
+      const cy = centerY()
 
-        if (plane.z < 500) {
-          plane.z = 3000
-          plane.x = (Math.random() - 0.5) * 4000
-          plane.y = (Math.random() - 0.5) * 4000
-        }
+      // Gradiente vermelho suave
+      const redGradient = createGradient(
+        cx - 300,
+        cy - 200,
+        400,
+        'rgba(218, 0, 40, 0.15)',
+        'rgba(218, 0, 40, 0)'
+      )
+      ctx.fillStyle = redGradient
+      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight)
 
-        const proj = project(plane.x, plane.y, plane.z)
-        const alpha = Math.max(0, Math.min(plane.opacity, 1 - plane.z / 3000))
+      // Gradiente azul suave
+      const blueGradient = createGradient(
+        cx + 300,
+        cy + 200,
+        400,
+        'rgba(4, 42, 161, 0.15)',
+        'rgba(4, 42, 161, 0)'
+      )
+      ctx.fillStyle = blueGradient
+      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight)
 
-        if (alpha > 0.01 && proj.scale > 0) {
-          ctx.save()
-          ctx.globalAlpha = alpha
-          ctx.translate(proj.x, proj.y)
-          ctx.rotate(plane.rotationZ)
+      // Gradiente central pulsante
+      const pulse = (Math.sin(time * 0.001) + 1) * 0.5
+      const centerGradient = createGradient(
+        cx,
+        cy,
+        300 + pulse * 100,
+        'rgba(255, 255, 255, 0.03)',
+        'rgba(255, 255, 255, 0)'
+      )
+      ctx.fillStyle = centerGradient
+      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight)
+    }
 
-          const planeWidth = 200 * proj.scale
-          const planeHeight = 150 * proj.scale
+    // Função para desenhar linhas de conexão sutis
+    const drawConnectionLines = () => {
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)'
+      ctx.lineWidth = 0.5
 
-          // Desenhar plano
-          ctx.fillStyle = '#FFFFFF'
-          ctx.fillRect(-planeWidth / 2, -planeHeight / 2, planeWidth, planeHeight)
+      // Conectar partículas próximas
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x
+          const dy = particles[i].y - particles[j].y
+          const distance = Math.sqrt(dx * dx + dy * dy)
 
-          // Desenhar conteúdo
-          if (plane.type === 'code') {
-            ctx.fillStyle = '#000000'
-            ctx.font = `${12 * proj.scale}px monospace`
-            plane.content.forEach((line, i) => {
-              ctx.fillText(
-                line,
-                -planeWidth / 2 + 10 * proj.scale,
-                -planeHeight / 2 + (i + 1) * 20 * proj.scale
-              )
-            })
-          } else {
-            // Gráfico fictício
-            if (plane.chartData) {
-              ctx.strokeStyle = '#000000'
-              ctx.lineWidth = 2 * proj.scale
-              ctx.beginPath()
-              const points = plane.chartData.length
-              for (let i = 0; i < points; i++) {
-                const x = (-planeWidth / 2) + (i / (points - 1)) * planeWidth
-                const y = (-planeHeight / 2) + (1 - plane.chartData[i]) * planeHeight * 0.8
-                if (i === 0) ctx.moveTo(x, y)
-                else ctx.lineTo(x, y)
-              }
-              ctx.stroke()
-            }
+          if (distance < 120) {
+            const opacity = (1 - distance / 120) * 0.1
+            ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`
+            ctx.beginPath()
+            ctx.moveTo(particles[i].x, particles[i].y)
+            ctx.lineTo(particles[j].x, particles[j].y)
+            ctx.stroke()
           }
-
-          ctx.restore()
         }
-      })
+      }
     }
 
-    // Loop de animação
-    const animate = () => {
-      updateCenter()
-      ctx.fillStyle = BLACK
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+    // Loop de animação suave
+    const animate = (currentTime: number) => {
+      timeRef.current = currentTime
 
-      cameraZ += 2
+      // Limpar canvas com fade suave
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
+      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight)
 
-      drawGrid()
-      drawParticles()
-      drawFloatingLogos()
-      drawFloatingPlanes()
+      // Desenhar elementos
+      drawBackgroundGradients(currentTime)
+      drawOrbitalRings(currentTime)
+      drawWaves()
+      drawConnectionLines()
+      drawParticles(currentTime)
 
       animationFrameRef.current = requestAnimationFrame(animate)
     }
 
-    // Aguardar logo carregar antes de iniciar animação
-    if (logoImage.complete) {
-      animate()
-    } else {
-      logoImage.onload = () => {
-        animate()
-      }
-    }
+    animate(0)
 
     // Áudio de tecnologia - ambiente suave
     const createAudio = () => {
@@ -382,80 +293,63 @@ export const AnimatedBackground = () => {
           isPlaying = true
           const now = audioContext.currentTime
 
-          // Criar múltiplos osciladores para um som mais rico
+          // Som ambiente mais suave e moderno
           const osc1 = audioContext.createOscillator()
           const osc2 = audioContext.createOscillator()
           const gain = audioContext.createGain()
           const filter = audioContext.createBiquadFilter()
-          const compressor = audioContext.createDynamicsCompressor()
 
-          // Oscilador principal (baixa frequência)
           osc1.type = 'sine'
-          osc1.frequency.setValueAtTime(60 + Math.random() * 20, now)
+          osc1.frequency.setValueAtTime(80 + Math.random() * 10, now)
 
-          // Oscilador secundário (harmônico)
           osc2.type = 'triangle'
-          osc2.frequency.setValueAtTime(120 + Math.random() * 40, now)
+          osc2.frequency.setValueAtTime(160 + Math.random() * 20, now)
 
-          // Filtro passa-baixa para suavizar
           filter.type = 'lowpass'
-          filter.frequency.setValueAtTime(400 + Math.random() * 200, now)
-          filter.Q.setValueAtTime(0.5, now)
+          filter.frequency.setValueAtTime(300 + Math.random() * 100, now)
+          filter.Q.setValueAtTime(0.3, now)
 
-          // Compressor para suavizar picos
-          compressor.threshold.setValueAtTime(-24, now)
-          compressor.knee.setValueAtTime(30, now)
-          compressor.ratio.setValueAtTime(12, now)
-          compressor.attack.setValueAtTime(0.003, now)
-          compressor.release.setValueAtTime(0.25, now)
-
-          // Volume muito baixo para ambiente
           gain.gain.setValueAtTime(0, now)
-          gain.gain.linearRampToValueAtTime(0.015, now + 0.3)
-          gain.gain.linearRampToValueAtTime(0.015, now + 2)
-          gain.gain.linearRampToValueAtTime(0, now + 2.3)
+          gain.gain.linearRampToValueAtTime(0.008, now + 0.5)
+          gain.gain.linearRampToValueAtTime(0.008, now + 3)
+          gain.gain.linearRampToValueAtTime(0, now + 3.5)
 
           osc1.connect(filter)
           osc2.connect(filter)
-          filter.connect(compressor)
-          compressor.connect(gain)
+          filter.connect(gain)
           gain.connect(audioContext.destination)
 
           osc1.start(now)
           osc2.start(now)
-          osc1.stop(now + 2.3)
-          osc2.stop(now + 2.3)
+          osc1.stop(now + 3.5)
+          osc2.stop(now + 3.5)
 
           setTimeout(() => {
             isPlaying = false
-          }, 2300)
+          }, 3500)
         } catch (error) {
           isPlaying = false
         }
       }
 
-      // Inicializar áudio apenas após interação do usuário
       const initAudio = async () => {
         try {
           audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-          
-          // Reproduzir som inicial após um pequeno delay
+
           setTimeout(() => {
             playSound()
-          }, 1000)
+          }, 2000)
 
-          // Repetir a cada 5-7 segundos
           intervalId = window.setInterval(() => {
             if (!document.hidden) {
               playSound()
             }
-          }, 5000 + Math.random() * 2000)
+          }, 6000 + Math.random() * 3000)
         } catch (error) {
           console.log('Áudio não disponível:', error)
         }
       }
 
-      // Inicializar após primeira interação
       const handleInteraction = () => {
         if (!audioContext) {
           initAudio()
@@ -501,4 +395,3 @@ export const AnimatedBackground = () => {
     />
   )
 }
-
