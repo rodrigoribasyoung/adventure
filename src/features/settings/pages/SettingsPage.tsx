@@ -1,7 +1,8 @@
 import { Container } from '@/components/layout/Container'
 import { Card } from '@/components/ui/Card'
 import { Link } from 'react-router-dom'
-import { FiTarget, FiEdit3, FiUsers, FiSettings, FiLink, FiDownload, FiFolder, FiFileText, FiFile, FiUser, FiClock } from 'react-icons/fi'
+import { FiTarget, FiEdit3, FiUsers, FiSettings, FiLink, FiDownload, FiFolder, FiFileText, FiFile, FiUser, FiClock, FiDatabase } from 'react-icons/fi'
+import { usePermissions } from '@/hooks/usePermissions'
 
 interface SettingsItem {
   id: string
@@ -12,6 +13,8 @@ interface SettingsItem {
 }
 
 const SettingsPage = () => {
+  const { isMaster } = usePermissions()
+  
   const settingsItems: SettingsItem[] = [
     { id: 'funnels', label: 'Funis', icon: FiTarget, path: '/settings/funnels', description: 'Gerencie seus funis e estágios de vendas' },
     { id: 'customFields', label: 'Campos Personalizados', icon: FiEdit3, path: '/settings/custom-fields', description: 'Crie campos personalizados para contatos, empresas e negociações' },
@@ -24,6 +27,7 @@ const SettingsPage = () => {
     { id: 'proposals', label: 'Propostas', icon: FiFile, path: '/proposals', description: 'Gerencie propostas comerciais' },
     { id: 'projectMembers', label: 'Responsáveis', icon: FiUser, path: '/project-members', description: 'Gerencie os responsáveis e colaboradores do projeto' },
     { id: 'activityHistory', label: 'Histórico de Ações', icon: FiClock, path: '/settings/activity-history', description: 'Visualize o histórico de todas as ações realizadas no sistema' },
+    ...(isMaster ? [{ id: 'tenants', label: 'Tenants', icon: FiDatabase, path: '/settings/tenants', description: 'Gerencie contas de clientes, projetos e permissões' }] : []),
   ]
 
   return (

@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/lib/firebase/auth'
-import { signInWithGoogle, signOut } from '@/lib/firebase/auth'
+import { signInWithGoogle, signInWithEmail, signUpWithEmail, signOut } from '@/lib/firebase/auth'
 import { getDocument, createDocument } from '@/lib/firebase/db'
 import { seedDatabase } from '@/lib/firebase/seed'
 import { User } from '@/types'
@@ -11,6 +11,8 @@ interface AuthContextType {
   userData: User | null
   loading: boolean
   signIn: () => Promise<void>
+  signInWithEmail: (email: string, password: string) => Promise<void>
+  signUpWithEmail: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -92,6 +94,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }
 
+  const handleSignInWithEmail = async (email: string, password: string) => {
+    try {
+      await signInWithEmail(email, password)
+      // O estado será atualizado pelo onAuthStateChanged
+    } catch (error) {
+      console.error('Erro ao fazer login com email:', error)
+      throw error
+    }
+  }
+
+  const handleSignUpWithEmail = async (email: string, password: string) => {
+    try {
+      await signUpWithEmail(email, password)
+      // O estado será atualizado pelo onAuthStateChanged
+    } catch (error) {
+      console.error('Erro ao criar conta:', error)
+      throw error
+    }
+  }
+
   const handleSignOut = async () => {
     try {
       await signOut()
@@ -107,6 +129,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     userData,
     loading,
     signIn: handleSignIn,
+    signInWithEmail: handleSignInWithEmail,
+    signUpWithEmail: handleSignUpWithEmail,
     signOut: handleSignOut,
   }
 

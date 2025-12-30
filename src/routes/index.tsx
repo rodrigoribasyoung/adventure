@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import WelcomePage from '@/features/auth/pages/WelcomePage'
+import CRMPage from '@/features/home/pages/CRMPage'
 import HomePage from '@/features/home/pages/HomePage'
 import DashboardPage from '@/features/dashboard/pages/DashboardPage'
 import ContactsPage from '@/features/contacts/pages/ContactsPage'
@@ -22,6 +23,7 @@ import TasksPage from '@/features/tasks/pages/TasksPage'
 import ProjectsPage from '@/features/projects/pages/ProjectsPage'
 import ProjectMembersPage from '@/features/projectMembers/pages/ProjectMembersPage'
 import ProposalsPage from '@/features/proposals/pages/ProposalsPage'
+import TenantsPage from '@/features/tenants/pages/TenantsPage'
 import { ReactNode } from 'react'
 
 // Wrapper para usar useLocation dentro do PrivateRoute
@@ -55,6 +57,10 @@ const PrivateRoute = ({ children }: { children: ReactNode }) => {
 }
 
 export const router = createBrowserRouter([
+  {
+    path: '/crm',
+    element: <CRMPage />,
+  },
   {
     path: '/login',
     element: <WelcomePage />,
@@ -224,6 +230,14 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute>
         <ActivityHistoryPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/settings/tenants',
+    element: (
+      <PrivateRoute>
+        <TenantsPage />
       </PrivateRoute>
     ),
   },
