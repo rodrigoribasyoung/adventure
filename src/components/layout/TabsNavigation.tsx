@@ -34,6 +34,8 @@ export const TabsNavigation = () => {
       <div className="flex items-center gap-1 px-4">
         {tabs.map((tab) => {
           const active = isActive(tab.path)
+          // Marketing inativo usa 30% de transparência
+          const isMarketingInactive = tab.path === '/marketing' && !active
           return (
             <Link
               key={tab.path}
@@ -44,11 +46,23 @@ export const TabsNavigation = () => {
                 ${
                   active
                     ? 'text-white border-b-2 border-primary-red bg-white/5'
+                    : isMarketingInactive
+                    ? 'text-white/30 hover:text-white/50 hover:bg-white/5'
                     : 'text-white/70 hover:text-white hover:bg-white/5'
                 }
               `}
             >
-              <Icon name={tab.icon} size={18} className={active ? 'text-white' : 'text-white/70'} />
+              <Icon 
+                name={tab.icon} 
+                size={18} 
+                className={
+                  active 
+                    ? 'text-white' 
+                    : isMarketingInactive 
+                    ? 'text-white/30' 
+                    : 'text-white/70'
+                } 
+              />
               <span>{tab.label}</span>
             </Link>
           )

@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import { soundEffects } from '@/lib/utils/soundEffects'
 
 interface Particle {
   x: number
@@ -345,10 +344,6 @@ export const AnimatedBackground = () => {
           }
         })
         
-        // Som sutil quando há conexões (limitado para não ser excessivo)
-        if (connectionCount > 0 && Math.random() < 0.02) {
-          soundEffects.particle()
-        }
       }
     }
 
@@ -375,104 +370,6 @@ export const AnimatedBackground = () => {
 
     animate(0)
 
-    // Áudio de tecnologia - ambiente suave
-    const createAudio = () => {
-      let audioContext: AudioContext | null = null
-      let intervalId: number | null = null
-      let isPlaying = false
-
-      const playSound = () => {
-        if (!audioContext || document.hidden || isPlaying) return
-
-        try {
-          isPlaying = true
-          const now = audioContext.currentTime
-
-          // Som ambiente mais suave e moderno
-          const osc1 = audioContext.createOscillator()
-          const osc2 = audioContext.createOscillator()
-          const gain = audioContext.createGain()
-          const filter = audioContext.createBiquadFilter()
-
-          osc1.type = 'sine'
-          osc1.frequency.setValueAtTime(80 + Math.random() * 10, now)
-
-          osc2.type = 'triangle'
-          osc2.frequency.setValueAtTime(160 + Math.random() * 20, now)
-
-          filter.type = 'lowpass'
-          filter.frequency.setValueAtTime(300 + Math.random() * 100, now)
-          filter.Q.setValueAtTime(0.3, now)
-
-          gain.gain.setValueAtTime(0, now)
-          gain.gain.linearRampToValueAtTime(0.008, now + 0.5)
-          gain.gain.linearRampToValueAtTime(0.008, now + 3)
-          gain.gain.linearRampToValueAtTime(0, now + 3.5)
-
-          osc1.connect(filter)
-          osc2.connect(filter)
-          filter.connect(gain)
-          gain.connect(audioContext.destination)
-
-          osc1.start(now)
-          osc2.start(now)
-          osc1.stop(now + 3.5)
-          osc2.stop(now + 3.5)
-
-          setTimeout(() => {
-            isPlaying = false
-          }, 3500)
-        } catch (error) {
-          isPlaying = false
-        }
-      }
-
-      const initAudio = async () => {
-        try {
-          audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-
-          setTimeout(() => {
-            playSound()
-          }, 2000)
-
-          intervalId = window.setInterval(() => {
-            if (!document.hidden) {
-              playSound()
-            }
-          }, 6000 + Math.random() * 3000)
-        } catch (error) {
-          console.log('Áudio não disponível:', error)
-        }
-      }
-
-      const handleInteraction = () => {
-        if (!audioContext) {
-          initAudio()
-          document.removeEventListener('click', handleInteraction)
-          document.removeEventListener('touchstart', handleInteraction)
-          document.removeEventListener('keydown', handleInteraction)
-        }
-      }
-
-      document.addEventListener('click', handleInteraction, { once: true })
-      document.addEventListener('touchstart', handleInteraction, { once: true })
-      document.addEventListener('keydown', handleInteraction, { once: true })
-
-      return () => {
-        if (intervalId) {
-          clearInterval(intervalId)
-        }
-        if (audioContext) {
-          audioContext.close()
-        }
-        document.removeEventListener('click', handleInteraction)
-        document.removeEventListener('touchstart', handleInteraction)
-        document.removeEventListener('keydown', handleInteraction)
-      }
-    }
-
-    const audioCleanup = createAudio()
-
     return () => {
       window.removeEventListener('resize', resizeCanvas)
       window.removeEventListener('mousemove', handleMouseMove)
@@ -480,7 +377,6 @@ export const AnimatedBackground = () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
       }
-      audioCleanup()
     }
   }, [])
 

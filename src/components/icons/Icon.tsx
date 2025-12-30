@@ -2,7 +2,7 @@ import { IconType } from 'react-icons'
 import { 
   FiHome, 
   FiBriefcase, 
-  FiSettings, 
+  FiFileText, 
   FiLayers, 
   FiUsers, 
   FiCheckSquare, 
@@ -22,7 +22,7 @@ import {
 export const Icons = {
   home: FiHome,
   deals: FiBriefcase,
-  services: FiSettings,
+  services: FiFileText,
   companies: FiLayers,
   contacts: FiUsers,
   tasks: FiCheckSquare,

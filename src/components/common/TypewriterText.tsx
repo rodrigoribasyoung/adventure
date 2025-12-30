@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { soundEffects } from '@/lib/utils/soundEffects'
 
 interface TypewriterTextProps {
   text: string
@@ -22,11 +21,6 @@ export const TypewriterText = ({ text, speed = 20, onComplete }: TypewriterTextP
       const timeout = setTimeout(() => {
         setDisplayedText(text.slice(0, currentIndex + 1))
         setCurrentIndex(currentIndex + 1)
-        
-        // Som sutil a cada caractere (apenas alguns para não ser excessivo)
-        if (currentIndex % 3 === 0) {
-          soundEffects.particle()
-        }
       }, speed)
 
       return () => clearTimeout(timeout)
