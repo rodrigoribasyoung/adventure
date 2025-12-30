@@ -17,7 +17,6 @@ import { Deal } from '@/types'
 import { Toast } from '@/components/ui/Toast'
 import { Button } from '@/components/ui/Button'
 import { filterDeals } from '../utils/filterDeals'
-import { Timestamp } from 'firebase/firestore'
 
 type ViewMode = 'kanban' | 'list'
 

@@ -1,5 +1,4 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Icon } from '@/components/icons/Icon'
 
 interface TabItem {
   label: string
