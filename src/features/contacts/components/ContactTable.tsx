@@ -10,9 +10,10 @@ interface ContactTableProps {
   onDelete: (id: string) => void
   onCreateNew?: () => void
   canDelete?: boolean
+  companies?: Array<{ id: string; name: string }>
 }
 
-export const ContactTable = ({ contacts, loading, onEdit, onDelete, canDelete = true }: ContactTableProps) => {
+export const ContactTable = ({ contacts, loading, onEdit, onDelete, canDelete = true, companies = [] }: ContactTableProps) => {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(25)
 
@@ -55,53 +56,62 @@ export const ContactTable = ({ contacts, loading, onEdit, onDelete, canDelete = 
                     <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
                       Telefone
                     </th>
+                    <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
+                      Empresa
+                    </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
                       Ações
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/10">
-                  {paginatedContacts.map((contact) => (
-                  <tr
-                    key={contact.id}
-                    className="hover:bg-white/5 transition-colors cursor-pointer"
-                    onClick={() => onEdit(contact)}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-white">{contact.name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-white/70">{contact.email || '-'}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-white/70">{contact.phone || '-'}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onEdit(contact)}
-                        >
-                          Editar
-                        </Button>
-                        {canDelete && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              if (confirm('Tem certeza que deseja excluir este contato?')) {
-                                onDelete(contact.id)
-                              }
-                            }}
-                          >
-                            Excluir
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                  {paginatedContacts.map((contact) => {
+                    const company = contact.companyId ? companies.find(c => c.id === contact.companyId) : null
+                    return (
+                      <tr
+                        key={contact.id}
+                        className="hover:bg-white/5 transition-colors cursor-pointer"
+                        onClick={() => onEdit(contact)}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-white">{contact.name}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-white/70">{contact.email || '-'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-white/70">{contact.phone || '-'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-white/70">{company?.name || '-'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => onEdit(contact)}
+                            >
+                              Editar
+                            </Button>
+                            {canDelete && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  if (confirm('Tem certeza que deseja excluir este contato?')) {
+                                    onDelete(contact.id)
+                                  }
+                                }}
+                              >
+                                Excluir
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>

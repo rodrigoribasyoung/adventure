@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/Card'
 import { formatCurrency } from '@/lib/utils/formatCurrency'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { FiArrowUp, FiArrowDown, FiPause, FiPlay } from 'react-icons/fi'
 
 interface DealKanbanProps {
   deals: Deal[]
@@ -12,6 +13,10 @@ interface DealKanbanProps {
   onDealClick: (deal: Deal) => void
   onStageChange: (dealId: string, newStage: string) => void
   onOpenTasks?: (deal: Deal) => void
+  onWinDeal?: (dealId: string) => void
+  onLoseDeal?: (dealId: string) => void
+  onPauseDeal?: (dealId: string) => void
+  onResumeDeal?: (dealId: string) => void
   loading?: boolean
   selectedDealIds?: Set<string>
   onToggleSelect?: (dealId: string) => void
@@ -23,7 +28,11 @@ export const DealKanban = ({
   stages, 
   onDealClick, 
   onStageChange, 
-  onOpenTasks, 
+  onOpenTasks,
+  onWinDeal,
+  onLoseDeal,
+  onPauseDeal,
+  onResumeDeal,
   loading,
   selectedDealIds = new Set(),
   onToggleSelect
@@ -80,11 +89,14 @@ export const DealKanban = ({
                   {stageDeals.length}
                 </span>
               </div>
-              {stageTotal > 0 && (
+              <div className="space-y-1">
                 <p className="text-sm text-primary-red font-semibold">
                   {formatCurrency(stageTotal, 'BRL')}
                 </p>
-              )}
+                <p className="text-xs text-white/60">
+                  {stageDeals.length} {stageDeals.length === 1 ? 'negociação' : 'negociações'}
+                </p>
+              </div>
             </div>
 
             <div className="space-y-3 min-h-[200px]">
@@ -157,6 +169,62 @@ export const DealKanban = ({
                       >
                         📄 Ver Contrato
                       </a>
+                    )}
+                    {/* Botões de Ação Rápida */}
+                    {deal.status === 'active' && (
+                      <div className="flex items-center gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
+                        {onWinDeal && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onWinDeal(deal.id)
+                            }}
+                            className="flex-1 px-2 py-1.5 text-xs bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 rounded-lg text-green-400 transition-all flex items-center justify-center gap-1"
+                            title="Marcar como ganho"
+                          >
+                            <FiArrowUp className="w-3 h-3" />
+                            Ganho
+                          </button>
+                        )}
+                        {onLoseDeal && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onLoseDeal(deal.id)
+                            }}
+                            className="flex-1 px-2 py-1.5 text-xs bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded-lg text-red-400 transition-all flex items-center justify-center gap-1"
+                            title="Marcar como perda"
+                          >
+                            <FiArrowDown className="w-3 h-3" />
+                            Perda
+                          </button>
+                        )}
+                        {onPauseDeal && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onPauseDeal(deal.id)
+                            }}
+                            className="px-2 py-1.5 text-xs bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 rounded-lg text-purple-400 transition-all"
+                            title="Pausar negociação"
+                          >
+                            <FiPause className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    {deal.status === 'paused' && onResumeDeal && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onResumeDeal(deal.id)
+                        }}
+                        className="w-full mt-2 px-3 py-1.5 text-xs bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 rounded-lg text-purple-400 transition-all flex items-center justify-center gap-1"
+                        title="Retomar negociação"
+                      >
+                        <FiPlay className="w-3 h-3" />
+                        Retomar
+                      </button>
                     )}
                     {onOpenTasks && (
                       <button

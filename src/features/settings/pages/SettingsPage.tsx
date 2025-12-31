@@ -57,7 +57,7 @@ const SettingsPage = () => {
               <h2 className="text-sm font-medium text-white/50 uppercase tracking-wider mb-3 px-1">
                 {category}
               </h2>
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                 {groupedItems[category].map((item) => {
                   const Icon = item.icon
                   return (

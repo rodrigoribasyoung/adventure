@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Container } from '@/components/layout/Container'
+import { BackButton } from '@/components/common/BackButton'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
@@ -63,6 +64,9 @@ const CustomFieldsPage = () => {
   return (
     <Container>
       <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <BackButton to="/settings" />
+        </div>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Campos Personalizados</h1>

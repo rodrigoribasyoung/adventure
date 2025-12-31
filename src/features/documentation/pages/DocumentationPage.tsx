@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { NonCRMPageLayout } from '@/components/layout/NonCRMPageLayout'
 import { FiFileText, FiUsers, FiBriefcase, FiTarget, FiSettings, FiPackage, FiCheckCircle, FiTrendingDown, FiList, FiFile, FiClock, FiHome, FiGrid, FiBox, FiUsers as FiTeam, FiUser, FiFolder, FiRadio, FiFlag, FiKey, FiCode } from 'react-icons/fi'
 
 interface DocumentationSection {
@@ -282,7 +283,7 @@ const DocumentationPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative" style={{ background: 'linear-gradient(135deg, #0a1628 0%, #1a2f4a 30%, #0f1b2e 70%, #051018 100%)' }}>
+    <NonCRMPageLayout>
       {/* Simplified Header */}
       <header className="h-16 bg-black/20 border-b border-white/5 flex items-center justify-between px-8 shadow-lg relative z-20">
         <div className="flex items-center gap-8">
@@ -377,7 +378,7 @@ const DocumentationPage = () => {
           </div>
         </main>
       </div>
-    </div>
+    </NonCRMPageLayout>
   )
 }
 

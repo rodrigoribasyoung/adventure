@@ -185,10 +185,10 @@ export const FeaturesDiagram = () => {
           <ul className="w-full xl:col-span-2 xl:flex items-center justify-center relative">
             <div className="relative w-full flex items-center justify-center">
               {/* Logo com círculo */}
-              <div className="relative" style={{ zIndex: 10 }}>
-                {/* Glow atrás do logo - corrigido */}
+              <div className="relative group cursor-pointer" style={{ zIndex: 10 }}>
+                {/* Glow atrás do logo - com animação de hover */}
                 <div 
-                  className="absolute"
+                  className="absolute transition-all duration-500 ease-out"
                   style={{
                     width: '140px',
                     height: '140px',
@@ -199,10 +199,20 @@ export const FeaturesDiagram = () => {
                     filter: 'blur(25px)',
                     zIndex: -1,
                   }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.width = '160px'
+                    e.currentTarget.style.height = '160px'
+                    e.currentTarget.style.background = 'radial-gradient(circle, rgba(4, 42, 161, 0.7) 0%, rgba(4, 42, 161, 0.3) 50%, transparent 70%)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.width = '140px'
+                    e.currentTarget.style.height = '140px'
+                    e.currentTarget.style.background = 'radial-gradient(circle, rgba(4, 42, 161, 0.5) 0%, rgba(4, 42, 161, 0.2) 50%, transparent 70%)'
+                  }}
                 />
-                {/* Círculo com gradiente */}
+                {/* Círculo com gradiente - com animação de hover */}
                 <div 
-                  className="relative w-28 h-28 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/10 shadow-lg"
+                  className="relative w-28 h-28 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/10 shadow-lg transition-all duration-500 ease-out group-hover:scale-110 group-hover:border-white/20"
                   style={{
                     background: 'radial-gradient(circle at 30% 30%, rgba(4, 42, 161, 0.6) 0%, rgba(4, 42, 161, 0.3) 50%, rgba(10, 25, 41, 0.95) 100%)',
                     zIndex: 1,
@@ -211,7 +221,7 @@ export const FeaturesDiagram = () => {
                   <img
                     src="/assets/brand/logo/adventure-light-2.png"
                     alt="Adventure Labs"
-                    className="h-16 w-auto object-contain relative"
+                    className="h-16 w-auto object-contain relative transition-transform duration-500 ease-out group-hover:scale-110"
                     style={{ zIndex: 2 }}
                   />
                 </div>

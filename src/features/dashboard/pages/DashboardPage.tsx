@@ -24,6 +24,18 @@ const DashboardPage = () => {
     navigate(`/deals`)
   }
 
+  // Calcular heat levels baseado em valores relativos
+  const calculateHeatLevel = (value: number, maxValue: number): number => {
+    if (maxValue === 0) return 0
+    return Math.min(value / maxValue, 1)
+  }
+
+  // Encontrar valores máximos para normalização
+  const maxDeals = Math.max(stats.totalDeals, stats.activeDeals, stats.wonDeals, stats.lostDeals, 1)
+  const maxValue = Math.max(stats.totalValue, stats.activeValue, stats.wonValue, stats.lostValue, stats.averageDealValue, 1)
+  const maxConversion = Math.max(stats.conversionRate, stats.lossRate, 1)
+  const maxContacts = Math.max(stats.totalContacts, stats.totalCompanies, 1)
+
   if (loading) {
     return (
       <Container>
@@ -58,6 +70,7 @@ const DashboardPage = () => {
             value={stats.totalDeals}
             subtitle={`${stats.activeDeals} ativas`}
             format="number"
+            heatLevel={calculateHeatLevel(stats.totalDeals, maxDeals)}
           />
           
           <MetricCard
@@ -65,6 +78,7 @@ const DashboardPage = () => {
             value={stats.totalValue}
             subtitle={`${stats.activeDeals} negociações ativas`}
             format="currency"
+            heatLevel={calculateHeatLevel(stats.totalValue, maxValue)}
           />
           
           <MetricCard
@@ -72,6 +86,7 @@ const DashboardPage = () => {
             value={stats.conversionRate.toFixed(1)}
             subtitle={`${stats.wonDeals} ganhas / ${stats.wonDeals + stats.lostDeals} fechadas`}
             format="percentage"
+            heatLevel={calculateHeatLevel(stats.conversionRate, 100)}
           />
           
           <MetricCard
@@ -79,6 +94,7 @@ const DashboardPage = () => {
             value={stats.lossRate.toFixed(1)}
             subtitle={`${stats.lostDeals} perdidas`}
             format="percentage"
+            heatLevel={calculateHeatLevel(stats.lossRate, 100)}
           />
         </div>
 
@@ -89,6 +105,7 @@ const DashboardPage = () => {
             value={stats.averageDealValue}
             subtitle="Valor médio por negociação"
             format="currency"
+            heatLevel={calculateHeatLevel(stats.averageDealValue, maxValue)}
           />
 
           {stats.averageTimeToClose !== undefined && (
@@ -96,6 +113,7 @@ const DashboardPage = () => {
               title="Tempo Médio de Fechamento"
               value={`${Math.round(stats.averageTimeToClose)} dias`}
               subtitle="Baseado em negociações fechadas"
+              heatLevel={0.3} // Tempo médio é neutro
             />
           )}
           
@@ -104,6 +122,7 @@ const DashboardPage = () => {
             value={stats.activeDeals}
             subtitle={formatCurrency(stats.activeValue, 'BRL')}
             format="number"
+            heatLevel={calculateHeatLevel(stats.activeDeals, maxDeals)}
           />
           
           <MetricCard
@@ -111,6 +130,7 @@ const DashboardPage = () => {
             value={stats.wonDeals}
             subtitle={formatCurrency(stats.wonValue, 'BRL')}
             format="number"
+            heatLevel={calculateHeatLevel(stats.wonDeals, maxDeals)}
           />
           
           <MetricCard
@@ -118,18 +138,21 @@ const DashboardPage = () => {
             value={stats.lostDeals}
             subtitle={formatCurrency(stats.lostValue, 'BRL')}
             format="number"
+            heatLevel={calculateHeatLevel(stats.lostDeals, maxDeals)}
           />
           
           <MetricCard
             title="Contatos"
             value={stats.totalContacts}
             format="number"
+            heatLevel={calculateHeatLevel(stats.totalContacts, maxContacts)}
           />
           
           <MetricCard
             title="Empresas"
             value={stats.totalCompanies}
             format="number"
+            heatLevel={calculateHeatLevel(stats.totalCompanies, maxContacts)}
           />
         </div>
 

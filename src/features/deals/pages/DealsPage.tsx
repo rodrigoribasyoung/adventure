@@ -36,7 +36,7 @@ const initialFilters: DealFiltersType = {
 
 const DealsPage = () => {
   const navigate = useNavigate()
-  const { deals, loading, createDeal, updateDeal, deleteDeal, updateDealStage, closeDeal } = useDeals()
+  const { deals, loading, createDeal, updateDeal, deleteDeal, updateDealStage, closeDeal, pauseDeal, reopenDeal } = useDeals()
   const { canDeleteDealsAndCompanies } = usePermissions()
   const { activeFunnel } = useFunnels()
   const { contacts } = useContacts()
@@ -199,6 +199,76 @@ const DealsPage = () => {
     }
   }
 
+  const handleWinDeal = async (dealId: string) => {
+    try {
+      const deal = deals.find(d => d.id === dealId)
+      if (!deal) return
+      
+      const stage = activeFunnel?.stages.find(s => s.isWonStage)
+      if (stage) {
+        await updateDealStage(dealId, stage.id)
+      }
+      await closeDeal(dealId, 'won')
+      setToast({ 
+        message: 'Negociação marcada como ganha!', 
+        type: 'success', 
+        visible: true 
+      })
+    } catch (error: any) {
+      console.error('[DealsPage] Erro ao marcar como ganho:', error)
+      setToast({ message: 'Erro ao marcar como ganho', type: 'error', visible: true })
+    }
+  }
+
+  const handleLoseDeal = async (dealId: string) => {
+    try {
+      const deal = deals.find(d => d.id === dealId)
+      if (!deal) return
+      
+      const stage = activeFunnel?.stages.find(s => s.isLostStage)
+      if (stage) {
+        await updateDealStage(dealId, stage.id)
+      }
+      await closeDeal(dealId, 'lost')
+      setToast({ 
+        message: 'Negociação marcada como perdida!', 
+        type: 'success', 
+        visible: true 
+      })
+    } catch (error: any) {
+      console.error('[DealsPage] Erro ao marcar como perda:', error)
+      setToast({ message: 'Erro ao marcar como perda', type: 'error', visible: true })
+    }
+  }
+
+  const handlePauseDeal = async (dealId: string) => {
+    try {
+      await pauseDeal(dealId)
+      setToast({ 
+        message: 'Negociação pausada!', 
+        type: 'success', 
+        visible: true 
+      })
+    } catch (error: any) {
+      console.error('[DealsPage] Erro ao pausar negociação:', error)
+      setToast({ message: 'Erro ao pausar negociação', type: 'error', visible: true })
+    }
+  }
+
+  const handleResumeDeal = async (dealId: string) => {
+    try {
+      await updateDeal(dealId, { status: 'active' })
+      setToast({ 
+        message: 'Negociação retomada!', 
+        type: 'success', 
+        visible: true 
+      })
+    } catch (error: any) {
+      console.error('[DealsPage] Erro ao retomar negociação:', error)
+      setToast({ message: 'Erro ao retomar negociação', type: 'error', visible: true })
+    }
+  }
+
   const stages = activeFunnel?.stages || []
 
   // Filtrar negociações: se houver filtro de status, usar todas; senão, apenas ativas
@@ -290,6 +360,10 @@ const DealsPage = () => {
                 onDealClick={handleDealClick}
                 onStageChange={handleStageChange}
                 onOpenTasks={handleOpenTasks}
+                onWinDeal={handleWinDeal}
+                onLoseDeal={handleLoseDeal}
+                onPauseDeal={handlePauseDeal}
+                onResumeDeal={handleResumeDeal}
                 loading={loading}
                 selectedDealIds={selectedDealIds}
                 onToggleSelect={handleToggleSelect}

@@ -70,6 +70,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
   const [quickCreateLoading, setQuickCreateLoading] = useState(false)
+  const [quickCreateError, setQuickCreateError] = useState<string | null>(null)
 
   const form = useForm<DealFormData>({
     resolver: zodResolver(dealSchema),
@@ -166,12 +167,29 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
   const handleQuickCreateCompany = async (companyData: any) => {
     try {
       setQuickCreateLoading(true)
-      const companyId = await createCompany(companyData)
-      setValue('companyId', companyId)
-      setIsCompanyModalOpen(false)
-    } catch (error) {
-      console.error('Erro ao criar empresa:', error)
-      throw error
+      setQuickCreateError(null)
+      // Garantir que os dados estão no formato correto
+      const formattedData = {
+        name: companyData.name || '',
+        cnpj: companyData.cnpj || undefined,
+        email: companyData.email || undefined,
+        phone: companyData.phone || undefined,
+        address: companyData.address || undefined,
+        customFields: companyData.customFields || undefined,
+      }
+      const companyId = await createCompany(formattedData)
+      if (companyId) {
+        setValue('companyId', companyId)
+        setIsCompanyModalOpen(false)
+        setQuickCreateError(null)
+      } else {
+        throw new Error('Não foi possível criar a empresa. ID não retornado.')
+      }
+    } catch (error: any) {
+      console.error('[DealForm] Erro ao criar empresa:', error)
+      const errorMessage = error?.message || 'Erro ao criar empresa. Verifique os dados e tente novamente.'
+      setQuickCreateError(errorMessage)
+      // Não fechar o modal em caso de erro para que o usuário possa corrigir
     } finally {
       setQuickCreateLoading(false)
     }
@@ -594,15 +612,28 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
       {/* Modal rápido de criação de empresa */}
       <Modal
         isOpen={isCompanyModalOpen}
-        onClose={() => setIsCompanyModalOpen(false)}
+        onClose={() => {
+          setIsCompanyModalOpen(false)
+          setQuickCreateError(null)
+        }}
         title="Nova Empresa"
         size="md"
       >
-        <CompanyForm
-          onSubmit={handleQuickCreateCompany}
-          onCancel={() => setIsCompanyModalOpen(false)}
-          loading={quickCreateLoading}
-        />
+        <div className="space-y-4">
+          {quickCreateError && (
+            <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
+              <p className="text-sm text-red-400">{quickCreateError}</p>
+            </div>
+          )}
+          <CompanyForm
+            onSubmit={handleQuickCreateCompany}
+            onCancel={() => {
+              setIsCompanyModalOpen(false)
+              setQuickCreateError(null)
+            }}
+            loading={quickCreateLoading}
+          />
+        </div>
       </Modal>
     </form>
   )

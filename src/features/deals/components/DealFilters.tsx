@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card } from '@/components/ui/Card'
+import { FiSearch } from 'react-icons/fi'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { useCompanies } from '@/features/companies/hooks/useCompanies'
@@ -72,13 +73,35 @@ export const DealFilters = ({ filters, onFiltersChange, onReset }: DealFiltersPr
       <div className="space-y-4">
         {/* Busca e Toggle */}
         <div className="flex items-center gap-4">
-          <div className="flex-1">
+          <div className="flex-1 relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60">
+              <FiSearch className="w-4 h-4" />
+            </div>
             <Input
               placeholder="Buscar por título, contato ou empresa..."
               value={filters.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  // Pesquisa já é feita automaticamente, apenas prevenir submit do form se houver
+                  e.preventDefault()
+                }
+              }}
+              className="pl-10"
             />
           </div>
+          <Button
+            variant="primary-red"
+            size="sm"
+            onClick={() => {
+              // A pesquisa já é feita automaticamente via onChange
+              // Este botão serve como feedback visual
+            }}
+            className="flex items-center gap-2"
+          >
+            <FiSearch className="w-4 h-4" />
+            Pesquisar
+          </Button>
           <Button
             variant="ghost"
             size="sm"

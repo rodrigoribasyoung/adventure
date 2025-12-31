@@ -40,18 +40,18 @@ const HomePage = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             <Card 
               variant="elevated" 
-              className="cursor-pointer hover:border-white/20 transition-all group"
+              className="cursor-pointer hover:border-primary-red/50 hover:bg-white/5 transition-all duration-300 group"
               onClick={() => navigate('/deals')}
             >
               <div className="text-center p-4">
-                <div className="mb-3 group-hover:scale-105 transition-transform flex justify-center">
-                  <FiBriefcase className="w-8 h-8 text-white/60" />
+                <div className="mb-3 group-hover:scale-110 transition-transform duration-300 flex justify-center">
+                  <FiBriefcase className="w-8 h-8 text-white/60 group-hover:text-primary-red transition-colors duration-300" />
                 </div>
-                <h3 className="text-base text-white/90 mb-2">Negócios</h3>
-                <p className="text-white/60 text-xs mb-4">
+                <h3 className="text-base text-white/90 mb-2 group-hover:text-white transition-colors duration-300">Negócios</h3>
+                <p className="text-white/60 text-xs mb-4 group-hover:text-white/70 transition-colors duration-300">
                   Gerencie seu pipeline de vendas e acompanhe suas negociações
                 </p>
-                <Button variant="secondary" size="sm" className="w-full">
+                <Button variant="secondary" size="sm" className="w-full group-hover:bg-primary-red/20 group-hover:border-primary-red/50 group-hover:text-primary-red transition-all duration-300">
                   Acessar Negócios
                 </Button>
               </div>
@@ -59,18 +59,18 @@ const HomePage = () => {
 
             <Card 
               variant="elevated" 
-              className="cursor-pointer hover:border-white/20 transition-all group"
+              className="cursor-pointer hover:border-primary-blue/50 hover:bg-white/5 transition-all duration-300 group"
               onClick={() => navigate('/contacts')}
             >
               <div className="text-center p-4">
-                <div className="mb-3 group-hover:scale-105 transition-transform flex justify-center">
-                  <FiUsers className="w-8 h-8 text-white/60" />
+                <div className="mb-3 group-hover:scale-110 transition-transform duration-300 flex justify-center">
+                  <FiUsers className="w-8 h-8 text-white/60 group-hover:text-primary-blue transition-colors duration-300" />
                 </div>
-                <h3 className="text-base text-white/90 mb-2">Contatos</h3>
-                <p className="text-white/60 text-xs mb-4">
+                <h3 className="text-base text-white/90 mb-2 group-hover:text-white transition-colors duration-300">Contatos</h3>
+                <p className="text-white/60 text-xs mb-4 group-hover:text-white/70 transition-colors duration-300">
                   Organize e mantenha seus contatos sempre atualizados
                 </p>
-                <Button variant="secondary" size="sm" className="w-full">
+                <Button variant="secondary" size="sm" className="w-full group-hover:bg-primary-blue/20 group-hover:border-primary-blue/50 group-hover:text-primary-blue transition-all duration-300">
                   Acessar Contatos
                 </Button>
               </div>
@@ -78,18 +78,18 @@ const HomePage = () => {
 
             <Card 
               variant="elevated" 
-              className="cursor-pointer hover:border-white/20 transition-all group"
+              className="cursor-pointer hover:border-primary-red/50 hover:bg-white/5 transition-all duration-300 group"
               onClick={() => navigate('/reports')}
             >
               <div className="text-center p-4">
-                <div className="mb-3 group-hover:scale-105 transition-transform flex justify-center">
-                  <FiBarChart2 className="w-8 h-8 text-white/60" />
+                <div className="mb-3 group-hover:scale-110 transition-transform duration-300 flex justify-center">
+                  <FiBarChart2 className="w-8 h-8 text-white/60 group-hover:text-primary-red transition-colors duration-300" />
                 </div>
-                <h3 className="text-base text-white/90 mb-2">Relatórios</h3>
-                <p className="text-white/60 text-xs mb-4">
+                <h3 className="text-base text-white/90 mb-2 group-hover:text-white transition-colors duration-300">Relatórios</h3>
+                <p className="text-white/60 text-xs mb-4 group-hover:text-white/70 transition-colors duration-300">
                   Analise métricas e acompanhe o desempenho do seu negócio
                 </p>
-                <Button variant="secondary" size="sm" className="w-full">
+                <Button variant="secondary" size="sm" className="w-full group-hover:bg-primary-red/20 group-hover:border-primary-red/50 group-hover:text-primary-red transition-all duration-300">
                   Acessar Relatórios
                 </Button>
               </div>

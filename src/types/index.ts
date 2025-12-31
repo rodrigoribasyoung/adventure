@@ -123,7 +123,7 @@ export interface Deal extends BaseEntity {
 // Task (Tarefa/Atividade)
 export interface Task extends BaseEntity {
   projectId: string // Projeto ao qual pertence
-  dealId: string
+  dealId?: string // Opcional - tarefa pode estar vinculada a uma negociação ou não
   title: string
   description?: string
   type: string

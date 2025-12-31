@@ -30,19 +30,68 @@ export interface DashboardStats {
 const getDateRange = (period: PeriodOption, customStartDate?: Date, customEndDate?: Date) => {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const yesterday = new Date(today)
+  yesterday.setDate(today.getDate() - 1)
 
   switch (period) {
     case 'today':
       return { startDate: today, endDate: now }
 
-    case 'week':
-      const weekStart = new Date(today)
-      weekStart.setDate(today.getDate() - today.getDay()) // Domingo da semana
-      return { startDate: weekStart, endDate: now }
+    case 'yesterday':
+      const yesterdayEnd = new Date(yesterday)
+      yesterdayEnd.setHours(23, 59, 59, 999)
+      return { startDate: yesterday, endDate: yesterdayEnd }
 
-    case 'month':
-      const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
-      return { startDate: monthStart, endDate: now }
+    case 'last7d':
+      const last7dStart = new Date(today)
+      last7dStart.setDate(today.getDate() - 7)
+      return { startDate: last7dStart, endDate: now }
+
+    case 'last30d':
+      const last30dStart = new Date(today)
+      last30dStart.setDate(today.getDate() - 30)
+      return { startDate: last30dStart, endDate: now }
+
+    case 'lastQuarter': {
+      const currentQuarter = Math.floor(now.getMonth() / 3)
+      const lastQuarterMonth = currentQuarter === 0 ? 9 : (currentQuarter - 1) * 3
+      const lastQuarterYear = currentQuarter === 0 ? now.getFullYear() - 1 : now.getFullYear()
+      const lastQuarterStart = new Date(lastQuarterYear, lastQuarterMonth, 1)
+      const lastQuarterEnd = new Date(lastQuarterYear, lastQuarterMonth + 3, 0, 23, 59, 59, 999)
+      return { startDate: lastQuarterStart, endDate: lastQuarterEnd }
+    }
+
+    case 'lastSemester': {
+      const currentSemester = Math.floor(now.getMonth() / 6)
+      const lastSemesterMonth = currentSemester === 0 ? 6 : 0
+      const lastSemesterYear = currentSemester === 0 ? now.getFullYear() - 1 : now.getFullYear()
+      const lastSemesterStart = new Date(lastSemesterYear, lastSemesterMonth, 1)
+      const lastSemesterEnd = new Date(lastSemesterYear, lastSemesterMonth + 6, 0, 23, 59, 59, 999)
+      return { startDate: lastSemesterStart, endDate: lastSemesterEnd }
+    }
+
+    case 'lastYear': {
+      const lastYearStart = new Date(now.getFullYear() - 1, 0, 1)
+      const lastYearEnd = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59, 999)
+      return { startDate: lastYearStart, endDate: lastYearEnd }
+    }
+
+    case 'thisQuarter': {
+      const currentQuarter = Math.floor(now.getMonth() / 3)
+      const quarterStart = new Date(now.getFullYear(), currentQuarter * 3, 1)
+      return { startDate: quarterStart, endDate: now }
+    }
+
+    case 'thisSemester': {
+      const currentSemester = Math.floor(now.getMonth() / 6)
+      const semesterStart = new Date(now.getFullYear(), currentSemester * 6, 1)
+      return { startDate: semesterStart, endDate: now }
+    }
+
+    case 'thisYear': {
+      const yearStart = new Date(now.getFullYear(), 0, 1)
+      return { startDate: yearStart, endDate: now }
+    }
 
     case 'custom':
       if (customStartDate && customEndDate) {

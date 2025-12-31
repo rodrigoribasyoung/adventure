@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Container } from '@/components/layout/Container'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { BackButton } from '@/components/common/BackButton'
 import { useDeals } from '../hooks/useDeals'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
@@ -202,13 +203,7 @@ const DealDetailPage = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/deals')}
-              className="text-white/70 hover:text-white"
-            >
-              ← Voltar
-            </Button>
+            <BackButton to="/deals" />
             <div>
               <h1 className="text-3xl font-bold text-white mb-2">{deal.title}</h1>
               <div className="flex items-center gap-4 text-white/70">
@@ -424,6 +419,37 @@ const DealDetailPage = () => {
                   Gerenciar Tarefas
                 </Button>
               </div>
+            </Card>
+
+            {/* Anotações */}
+            <Card>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-white">Anotações</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsEditModalOpen(true)}
+                >
+                  Editar
+                </Button>
+              </div>
+              {deal.notes ? (
+                <div className="p-4 bg-white/5 rounded-lg">
+                  <p className="text-white/90 whitespace-pre-wrap">{deal.notes}</p>
+                </div>
+              ) : (
+                <div className="p-4 bg-white/5 rounded-lg text-center">
+                  <p className="text-white/60 text-sm">Nenhuma anotação registrada</p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mt-2"
+                    onClick={() => setIsEditModalOpen(true)}
+                  >
+                    Adicionar Anotação
+                  </Button>
+                </div>
+              )}
             </Card>
           </div>
 

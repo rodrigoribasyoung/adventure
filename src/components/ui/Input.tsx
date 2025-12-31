@@ -6,7 +6,25 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, className = '', ...props }, ref) => {
+  ({ label, error, className = '', onKeyDown, ...props }, ref) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      // Prevenir navegação do browser quando Backspace é pressionado em campo de texto vazio
+      if (e.key === 'Backspace') {
+        const target = e.target as HTMLInputElement
+        // Prevenir navegação apenas se o campo está completamente vazio
+        // Isso permite que o backspace funcione normalmente para apagar texto
+        if (target.value.length === 0) {
+          e.preventDefault()
+          e.stopPropagation()
+          return
+        }
+      }
+      // Chamar handler original se fornecido
+      if (onKeyDown) {
+        onKeyDown(e)
+      }
+    }
+
     return (
       <div className="w-full">
         {label && (
@@ -26,6 +44,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ${error ? 'border-red-500/50 focus:ring-red-500/30' : ''}
             ${className}
           `}
+          onKeyDown={handleKeyDown}
           {...props}
         />
         {error && (

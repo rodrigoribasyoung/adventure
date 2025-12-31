@@ -84,17 +84,20 @@ export const useTasks = (dealId?: string) => {
       if (!currentUser) throw new Error('Usuário não autenticado')
       if (!currentProject) throw new Error('Nenhum projeto selecionado')
       
-      const taskData = {
+      const taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'> = {
         ...data,
         projectId: currentProject.id,
         status: data.status || 'pending',
         createdBy: currentUser.uid,
+        // Garantir que dealId seja incluído apenas se fornecido
+        dealId: data.dealId || undefined,
       }
       const id = await createDocument<Task>('tasks', taskData)
       await fetchTasks()
       return id
     } catch (err) {
       setError('Erro ao criar tarefa')
+      console.error('[useTasks] Erro ao criar tarefa:', err)
       throw err
     }
   }

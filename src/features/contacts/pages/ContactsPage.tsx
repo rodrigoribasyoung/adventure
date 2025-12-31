@@ -144,6 +144,7 @@ const ContactsPage = () => {
           onEdit={handleEdit}
           onDelete={handleDelete}
           onCreateNew={handleCreateNew}
+          companies={companies}
           canDelete={canDeleteDealsAndCompanies}
         />
       </div>

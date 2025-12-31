@@ -15,7 +15,7 @@ const baseTabs: TabItem[] = [
   { label: 'Dashboard', path: '/dashboard' },
   { label: 'Negociações', path: '/deals' },
   { label: 'Tarefas', path: '/tasks' },
-  { label: 'Propostas', path: '/proposals' },
+  // { label: 'Propostas', path: '/proposals' }, // Temporariamente oculto - será reativado posteriormente
   { label: 'Contatos', path: '/contacts' },
   { label: 'Empresas', path: '/companies' },
   { label: 'Relatórios', path: '/reports' },
@@ -24,12 +24,9 @@ const baseTabs: TabItem[] = [
 
 export const Header = () => {
   const location = useLocation()
-  const { isMaster } = useProject()
   
-  // Adicionar "Relatórios de Cliente" apenas para usuários master
-  const tabs = isMaster 
-    ? [...baseTabs, { label: 'Relatórios de Cliente', path: '/client-reports' }]
-    : baseTabs
+  // Relatórios de Cliente foi movido para dentro da página de Relatórios
+  const tabs = baseTabs
 
   // Verificar se a rota atual corresponde a uma aba
   const isActive = (path: string) => {

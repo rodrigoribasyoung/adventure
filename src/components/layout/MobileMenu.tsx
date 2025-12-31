@@ -15,7 +15,7 @@ const baseNavItems: NavItem[] = [
   { label: 'Dashboard', path: '/dashboard', icon: 'reports' },
   { label: 'Negociações', path: '/deals', icon: 'deals' },
   { label: 'Tarefas', path: '/tasks', icon: 'tasks' },
-  { label: 'Propostas', path: '/proposals', icon: 'proposals' },
+  // { label: 'Propostas', path: '/proposals', icon: 'proposals' }, // Temporariamente oculto - será reativado posteriormente
   { label: 'Contatos', path: '/contacts', icon: 'contacts' },
   { label: 'Empresas', path: '/companies', icon: 'companies' },
   { label: 'Relatórios', path: '/reports', icon: 'reports' },
@@ -27,12 +27,9 @@ export const MobileMenu = () => {
   const [isOpen, setIsOpen] = useState(false)
   const location = useLocation()
   const menuRef = useRef<HTMLDivElement>(null)
-  const { isMaster } = useProject()
   
-  // Adicionar "Relatórios de Cliente" apenas para usuários master
-  const navItems = isMaster
-    ? [...baseNavItems, { label: 'Relatórios de Cliente', path: '/client-reports', icon: 'reports' as keyof typeof import('@/components/icons/Icon').Icons }]
-    : baseNavItems
+  // Relatórios de Cliente foi movido para dentro da página de Relatórios
+  const navItems = baseNavItems
 
   // Fechar menu ao clicar fora
   useEffect(() => {

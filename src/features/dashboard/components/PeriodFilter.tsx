@@ -1,6 +1,18 @@
 import { Button } from '@/components/ui/Button'
 
-export type PeriodOption = 'today' | 'week' | 'month' | 'custom' | 'all'
+export type PeriodOption = 
+  | 'today' 
+  | 'yesterday' 
+  | 'last7d' 
+  | 'last30d' 
+  | 'lastQuarter' 
+  | 'lastSemester' 
+  | 'lastYear' 
+  | 'thisQuarter' 
+  | 'thisSemester' 
+  | 'thisYear' 
+  | 'custom' 
+  | 'all'
 
 interface PeriodFilterProps {
   selectedPeriod: PeriodOption
@@ -35,49 +47,36 @@ export const PeriodFilter = ({
     }
   }
 
+  const periodOptions = [
+    { value: 'today', label: 'Hoje' },
+    { value: 'yesterday', label: 'Ontem' },
+    { value: 'last7d', label: 'Últimos 7 dias' },
+    { value: 'last30d', label: 'Últimos 30 dias' },
+    { value: 'lastQuarter', label: 'Último trimestre' },
+    { value: 'lastSemester', label: 'Último semestre' },
+    { value: 'lastYear', label: 'Último ano' },
+    { value: 'thisQuarter', label: 'Este trimestre' },
+    { value: 'thisSemester', label: 'Este semestre' },
+    { value: 'thisYear', label: 'Este ano' },
+    { value: 'custom', label: 'Personalizado' },
+    { value: 'all', label: 'Todos' },
+  ]
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       <span className="text-sm text-white/70">Período:</span>
       
-      <Button
-        variant={selectedPeriod === 'today' ? 'primary-blue' : 'ghost'}
-        size="sm"
-        onClick={() => onPeriodChange('today')}
+      <select
+        value={selectedPeriod}
+        onChange={(e) => onPeriodChange(e.target.value as PeriodOption)}
+        className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
       >
-        Hoje
-      </Button>
-
-      <Button
-        variant={selectedPeriod === 'week' ? 'primary-blue' : 'ghost'}
-        size="sm"
-        onClick={() => onPeriodChange('week')}
-      >
-        Esta Semana
-      </Button>
-
-      <Button
-        variant={selectedPeriod === 'month' ? 'primary-blue' : 'ghost'}
-        size="sm"
-        onClick={() => onPeriodChange('month')}
-      >
-        Este Mês
-      </Button>
-
-      <Button
-        variant={selectedPeriod === 'all' ? 'primary-blue' : 'ghost'}
-        size="sm"
-        onClick={() => onPeriodChange('all')}
-      >
-        Todos
-      </Button>
-
-      <Button
-        variant={selectedPeriod === 'custom' ? 'primary-blue' : 'ghost'}
-        size="sm"
-        onClick={() => onPeriodChange('custom')}
-      >
-        Customizado
-      </Button>
+        {periodOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
 
       {selectedPeriod === 'custom' && onCustomDateRange && (
         <div className="flex items-center gap-2">

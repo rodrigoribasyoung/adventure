@@ -112,8 +112,39 @@ export const DealListView = ({
     )
   }
 
+  // Calcular resumo geral
+  const totalDeals = deals.length
+  const totalValue = deals.reduce((sum, deal) => sum + deal.value, 0)
+  const activeDeals = deals.filter(d => d.status === 'active').length
+  const wonDeals = deals.filter(d => d.status === 'won').length
+  const lostDeals = deals.filter(d => d.status === 'lost').length
+
   return (
     <div className="space-y-4">
+      {/* Resumo Geral */}
+      {totalDeals > 0 && (
+        <Card className="bg-white/5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
+            <div>
+              <p className="text-xs text-white/60 mb-1">Total de Negociações</p>
+              <p className="text-lg font-semibold text-white">{totalDeals}</p>
+            </div>
+            <div>
+              <p className="text-xs text-white/60 mb-1">Valor Total</p>
+              <p className="text-lg font-semibold text-primary-red">{formatCurrency(totalValue, 'BRL')}</p>
+            </div>
+            <div>
+              <p className="text-xs text-white/60 mb-1">Ativas</p>
+              <p className="text-lg font-semibold text-white">{activeDeals}</p>
+            </div>
+            <div>
+              <p className="text-xs text-white/60 mb-1">Ganhas / Perdidas</p>
+              <p className="text-lg font-semibold text-white">{wonDeals} / {lostDeals}</p>
+            </div>
+          </div>
+        </Card>
+      )}
+
       <div className="flex items-center justify-between">
         {onSortChange && (
           <div className="flex items-center gap-4">

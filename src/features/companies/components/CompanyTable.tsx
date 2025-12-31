@@ -58,56 +58,71 @@ export const CompanyTable = ({ companies, loading, onEdit, onDelete, canDelete =
                     <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
                       Telefone
                     </th>
+                    <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
+                      Endereço
+                    </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
                       Ações
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/10">
-                  {paginatedCompanies.map((company) => (
-                  <tr
-                    key={company.id}
-                    className="hover:bg-white/5 transition-colors cursor-pointer"
-                    onClick={() => onEdit(company)}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-white">{company.name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-white/70">{company.cnpj || '-'}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-white/70">{company.email || '-'}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-white/70">{company.phone || '-'}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onEdit(company)}
-                        >
-                          Editar
-                        </Button>
-                        {canDelete && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              if (confirm('Tem certeza que deseja excluir esta empresa?')) {
-                                onDelete(company.id)
-                              }
-                            }}
-                          >
-                            Excluir
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                  {paginatedCompanies.map((company) => {
+                    const address = company.address
+                    const addressString = address 
+                      ? `${address.street || ''}${address.city ? `, ${address.city}` : ''}${address.state ? ` - ${address.state}` : ''}${address.zipCode ? `, ${address.zipCode}` : ''}`.trim()
+                      : '-'
+                    
+                    return (
+                      <tr
+                        key={company.id}
+                        className="hover:bg-white/5 transition-colors cursor-pointer"
+                        onClick={() => onEdit(company)}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-white">{company.name}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-white/70">{company.cnpj || '-'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-white/70">{company.email || '-'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-white/70">{company.phone || '-'}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-white/70 max-w-xs truncate" title={addressString}>
+                            {addressString}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => onEdit(company)}
+                            >
+                              Editar
+                            </Button>
+                            {canDelete && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  if (confirm('Tem certeza que deseja excluir esta empresa?')) {
+                                    onDelete(company.id)
+                                  }
+                                }}
+                              >
+                                Excluir
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>

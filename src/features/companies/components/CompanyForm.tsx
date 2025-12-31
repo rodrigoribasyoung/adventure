@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { useCustomFields } from '@/features/customFields/hooks/useCustomFields'
 import { RenderCustomFields } from '@/components/customFields/RenderCustomFields'
+import { useContacts } from '@/features/contacts/hooks/useContacts'
 
 const companySchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -26,6 +27,10 @@ interface CompanyFormProps {
 
 export const CompanyForm = ({ company, onSubmit, onCancel, loading = false }: CompanyFormProps) => {
   const { customFields } = useCustomFields('company')
+  const { contacts } = useContacts()
+  
+  // Buscar contatos relacionados a esta empresa
+  const relatedContacts = company ? contacts.filter(c => c.companyId === company.id) : []
   const {
     register,
     handleSubmit,
@@ -92,6 +97,22 @@ export const CompanyForm = ({ company, onSubmit, onCancel, loading = false }: Co
         control={control}
         entityCustomFields={company?.customFields}
       />
+
+      {/* Contatos Relacionados */}
+      {company && relatedContacts.length > 0 && (
+        <div className="pt-4 border-t border-white/10">
+          <label className="block text-sm font-medium text-white/90 mb-2">
+            Contatos Relacionados ({relatedContacts.length})
+          </label>
+          <div className="space-y-2 max-h-32 overflow-y-auto bg-white/5 rounded-lg p-3">
+            {relatedContacts.map(contact => (
+              <div key={contact.id} className="text-sm text-white/70">
+                {contact.name} {contact.email && `(${contact.email})`}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="flex justify-end gap-3 pt-4">
         <Button type="button" variant="ghost" onClick={onCancel} disabled={loading}>

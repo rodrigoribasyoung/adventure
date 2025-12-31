@@ -1,4 +1,5 @@
 import { Container } from '@/components/layout/Container'
+import { BackButton } from '@/components/common/BackButton'
 import { CsvImport } from '@/components/imports/CsvImport'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { useCompanies } from '@/features/companies/hooks/useCompanies'
@@ -108,6 +109,9 @@ const ImportsPage = () => {
   return (
     <Container>
       <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <BackButton to="/settings" />
+        </div>
         <div>
           <h1 className="text-xl text-white/90 mb-1">Importar/Exportar Dados</h1>
           <p className="text-white/60 text-sm">Importe e exporte dados de contatos, empresas e negociações via arquivo CSV</p>
