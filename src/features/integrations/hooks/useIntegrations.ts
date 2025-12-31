@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react'
 import { IntegrationConnection, IntegrationProvider } from '../types'
 import { getDocuments, createDocument, updateDocument, deleteDocument, where, orderBy } from '@/lib/firebase/db'
 import { useAuth } from '@/contexts/AuthContext'
+import { useProject } from '@/contexts/ProjectContext'
 
 export const useIntegrations = (provider?: IntegrationProvider) => {
   const [connections, setConnections] = useState<IntegrationConnection[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { currentUser } = useAuth()
+  const { currentProject } = useProject()
 
   const fetchConnections = async () => {
     try {
@@ -17,6 +19,11 @@ export const useIntegrations = (provider?: IntegrationProvider) => {
       if (!currentUser) return
 
       const constraints: any[] = [where('userId', '==', currentUser.uid), orderBy('connectedAt', 'desc')]
+      
+      // Filtrar por projeto se houver um projeto selecionado
+      if (currentProject) {
+        constraints.push(where('projectId', '==', currentProject.id))
+      }
       
       if (provider) {
         constraints.push(where('provider', '==', provider))
@@ -48,15 +55,17 @@ export const useIntegrations = (provider?: IntegrationProvider) => {
     if (currentUser) {
       fetchConnections()
     }
-  }, [currentUser, provider])
+  }, [currentUser, currentProject, provider])
 
   const createConnection = async (data: Omit<IntegrationConnection, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>) => {
     try {
       if (!currentUser) throw new Error('Usuário não autenticado')
+      if (!currentProject) throw new Error('Nenhum projeto selecionado. Selecione um projeto antes de conectar uma integração.')
       
       const connectionData = {
         ...data,
         userId: currentUser.uid,
+        projectId: currentProject.id,
         createdBy: currentUser.uid,
       }
       const id = await createDocument<IntegrationConnection>('integrations', connectionData)

@@ -31,6 +31,11 @@ export const OAuthButton = ({
     try {
       setConnecting(true)
       
+      // Validar se clientId está configurado
+      if (!clientId || clientId.trim() === '') {
+        throw new Error('Client ID não configurado. Verifique as variáveis de ambiente.')
+      }
+      
       const state = generateState()
       sessionStorage.setItem(`oauth_state_${provider}`, state)
       
@@ -45,7 +50,12 @@ export const OAuthButton = ({
       
       if (code) {
         sessionStorage.removeItem(`oauth_state_${provider}`)
-        await onSuccess(code)
+        try {
+          await onSuccess(code)
+        } catch (error: any) {
+          onError?.(error.message || 'Erro ao processar autorização')
+          throw error
+        }
       } else {
         onError?.('Conexão cancelada ou falhou')
       }

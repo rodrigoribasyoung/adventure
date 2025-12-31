@@ -1,5 +1,6 @@
 import { Card } from '@/components/ui/Card'
 import { useGoogleAnalytics } from '../hooks/useGoogleAnalytics'
+import { formatCurrency } from '@/lib/utils/formatCurrency'
 
 interface GoogleAnalyticsDashboardProps {
   propertyId?: string
@@ -79,39 +80,100 @@ export const GoogleAnalyticsDashboard = ({ propertyId }: GoogleAnalyticsDashboar
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <div className="p-4">
-            <p className="text-sm text-white/70 mb-1">Usuários</p>
+            <p className="text-sm text-white/70 mb-1">Usuários Ativos</p>
             <p className="text-2xl font-bold text-white">{metrics.activeUsers.toLocaleString('pt-BR')}</p>
+            {metrics.sessions > 0 && (
+              <p className="text-xs text-white/60 mt-1">
+                {((metrics.activeUsers / metrics.sessions) * 100).toFixed(1)}% de novas sessões
+              </p>
+            )}
           </div>
         </Card>
         <Card>
           <div className="p-4">
             <p className="text-sm text-white/70 mb-1">Sessões</p>
             <p className="text-2xl font-bold text-white">{metrics.sessions.toLocaleString('pt-BR')}</p>
+            {metrics.activeUsers > 0 && (
+              <p className="text-xs text-white/60 mt-1">
+                {((metrics.sessions / metrics.activeUsers)).toFixed(2)} sessões/usuário
+              </p>
+            )}
           </div>
         </Card>
         <Card>
           <div className="p-4">
             <p className="text-sm text-white/70 mb-1">Taxa de Rejeição</p>
             <p className="text-2xl font-bold text-white">{metrics.bounceRate.toFixed(2)}%</p>
+            <p className="text-xs text-white/60 mt-1">
+              {metrics.bounceRate < 50 ? 'Excelente' : metrics.bounceRate < 70 ? 'Bom' : 'Atenção'}
+            </p>
           </div>
         </Card>
         <Card>
           <div className="p-4">
             <p className="text-sm text-white/70 mb-1">Duração Média</p>
             <p className="text-2xl font-bold text-white">{formatDuration(metrics.averageSessionDuration)}</p>
+            {metrics.sessions > 0 && (
+              <p className="text-xs text-white/60 mt-1">
+                {formatDuration(metrics.averageSessionDuration * metrics.sessions)} total
+              </p>
+            )}
           </div>
         </Card>
       </div>
 
-      {/* Conversões */}
-      {metrics.conversions > 0 && (
+      {/* Métricas Secundárias */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <div className="p-4">
-            <p className="text-sm text-white/70 mb-1">Conversões</p>
-            <p className="text-2xl font-bold text-white">{metrics.conversions.toLocaleString('pt-BR')}</p>
+            <p className="text-sm text-white/70 mb-1">Visualizações</p>
+            <p className="text-xl font-bold text-white">{metrics.screenPageViews.toLocaleString('pt-BR')}</p>
+            {metrics.sessions > 0 && (
+              <p className="text-xs text-white/60 mt-1">
+                {(metrics.screenPageViews / metrics.sessions).toFixed(2)} páginas/sessão
+              </p>
+            )}
           </div>
         </Card>
-      )}
+        <Card>
+          <div className="p-4">
+            <p className="text-sm text-white/70 mb-1">Eventos</p>
+            <p className="text-xl font-bold text-white">{metrics.eventCount.toLocaleString('pt-BR')}</p>
+            {metrics.sessions > 0 && (
+              <p className="text-xs text-white/60 mt-1">
+                {(metrics.eventCount / metrics.sessions).toFixed(1)} eventos/sessão
+              </p>
+            )}
+          </div>
+        </Card>
+        {metrics.conversions > 0 && (
+          <>
+            <Card>
+              <div className="p-4">
+                <p className="text-sm text-white/70 mb-1">Conversões</p>
+                <p className="text-xl font-bold text-white">{metrics.conversions.toLocaleString('pt-BR')}</p>
+                {metrics.sessions > 0 && (
+                  <p className="text-xs text-white/60 mt-1">
+                    {((metrics.conversions / metrics.sessions) * 100).toFixed(2)}% taxa de conversão
+                  </p>
+                )}
+              </div>
+            </Card>
+            <Card>
+              <div className="p-4">
+                <p className="text-sm text-white/70 mb-1">Usuários por Conversão</p>
+                <p className="text-xl font-bold text-white">
+                  {metrics.conversions > 0 && metrics.activeUsers > 0
+                    ? (metrics.activeUsers / metrics.conversions).toFixed(1)
+                    : 'N/A'
+                  }
+                </p>
+                <p className="text-xs text-white/60 mt-1">Média de usuários necessários</p>
+              </div>
+            </Card>
+          </>
+        )}
+      </div>
 
       {/* Páginas mais visitadas */}
       {topPages.length > 0 && (

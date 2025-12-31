@@ -93,6 +93,25 @@ export const MetaAdsDashboard = () => {
             <p className="text-2xl font-bold text-primary-red">
               {formatCurrency(metrics.spend, 'BRL')}
             </p>
+            {metrics.conversions && metrics.conversions > 0 && (
+              <p className="text-xs text-white/60 mt-1">
+                {metrics.conversions} conversões • CPL: {formatCurrency(metrics.spend / metrics.conversions, 'BRL')}
+              </p>
+            )}
+          </div>
+        </Card>
+
+        <Card variant="elevated">
+          <div className="p-4">
+            <p className="text-sm text-white/70 mb-1">Alcance</p>
+            <p className="text-2xl font-bold text-white">
+              {metrics.reach?.toLocaleString('pt-BR') || 'N/A'}
+            </p>
+            {metrics.reach && metrics.impressions > 0 && (
+              <p className="text-xs text-white/60 mt-1">
+                Frequência: {(metrics.impressions / metrics.reach).toFixed(2)}x
+              </p>
+            )}
           </div>
         </Card>
 
@@ -102,6 +121,7 @@ export const MetaAdsDashboard = () => {
             <p className="text-2xl font-bold text-white">
               {metrics.impressions.toLocaleString('pt-BR')}
             </p>
+            <p className="text-xs text-white/60 mt-1">CTR: {metrics.ctr.toFixed(2)}%</p>
           </div>
         </Card>
 
@@ -111,35 +131,89 @@ export const MetaAdsDashboard = () => {
             <p className="text-2xl font-bold text-white">
               {metrics.clicks.toLocaleString('pt-BR')}
             </p>
-            <p className="text-xs text-white/60 mt-1">CTR: {metrics.ctr.toFixed(2)}%</p>
+            <p className="text-xs text-white/60 mt-1">CPC: {formatCurrency(metrics.cpc, 'BRL')}</p>
+          </div>
+        </Card>
+      </div>
+
+      {/* Métricas Secundárias */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card variant="elevated">
+          <div className="p-4">
+            <p className="text-sm text-white/70 mb-1">CPM (Custo por 1000)</p>
+            <p className="text-xl font-bold text-white">
+              {formatCurrency(metrics.cpm, 'BRL')}
+            </p>
           </div>
         </Card>
 
         <Card variant="elevated">
           <div className="p-4">
-            <p className="text-sm text-white/70 mb-1">CPC</p>
-            <p className="text-2xl font-bold text-white">
+            <p className="text-sm text-white/70 mb-1">CPC Médio</p>
+            <p className="text-xl font-bold text-white">
               {formatCurrency(metrics.cpc, 'BRL')}
             </p>
-            <p className="text-xs text-white/60 mt-1">CPM: {formatCurrency(metrics.cpm, 'BRL')}</p>
           </div>
         </Card>
+
+        {metrics.conversions && metrics.conversions > 0 && (
+          <Card variant="elevated">
+            <div className="p-4">
+              <p className="text-sm text-white/70 mb-1">Conversões</p>
+              <p className="text-xl font-bold text-white">
+                {metrics.conversions.toLocaleString('pt-BR')}
+              </p>
+              <p className="text-xs text-white/60 mt-1">
+                Taxa: {((metrics.conversions / metrics.clicks) * 100).toFixed(2)}%
+              </p>
+            </div>
+          </Card>
+        )}
       </div>
 
       {/* Campanhas */}
       {campaigns.length > 0 && (
         <Card>
           <div className="p-4">
-            <h3 className="text-lg font-semibold text-white mb-4">Campanhas</h3>
-            <div className="space-y-2">
-              {campaigns.slice(0, 10).map(campaign => (
-                <div key={campaign.id} className="flex items-center justify-between py-2 border-b border-white/10">
-                  <div>
-                    <p className="text-white font-medium">{campaign.name}</p>
-                    <p className="text-sm text-white/70">{campaign.status} • {campaign.objective}</p>
+            <h3 className="text-lg font-semibold text-white mb-4">Campanhas ({campaigns.length})</h3>
+            <div className="space-y-3">
+              {campaigns.slice(0, 10).map(campaign => {
+                const statusColor = campaign.status === 'ACTIVE' 
+                  ? 'text-green-400' 
+                  : campaign.status === 'PAUSED' 
+                  ? 'text-yellow-400' 
+                  : 'text-white/60'
+                
+                return (
+                  <div key={campaign.id} className="p-3 bg-white/5 border border-white/10 rounded-lg">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="text-white font-medium">{campaign.name}</p>
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className={`text-xs ${statusColor}`}>
+                            {campaign.status}
+                          </span>
+                          <span className="text-xs text-white/60">•</span>
+                          <span className="text-xs text-white/60">{campaign.objective}</span>
+                        </div>
+                        {(campaign.daily_budget || campaign.lifetime_budget) && (
+                          <p className="text-xs text-white/50 mt-1">
+                            {campaign.daily_budget 
+                              ? `Orçamento diário: ${formatCurrency(campaign.daily_budget, 'BRL')}`
+                              : `Orçamento total: ${formatCurrency(campaign.lifetime_budget || 0, 'BRL')}`
+                            }
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
+              {campaigns.length > 10 && (
+                <p className="text-sm text-white/60 text-center pt-2">
+                  Mostrando 10 de {campaigns.length} campanhas
+                </p>
+              )}
             </div>
           </div>
         </Card>

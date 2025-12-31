@@ -16,6 +16,7 @@ import SettingsPage from '@/features/settings/pages/SettingsPage'
 import UsersPage from '@/features/users/pages/UsersPage'
 import AutomationsPage from '@/features/automations/pages/AutomationsPage'
 import IntegrationsPage from '@/features/integrations/pages/IntegrationsPage'
+import { OAuthCallbackPage } from '@/features/integrations/pages/OAuthCallbackPage'
 import ImportsPage from '@/features/settings/pages/ImportsPage'
 import ActivityHistoryPage from '@/features/activityHistory/pages/ActivityHistoryPage'
 import MarketingPage from '@/features/marketing/pages/MarketingPage'
@@ -219,6 +220,18 @@ export const router = createBrowserRouter([
         <IntegrationsPage />
       </PrivateRoute>
     ),
+  },
+  {
+    path: '/auth/google-ads/callback',
+    element: <OAuthCallbackPage />,
+  },
+  {
+    path: '/auth/google-analytics/callback',
+    element: <OAuthCallbackPage />,
+  },
+  {
+    path: '/auth/meta-ads/callback',
+    element: <OAuthCallbackPage />,
   },
   {
     path: '/settings/imports',

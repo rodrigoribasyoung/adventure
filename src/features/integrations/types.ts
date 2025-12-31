@@ -13,6 +13,7 @@ export interface IntegrationConnection extends BaseEntity {
   accountName: string
   metadata?: Record<string, any>
   userId: string // ID do usuário que conectou
+  projectId: string // ID do projeto ao qual a integração pertence
 }
 
 export interface IntegrationConfig {

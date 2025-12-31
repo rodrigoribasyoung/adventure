@@ -68,24 +68,36 @@ export const openOAuthPopup = (url: string, width: number = 600, height: number 
       return
     }
 
-    const checkPopup = setInterval(() => {
-      try {
-        if (popup.closed) {
-          clearInterval(checkPopup)
-          resolve(null)
-          return
-        }
+    // Listener para mensagens do popup (postMessage)
+    const messageHandler = (event: MessageEvent) => {
+      // Verificar origem por segurança
+      if (event.origin !== window.location.origin) {
+        return
+      }
 
-        // Verifica se a URL mudou (callback recebido)
-        const currentUrl = popup.location.href
-        if (currentUrl.includes('code=') || currentUrl.includes('access_token=')) {
-          clearInterval(checkPopup)
-          const authCode = extractAuthCode(currentUrl) || extractTokenFromUrl(currentUrl)
+      if (event.data.type === 'oauth_success') {
+        window.removeEventListener('message', messageHandler)
+        if (!popup.closed) {
           popup.close()
-          resolve(authCode)
         }
-      } catch (e) {
-        // Cross-origin, aguardar mensagem do postMessage
+        resolve(event.data.code)
+      } else if (event.data.type === 'oauth_error') {
+        window.removeEventListener('message', messageHandler)
+        if (!popup.closed) {
+          popup.close()
+        }
+        resolve(null)
+      }
+    }
+
+    window.addEventListener('message', messageHandler)
+
+    // Verificar se popup foi fechado manualmente
+    const checkPopup = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(checkPopup)
+        window.removeEventListener('message', messageHandler)
+        resolve(null)
       }
     }, 500)
 
@@ -94,6 +106,7 @@ export const openOAuthPopup = (url: string, width: number = 600, height: number 
       if (!popup.closed) {
         popup.close()
         clearInterval(checkPopup)
+        window.removeEventListener('message', messageHandler)
         resolve(null)
       }
     }, 5 * 60 * 1000)

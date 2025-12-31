@@ -11,7 +11,7 @@ Para o aplicativo funcionar corretamente no Vercel, você PRECISA adicionar as v
 3. Settings → Environment Variables
 4. Adicione as seguintes variáveis:
 
-### Variáveis necessárias:
+### Variáveis necessárias (Firebase):
 
 ```
 VITE_FIREBASE_API_KEY=AIzaSyCT-lXPqlD0ocUQeEaKavoU7JvbqBE9uSo
@@ -21,6 +21,26 @@ VITE_FIREBASE_STORAGE_BUCKET=adv-labs.firebasestorage.app
 VITE_FIREBASE_MESSAGING_SENDER_ID=227032080106
 VITE_FIREBASE_APP_ID=1:227032080106:web:b11927d925a3937fe4c193
 ```
+
+### Variáveis opcionais (Integrações OAuth):
+
+Para usar as integrações de marketing, adicione as seguintes variáveis:
+
+```
+# Google Ads
+VITE_GOOGLE_ADS_CLIENT_ID=seu-client-id-aqui
+VITE_GOOGLE_ADS_CLIENT_SECRET=seu-client-secret-aqui
+
+# Google Analytics
+VITE_GOOGLE_ANALYTICS_CLIENT_ID=seu-client-id-aqui
+VITE_GOOGLE_ANALYTICS_CLIENT_SECRET=seu-client-secret-aqui
+
+# Meta Ads (Facebook Ads)
+VITE_META_ADS_CLIENT_ID=seu-app-id-aqui
+VITE_META_ADS_CLIENT_SECRET=seu-app-secret-aqui
+```
+
+**Nota:** As variáveis de integração são opcionais. Se não estiverem configuradas, a interface mostrará uma mensagem informativa ao tentar conectar.
 
 ### Importante:
 
