@@ -1,11 +1,28 @@
-# Configuração do Google Ads OAuth
+# Integração Google Ads - Adventure CRM
 
-Este guia explica como configurar a integração OAuth do Google Ads no Adventure CRM.
+Este guia explica como usar a integração do Google Ads no Adventure CRM.
 
-## 📋 Pré-requisitos
+## 🎯 Para Usuários Finais (Clientes)
 
-- Conta Google com acesso ao Google Ads
-- Acesso ao Google Cloud Console
+**Não é necessário configurar nada!** A integração funciona de forma simples:
+
+1. Selecione um projeto no sistema
+2. Vá em **Configurações** → **Integrações**
+3. Clique em **Conectar Google Ads**
+4. Autorize o acesso à sua conta Google Ads
+5. Pronto! A integração está conectada e vinculada ao seu projeto
+
+A integração usa as credenciais OAuth do Adventure Labs, então você não precisa criar credenciais próprias.
+
+---
+
+## 🔧 Para Administradores (Configuração Técnica)
+
+Esta seção é apenas para a equipe técnica do Adventure Labs configurar as credenciais OAuth globais.
+
+### 📋 Pré-requisitos
+
+- Acesso ao Google Cloud Console do Adventure Labs
 - Permissões para criar projetos e credenciais OAuth
 
 ## 🚀 Passo a Passo
@@ -41,7 +58,9 @@ Este guia explica como configurar a integração OAuth do Google Ads no Adventur
 4. Clique em **Criar**
 5. **Copie o Client ID e Client Secret** (você precisará deles)
 
-### Passo 4: Configurar Variáveis de Ambiente
+### Passo 4: Configurar Variáveis de Ambiente (Adventure Labs)
+
+**Importante:** Estas credenciais são globais do Adventure Labs e serão usadas por todos os clientes.
 
 #### Desenvolvimento Local
 
@@ -62,6 +81,8 @@ VITE_GOOGLE_ADS_CLIENT_SECRET=seu-client-secret-aqui
 4. Selecione os ambientes (Production, Preview, Development)
 5. Faça um novo deploy para aplicar as variáveis
 
+**Nota:** Uma vez configuradas, todos os clientes poderão conectar suas contas Google Ads sem precisar configurar nada.
+
 ### Passo 5: Configurar Tela de Consentimento OAuth
 
 1. No Google Cloud Console, vá em **APIs e Serviços** → **Tela de consentimento OAuth**
@@ -81,8 +102,11 @@ VITE_GOOGLE_ADS_CLIENT_SECRET=seu-client-secret-aqui
 2. Acesse o sistema e vá em **Configurações** → **Integrações**
 3. Selecione um projeto
 4. Clique em **Conectar Google Ads**
-5. Você será redirecionado para autorizar o acesso
+5. Você será redirecionado para autorizar o acesso à sua conta Google Ads
 6. Após autorizar, você será redirecionado de volta e a integração será conectada
+7. A integração ficará vinculada ao projeto selecionado
+
+**Para clientes:** Não é necessário fazer nada além de autorizar o acesso. Tudo funciona automaticamente!
 
 ## ⚠️ Problemas Comuns
 
@@ -113,6 +137,60 @@ VITE_GOOGLE_ADS_CLIENT_SECRET=seu-client-secret-aqui
 1. Complete a configuração da Tela de Consentimento OAuth
 2. Adicione seu email como usuário de teste (se for Externo)
 3. Aguarde a verificação (pode levar alguns dias para produção)
+
+### Erro: "Missing or insufficient permissions"
+
+**Causa:** Este erro pode ocorrer por várias razões:
+
+1. **Google Ads API não habilitada:**
+   - A API do Google Ads não está habilitada no projeto do Google Cloud Console
+   - A API requer aprovação especial do Google
+
+2. **Escopo não configurado na Tela de Consentimento:**
+   - O escopo `https://www.googleapis.com/auth/adwords` não foi adicionado na tela de consentimento OAuth
+
+3. **API não aprovada:**
+   - A Google Ads API requer aprovação do Google
+   - Você precisa ter uma conta Google Ads ativa e solicitar acesso
+
+4. **Permissões insuficientes na conta:**
+   - A conta Google usada não tem acesso administrativo ao Google Ads
+   - A conta não tem uma conta Google Ads vinculada
+
+**Solução Passo a Passo:**
+
+1. **Verificar se a API está habilitada:**
+   - Acesse: https://console.cloud.google.com/apis/library
+   - Procure por "Google Ads API"
+   - Se não estiver habilitada, clique em "Habilitar"
+   - Se aparecer "Esta API requer aprovação", você precisará solicitar acesso
+
+2. **Solicitar acesso à Google Ads API:**
+   - Acesse: https://developers.google.com/google-ads/api/docs/get-started
+   - Clique em "Get Started" ou "Request Access"
+   - Preencha o formulário com:
+     - Informações da sua conta Google Ads
+     - Justificativa do uso da API
+     - Tipo de aplicativo
+   - Aguarde aprovação (pode levar alguns dias)
+
+3. **Verificar escopos na Tela de Consentimento:**
+   - Acesse: https://console.cloud.google.com/apis/credentials/consent
+   - Edite a tela de consentimento
+   - Em "Escopos", adicione: `https://www.googleapis.com/auth/adwords`
+   - Salve as alterações
+
+4. **Verificar permissões da conta:**
+   - Certifique-se de que a conta Google usada tem:
+     - Acesso administrativo a uma conta Google Ads
+     - Uma conta Google Ads ativa e em bom estado
+
+5. **Testar novamente:**
+   - Após fazer as alterações acima, aguarde alguns minutos
+   - Tente conectar novamente
+   - Se ainda não funcionar, verifique se a API foi aprovada
+
+**Nota Importante:** A Google Ads API é uma API restrita que requer aprovação do Google. O processo de aprovação pode levar de alguns dias a algumas semanas, dependendo do caso de uso.
 
 ## 📚 Recursos Adicionais
 

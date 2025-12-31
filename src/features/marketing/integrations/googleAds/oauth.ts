@@ -10,6 +10,8 @@ export const GOOGLE_ADS_OAUTH_CONFIG = {
   scope: 'https://www.googleapis.com/auth/adwords',
 }
 
+// Função removida - usando apenas credenciais globais do Adventure Labs
+
 /**
  * Gera URL de autorização Google Ads
  */
@@ -32,6 +34,7 @@ export const generateGoogleAdsAuthUrl = (state?: string): string => {
 
 /**
  * Troca código de autorização por access token e refresh token
+ * Usa as credenciais OAuth do Adventure Labs (variáveis de ambiente)
  */
 export const exchangeCodeForToken = async (code: string): Promise<{
   access_token: string
@@ -41,7 +44,7 @@ export const exchangeCodeForToken = async (code: string): Promise<{
 }> => {
   const params = new URLSearchParams({
     client_id: GOOGLE_ADS_OAUTH_CONFIG.clientId,
-    client_secret: import.meta.env.VITE_GOOGLE_ADS_CLIENT_SECRET || '', // Em produção, fazer no backend
+    client_secret: import.meta.env.VITE_GOOGLE_ADS_CLIENT_SECRET || '',
     redirect_uri: GOOGLE_ADS_OAUTH_CONFIG.redirectUri,
     code,
     grant_type: 'authorization_code',
@@ -57,7 +60,18 @@ export const exchangeCodeForToken = async (code: string): Promise<{
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}))
-    throw new Error(error.error_description || 'Erro ao obter token')
+    const errorMessage = error.error_description || error.error || 'Erro ao obter token'
+    
+    // Melhorar mensagens de erro comuns
+    if (error.error === 'invalid_grant' || errorMessage.includes('invalid_grant')) {
+      throw new Error('Código de autorização inválido ou expirado. Tente conectar novamente.')
+    }
+    
+    if (errorMessage.includes('insufficient permissions') || errorMessage.includes('Missing or insufficient')) {
+      throw new Error('Missing or insufficient permissions')
+    }
+    
+    throw new Error(errorMessage)
   }
 
   return response.json()
@@ -73,7 +87,7 @@ export const refreshAccessToken = async (refreshToken: string): Promise<{
 }> => {
   const params = new URLSearchParams({
     client_id: GOOGLE_ADS_OAUTH_CONFIG.clientId,
-    client_secret: import.meta.env.VITE_GOOGLE_ADS_CLIENT_SECRET || '', // Em produção, fazer no backend
+    client_secret: import.meta.env.VITE_GOOGLE_ADS_CLIENT_SECRET || '',
     refresh_token: refreshToken,
     grant_type: 'refresh_token',
   })

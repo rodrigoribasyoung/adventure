@@ -22,25 +22,31 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=227032080106
 VITE_FIREBASE_APP_ID=1:227032080106:web:b11927d925a3937fe4c193
 ```
 
-### Variáveis opcionais (Integrações OAuth):
+### Variáveis opcionais (Integrações OAuth - Adventure Labs):
 
-Para usar as integrações de marketing, adicione as seguintes variáveis:
+**Importante:** Estas são credenciais OAuth globais do Adventure Labs. Uma vez configuradas, todos os clientes poderão conectar suas contas sem precisar configurar nada.
+
+Para habilitar as integrações de marketing, adicione as seguintes variáveis:
 
 ```
-# Google Ads
+# Google Ads (Credenciais OAuth do Adventure Labs)
 VITE_GOOGLE_ADS_CLIENT_ID=seu-client-id-aqui
 VITE_GOOGLE_ADS_CLIENT_SECRET=seu-client-secret-aqui
 
-# Google Analytics
+# Google Analytics (Credenciais OAuth do Adventure Labs)
 VITE_GOOGLE_ANALYTICS_CLIENT_ID=seu-client-id-aqui
 VITE_GOOGLE_ANALYTICS_CLIENT_SECRET=seu-client-secret-aqui
 
-# Meta Ads (Facebook Ads)
+# Meta Ads (Credenciais OAuth do Adventure Labs)
 VITE_META_ADS_CLIENT_ID=seu-app-id-aqui
 VITE_META_ADS_CLIENT_SECRET=seu-app-secret-aqui
 ```
 
-**Nota:** As variáveis de integração são opcionais. Se não estiverem configuradas, a interface mostrará uma mensagem informativa ao tentar conectar.
+**Nota:** 
+- As variáveis de integração são opcionais
+- Se não estiverem configuradas, a interface mostrará uma mensagem informativa
+- Uma vez configuradas, os clientes apenas precisam autorizar o acesso (como em outros SaaS modernos)
+- Cada cliente terá sua própria conexão vinculada ao projeto dele
 
 ### Importante:
 

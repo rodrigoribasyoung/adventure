@@ -106,7 +106,7 @@ export const GoogleAnalyticsConnection = ({ onConnected }: GoogleAnalyticsConnec
     )
   }
 
-  // Verificar se o clientId está configurado
+  // Verificar se as credenciais do Adventure Labs estão configuradas
   if (!GOOGLE_ANALYTICS_OAUTH_CONFIG.clientId || GOOGLE_ANALYTICS_OAUTH_CONFIG.clientId.trim() === '') {
     return (
       <Card>
@@ -119,10 +119,8 @@ export const GoogleAnalyticsConnection = ({ onConnected }: GoogleAnalyticsConnec
             <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-4 mt-4">
               <p className="text-sm text-yellow-200 font-medium mb-2">Configuração necessária</p>
               <p className="text-xs text-yellow-200/80">
-                A variável de ambiente <code className="bg-white/10 px-1 rounded">VITE_GOOGLE_ANALYTICS_CLIENT_ID</code> não está configurada.
-              </p>
-              <p className="text-xs text-yellow-200/80 mt-2">
-                Para conectar o Google Analytics, você precisa criar credenciais OAuth no Google Cloud Console e adicionar a variável no arquivo .env
+                As credenciais OAuth do Adventure Labs não estão configuradas. 
+                Entre em contato com o suporte para configurar a integração.
               </p>
             </div>
           </div>

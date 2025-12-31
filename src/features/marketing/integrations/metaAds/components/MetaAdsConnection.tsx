@@ -93,7 +93,7 @@ export const MetaAdsConnection = ({ onConnected }: MetaAdsConnectionProps) => {
     )
   }
 
-  // Verificar se o clientId está configurado
+  // Verificar se as credenciais do Adventure Labs estão configuradas
   if (!META_ADS_OAUTH_CONFIG.clientId || META_ADS_OAUTH_CONFIG.clientId.trim() === '') {
     return (
       <Card>
@@ -102,10 +102,8 @@ export const MetaAdsConnection = ({ onConnected }: MetaAdsConnectionProps) => {
           <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-4 mt-4">
             <p className="text-sm text-yellow-200 font-medium mb-2">Configuração necessária</p>
             <p className="text-xs text-yellow-200/80">
-              A variável de ambiente <code className="bg-white/10 px-1 rounded">VITE_META_ADS_CLIENT_ID</code> não está configurada.
-            </p>
-            <p className="text-xs text-yellow-200/80 mt-2">
-              Para conectar o Meta Ads, você precisa criar um app no Facebook Developers e adicionar a variável no arquivo .env
+              As credenciais OAuth do Adventure Labs não estão configuradas. 
+              Entre em contato com o suporte para configurar a integração.
             </p>
           </div>
         </div>

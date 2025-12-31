@@ -20,8 +20,11 @@ export const GoogleAdsConnection = ({ onConnected, onError }: GoogleAdsConnectio
 
   const handleConnect = async (code: string) => {
     try {
+      if (!currentProject) {
+        throw new Error('Nenhum projeto selecionado')
+      }
       
-      // Trocar código por token
+      // Trocar código por token usando credenciais do Adventure Labs (variáveis de ambiente)
       const tokenData = await exchangeCodeForToken(code)
       
       // Buscar informações da conta (simplificado - em produção, buscar dados reais)
@@ -29,10 +32,6 @@ export const GoogleAdsConnection = ({ onConnected, onError }: GoogleAdsConnectio
       const accountName = 'Minha Conta Google Ads' // Simplificado
       
       // Criar conexão
-      if (!currentProject) {
-        throw new Error('Nenhum projeto selecionado')
-      }
-
       const connectionData = prepareConnectionForStorage({
         provider: 'google_ads',
         accessToken: tokenData.access_token,
@@ -52,6 +51,18 @@ export const GoogleAdsConnection = ({ onConnected, onError }: GoogleAdsConnectio
       onConnected?.()
     } catch (error: any) {
       console.error('Erro ao conectar Google Ads:', error)
+      
+      // Melhorar mensagem de erro para "Missing or insufficient permissions"
+      if (error.message?.includes('insufficient permissions') || error.message?.includes('Missing or insufficient')) {
+        throw new Error(
+          'Permissões insuficientes. Verifique se:\n' +
+          '1. A Google Ads API está habilitada no Google Cloud Console\n' +
+          '2. O escopo foi adicionado na Tela de Consentimento OAuth\n' +
+          '3. Você tem acesso a uma conta Google Ads ativa\n' +
+          '4. A API foi aprovada pelo Google (pode levar alguns dias)'
+        )
+      }
+      
       throw error
     }
   }
@@ -103,7 +114,7 @@ export const GoogleAdsConnection = ({ onConnected, onError }: GoogleAdsConnectio
     )
   }
 
-  // Verificar se o clientId está configurado
+  // Verificar se as credenciais do Adventure Labs estão configuradas
   if (!GOOGLE_ADS_OAUTH_CONFIG.clientId || GOOGLE_ADS_OAUTH_CONFIG.clientId.trim() === '') {
     return (
       <Card>
@@ -113,17 +124,9 @@ export const GoogleAdsConnection = ({ onConnected, onError }: GoogleAdsConnectio
             <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-4 mt-4">
               <p className="text-sm text-yellow-200 font-medium mb-2">Configuração necessária</p>
               <p className="text-xs text-yellow-200/80">
-                A variável de ambiente <code className="bg-white/10 px-1 rounded">VITE_GOOGLE_ADS_CLIENT_ID</code> não está configurada.
+                As credenciais OAuth do Adventure Labs não estão configuradas. 
+                Entre em contato com o suporte para configurar a integração.
               </p>
-              <p className="text-xs text-yellow-200/80 mt-2">
-                Para conectar o Google Ads, você precisa:
-              </p>
-              <ol className="text-xs text-yellow-200/80 mt-2 list-decimal list-inside space-y-1">
-                <li>Criar um projeto no Google Cloud Console</li>
-                <li>Habilitar a Google Ads API</li>
-                <li>Criar credenciais OAuth 2.0</li>
-                <li>Adicionar a variável <code className="bg-white/10 px-1 rounded">VITE_GOOGLE_ADS_CLIENT_ID</code> no arquivo .env</li>
-              </ol>
             </div>
           </div>
         </div>
