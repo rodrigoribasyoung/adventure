@@ -2,10 +2,12 @@ import { useState, useRef } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Toast } from '@/components/ui/Toast'
-import { useClientReports } from '../hooks/useClientReports'
 import { useProject } from '@/contexts/ProjectContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { parseCsv, processClientReportsCsv } from '../utils/csvParser'
+import { createDocumentsBatch } from '@/lib/firebase/db'
+import { MarketingReport, SalesReport } from '../types'
+import { useClientReports } from '../hooks/useClientReports'
 
 interface CsvImporterProps {
   onImportComplete?: () => void
@@ -14,10 +16,10 @@ interface CsvImporterProps {
 export const CsvImporter = ({ onImportComplete }: CsvImporterProps) => {
   const { currentProject } = useProject()
   const { currentUser } = useAuth()
-  const { createMarketingReportFull, createSalesReportFull } = useClientReports(currentProject?.id)
+  const { refetchAll } = useClientReports(currentProject?.id)
   
   const [loading, setLoading] = useState(false)
-  const [progress, setProgress] = useState<{ current: number; total: number } | null>(null)
+  const [progress, setProgress] = useState<{ current: number; total: number; status: string } | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; visible: boolean }>({
     message: '',
     type: 'success',
@@ -66,30 +68,68 @@ export const CsvImporter = ({ onImportComplete }: CsvImporterProps) => {
       )
 
       const total = marketingReports.length + salesReports.length
-      setProgress({ current: 0, total })
+      setProgress({ current: 0, total, status: 'Preparando dados...' })
 
-      // Criar relatórios de marketing
-      let current = 0
-      for (const report of marketingReports) {
+      // Preparar dados para batch (remover id, createdAt, updatedAt, createdBy já está incluído)
+      const marketingReportsData = marketingReports.map(report => {
+        const { id, createdAt, updatedAt, ...data } = report
+        return data as Omit<MarketingReport, 'id' | 'createdAt' | 'updatedAt'>
+      })
+
+      const salesReportsData = salesReports.map(report => {
+        const { id, createdAt, updatedAt, ...data } = report
+        return data as Omit<SalesReport, 'id' | 'createdAt' | 'updatedAt'>
+      })
+
+      // Criar relatórios de marketing em batch
+      if (marketingReportsData.length > 0) {
+        setProgress({ 
+          current: 0, 
+          total, 
+          status: `Criando ${marketingReportsData.length} relatório(s) de marketing...` 
+        })
+        
         try {
-          await createMarketingReportFull(report)
-          current++
-          setProgress({ current, total })
+          await createDocumentsBatch<MarketingReport>('marketingReports', marketingReportsData)
+          setProgress({ 
+            current: marketingReportsData.length, 
+            total, 
+            status: 'Relatórios de marketing criados!' 
+          })
         } catch (error) {
-          console.error('Erro ao criar relatório de marketing:', error)
+          console.error('Erro ao criar batch de relatórios de marketing:', error)
+          throw new Error('Erro ao criar relatórios de marketing')
         }
       }
 
-      // Criar relatórios de vendas
-      for (const report of salesReports) {
+      // Criar relatórios de vendas em batch
+      if (salesReportsData.length > 0) {
+        setProgress({ 
+          current: marketingReportsData.length, 
+          total, 
+          status: `Criando ${salesReportsData.length} relatório(s) de vendas...` 
+        })
+        
         try {
-          await createSalesReportFull(report)
-          current++
-          setProgress({ current, total })
+          await createDocumentsBatch<SalesReport>('salesReports', salesReportsData)
+          setProgress({ 
+            current: total, 
+            total, 
+            status: 'Todos os relatórios criados!' 
+          })
         } catch (error) {
-          console.error('Erro ao criar relatório de vendas:', error)
+          console.error('Erro ao criar batch de relatórios de vendas:', error)
+          throw new Error('Erro ao criar relatórios de vendas')
         }
       }
+
+      // Recarregar dados após importação
+      setProgress({ 
+        current: total, 
+        total, 
+        status: 'Recarregando dados...' 
+      })
+      await refetchAll()
 
       setToast({
         message: `${marketingReports.length} relatório(s) de marketing e ${salesReports.length} relatório(s) de vendas importado(s) com sucesso!`,
@@ -134,7 +174,7 @@ export const CsvImporter = ({ onImportComplete }: CsvImporterProps) => {
             {progress && (
               <div className="mb-4">
                 <div className="flex items-center justify-between text-sm text-white/70 mb-1">
-                  <span>Processando...</span>
+                  <span>{progress.status || 'Processando...'}</span>
                   <span>{progress.current} / {progress.total}</span>
                 </div>
                 <div className="w-full bg-white/10 rounded-full h-2">

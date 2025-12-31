@@ -351,6 +351,50 @@ service cloud.firestore {
                          hasProjectAccess(resource.data.projectId)));
     }
     
+    // MarketingReports (Relatórios de Marketing)
+    match /marketingReports/{reportId} {
+      allow read: if request.auth != null && 
+                     (isDeveloperOrOwner() || 
+                      (resource.data.projectId != null && hasProjectAccess(resource.data.projectId)));
+      allow create: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (request.resource.data.projectId != null && 
+                         hasProjectAccess(request.resource.data.projectId) &&
+                         request.resource.data.createdBy == request.auth.uid));
+      allow update: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+      allow delete: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+    }
+    
+    // SalesReports (Relatórios de Vendas)
+    match /salesReports/{reportId} {
+      allow read: if request.auth != null && 
+                     (isDeveloperOrOwner() || 
+                      (resource.data.projectId != null && hasProjectAccess(resource.data.projectId)));
+      allow create: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (request.resource.data.projectId != null && 
+                         hasProjectAccess(request.resource.data.projectId) &&
+                         request.resource.data.createdBy == request.auth.uid));
+      allow update: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+      allow delete: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+    }
+    
     // Accounts (Contas - se existir)
     match /accounts/{accountId} {
       allow read: if request.auth != null && 
