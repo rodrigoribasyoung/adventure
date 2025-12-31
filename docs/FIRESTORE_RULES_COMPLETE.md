@@ -2,7 +2,17 @@
 
 ## ⚠️ IMPORTANTE
 
-Essas são as regras completas do Firestore incluindo as novas coleções `accounts` e `projects`. **Você DEVE** configurar essas regras no Firebase Console para o sistema funcionar.
+**ESTE ARQUIVO ESTÁ DESATUALIZADO**
+
+As regras do Firestore foram atualizadas para suportar uma hierarquia de acesso mais robusta. 
+
+**👉 Consulte o arquivo [FIRESTORE_RULES_HIERARCHY.md](./FIRESTORE_RULES_HIERARCHY.md) para a documentação atualizada.**
+
+---
+
+## 📋 Documentação Antiga (Mantida para Referência)
+
+Essas são as regras antigas do Firestore incluindo as novas coleções `accounts` e `projects`. **Você DEVE** usar as novas regras do arquivo `firestore.rules` na raiz do projeto.
 
 ## 📋 Configuração
 

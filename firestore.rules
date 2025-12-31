@@ -1,0 +1,366 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // HELPER FUNCTIONS - Hierarquia de Acesso
+    // ============================================
+    
+    // Função para obter dados do usuário
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    // Verificar se é Desenvolvedor (nível 0 - acesso total)
+    function isDeveloper() {
+      return request.auth != null && 
+             getUserData().userType == 'developer';
+    }
+    
+    // Verificar se é Proprietário (nível 1 - acesso total)
+    function isOwner() {
+      return request.auth != null && 
+             getUserData().userType == 'owner';
+    }
+    
+    // Verificar se é Desenvolvedor ou Proprietário (acesso total)
+    function isDeveloperOrOwner() {
+      return isDeveloper() || isOwner();
+    }
+    
+    // Verificar se tem acesso a um projeto específico
+    // Clientes e Usuários precisam estar vinculados ao projeto via projectUsers
+    function hasProjectAccess(projectId) {
+      // Desenvolvedor e Proprietário têm acesso a todos os projetos
+      return isDeveloperOrOwner() || 
+             // Ou se é dono do projeto
+             (get(/databases/$(database)/documents/projects/$(projectId)).data.ownerId == request.auth.uid) ||
+             // Ou se existe projectUser vinculado (usando ID composto userId_projectId)
+             (exists(/databases/$(database)/documents/projectUsers/$(request.auth.uid + '_' + projectId)) &&
+              get(/databases/$(database)/documents/projectUsers/$(request.auth.uid + '_' + projectId)).data.userId == request.auth.uid &&
+              get(/databases/$(database)/documents/projectUsers/$(request.auth.uid + '_' + projectId)).data.projectId == projectId);
+    }
+    
+    // Verificar se é dono de um projeto
+    function isProjectOwner(projectId) {
+      let project = get(/databases/$(database)/documents/projects/$(projectId));
+      return project.data.ownerId == request.auth.uid || isDeveloperOrOwner();
+    }
+    
+    // ============================================
+    // REGRAS POR COLEÇÃO
+    // ============================================
+    
+    // Users (Usuários)
+    match /users/{userId} {
+      // Leitura: Todos autenticados podem ler
+      allow read: if request.auth != null;
+      
+      // Criação: Apenas Desenvolvedor ou Proprietário podem criar
+      allow create: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        request.resource.data.createdBy == request.auth.uid);
+      
+      // Atualização: Usuário pode atualizar seu próprio perfil, Desenvolvedor/Proprietário podem atualizar qualquer um
+      allow update: if request.auth != null && 
+                       (request.auth.uid == userId || 
+                        isDeveloperOrOwner());
+      
+      // Exclusão: Apenas Desenvolvedor pode excluir
+      allow delete: if isDeveloper();
+    }
+    
+    // Projects (Projetos)
+    match /projects/{projectId} {
+      // Leitura: Desenvolvedor/Proprietário veem todos, Cliente/Usuário veem apenas os que têm acesso
+      allow read: if request.auth != null && 
+                     (isDeveloperOrOwner() || 
+                      hasProjectAccess(projectId));
+      
+      // Criação: Apenas Desenvolvedor ou Proprietário podem criar
+      allow create: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        request.resource.data.ownerId == request.auth.uid);
+      
+      // Atualização: Desenvolvedor/Proprietário ou dono do projeto
+      allow update: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        isProjectOwner(projectId));
+      
+      // Exclusão: Apenas Desenvolvedor ou Proprietário
+      allow delete: if isDeveloperOrOwner();
+    }
+    
+    // ProjectUsers (Relação Usuário-Projeto)
+    match /projectUsers/{projectUserId} {
+      // Leitura: Desenvolvedor/Proprietário veem todos, outros veem apenas os próprios
+      allow read: if request.auth != null && 
+                     (isDeveloperOrOwner() || 
+                      resource.data.userId == request.auth.uid);
+      
+      // Criação: Desenvolvedor/Proprietário podem criar qualquer relação, outros apenas para si
+      allow create: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        request.resource.data.userId == request.auth.uid);
+      
+      // Atualização: Desenvolvedor/Proprietário ou próprio usuário
+      allow update: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        resource.data.userId == request.auth.uid);
+      
+      // Exclusão: Desenvolvedor/Proprietário ou próprio usuário
+      allow delete: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        resource.data.userId == request.auth.uid);
+    }
+    
+    // ProjectMembers (Responsáveis/Colaboradores)
+    match /projectMembers/{memberId} {
+      // Leitura: Desenvolvedor/Proprietário veem todos, outros veem apenas do projeto que têm acesso
+      allow read: if request.auth != null && 
+                     (isDeveloperOrOwner() || 
+                      hasProjectAccess(resource.data.projectId));
+      
+      // Criação: Desenvolvedor/Proprietário ou quem tem acesso ao projeto
+      allow create: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        hasProjectAccess(request.resource.data.projectId));
+      
+      // Atualização: Desenvolvedor/Proprietário ou quem tem acesso ao projeto
+      allow update: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        hasProjectAccess(resource.data.projectId));
+      
+      // Exclusão: Desenvolvedor/Proprietário ou quem tem acesso ao projeto
+      allow delete: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        hasProjectAccess(resource.data.projectId));
+    }
+    
+    // Contacts (Contatos)
+    match /contacts/{contactId} {
+      // Leitura: Desenvolvedor/Proprietário veem todos, outros veem apenas do projeto que têm acesso
+      allow read: if request.auth != null && 
+                     (isDeveloperOrOwner() || 
+                      (resource.data.projectId != null && hasProjectAccess(resource.data.projectId)));
+      
+      // Criação: Desenvolvedor/Proprietário ou quem tem acesso ao projeto
+      allow create: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (request.resource.data.projectId != null && 
+                         hasProjectAccess(request.resource.data.projectId) &&
+                         request.resource.data.createdBy == request.auth.uid));
+      
+      // Atualização: Desenvolvedor/Proprietário ou criador com acesso ao projeto
+      allow update: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+      
+      // Exclusão: Desenvolvedor/Proprietário ou criador com acesso ao projeto
+      allow delete: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+    }
+    
+    // Companies (Empresas)
+    match /companies/{companyId} {
+      allow read: if request.auth != null && 
+                     (isDeveloperOrOwner() || 
+                      (resource.data.projectId != null && hasProjectAccess(resource.data.projectId)));
+      allow create: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (request.resource.data.projectId != null && 
+                         hasProjectAccess(request.resource.data.projectId) &&
+                         request.resource.data.createdBy == request.auth.uid));
+      allow update: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+      allow delete: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+    }
+    
+    // Services (Serviços)
+    match /services/{serviceId} {
+      allow read: if request.auth != null && 
+                     (isDeveloperOrOwner() || 
+                      (resource.data.projectId != null && hasProjectAccess(resource.data.projectId)));
+      allow create: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (request.resource.data.projectId != null && 
+                         hasProjectAccess(request.resource.data.projectId) &&
+                         request.resource.data.createdBy == request.auth.uid));
+      allow update: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+      allow delete: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+    }
+    
+    // Deals (Negociações)
+    match /deals/{dealId} {
+      allow read: if request.auth != null && 
+                     (isDeveloperOrOwner() || 
+                      (resource.data.projectId != null && hasProjectAccess(resource.data.projectId)));
+      allow create: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (request.resource.data.projectId != null && 
+                         hasProjectAccess(request.resource.data.projectId) &&
+                         request.resource.data.createdBy == request.auth.uid));
+      allow update: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+      allow delete: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+    }
+    
+    // Tasks (Tarefas)
+    match /tasks/{taskId} {
+      allow read: if request.auth != null && 
+                     (isDeveloperOrOwner() || 
+                      (resource.data.projectId != null && hasProjectAccess(resource.data.projectId)));
+      allow create: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (request.resource.data.projectId != null && 
+                         hasProjectAccess(request.resource.data.projectId) &&
+                         request.resource.data.createdBy == request.auth.uid));
+      allow update: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+      allow delete: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+    }
+    
+    // Funnels (Funis)
+    match /funnels/{funnelId} {
+      allow read: if request.auth != null && 
+                     (isDeveloperOrOwner() || 
+                      (resource.data.projectId != null && hasProjectAccess(resource.data.projectId)));
+      allow create: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (request.resource.data.projectId != null && 
+                         hasProjectAccess(request.resource.data.projectId) &&
+                         request.resource.data.createdBy == request.auth.uid));
+      allow update: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+      allow delete: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+    }
+    
+    // Proposals (Propostas)
+    match /proposals/{proposalId} {
+      allow read: if request.auth != null && 
+                     (isDeveloperOrOwner() || 
+                      (resource.data.projectId != null && hasProjectAccess(resource.data.projectId)));
+      allow create: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (request.resource.data.projectId != null && 
+                         hasProjectAccess(request.resource.data.projectId) &&
+                         request.resource.data.createdBy == request.auth.uid));
+      allow update: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+      allow delete: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+    }
+    
+    // CloseReasons (Motivos de Fechamento - globais)
+    match /closeReasons/{reasonId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        request.resource.data.createdBy == request.auth.uid);
+      allow update: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        resource.data.createdBy == request.auth.uid);
+      allow delete: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        resource.data.createdBy == request.auth.uid);
+    }
+    
+    // CustomFields (Campos Personalizados)
+    match /customFields/{fieldId} {
+      allow read: if request.auth != null && 
+                     (isDeveloperOrOwner() || 
+                      (resource.data.projectId != null && hasProjectAccess(resource.data.projectId)));
+      allow create: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (request.resource.data.projectId != null && 
+                         hasProjectAccess(request.resource.data.projectId) &&
+                         request.resource.data.createdBy == request.auth.uid));
+      allow update: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+      allow delete: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+    }
+    
+    // WhatsAppConversations (Conversas WhatsApp)
+    match /whatsappConversations/{conversationId} {
+      allow read: if request.auth != null && 
+                     (isDeveloperOrOwner() || 
+                      (resource.data.projectId != null && hasProjectAccess(resource.data.projectId)));
+      allow create: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (request.resource.data.projectId != null && 
+                         hasProjectAccess(request.resource.data.projectId) &&
+                         request.resource.data.createdBy == request.auth.uid));
+      allow update: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        (resource.data.createdBy == request.auth.uid &&
+                         resource.data.projectId != null && 
+                         hasProjectAccess(resource.data.projectId)));
+    }
+    
+    // Accounts (Contas - se existir)
+    match /accounts/{accountId} {
+      allow read: if request.auth != null && 
+                     (isDeveloperOrOwner() || 
+                      resource.data.ownerId == request.auth.uid);
+      allow create: if request.auth != null && isDeveloperOrOwner();
+      allow update: if request.auth != null && 
+                       (isDeveloperOrOwner() || 
+                        resource.data.ownerId == request.auth.uid);
+      allow delete: if request.auth != null && isDeveloperOrOwner();
+    }
+  }
+}

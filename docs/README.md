@@ -14,6 +14,7 @@ Bem-vindo à documentação do Adventure CRM. Aqui você encontra todos os guias
 ### Configuração Multi-Tenant
 
 - **[Configuração Firebase Multi-Tenant](FIREBASE_MULTI_TENANT_SETUP.md)** - Guia completo para configurar o Firebase Firestore para suportar multi-tenant (projectId)
+- **[Hierarquia de Acesso](FIRESTORE_RULES_HIERARCHY.md)** - Sistema de hierarquia de acesso (Desenvolvedor, Proprietário, Cliente, Usuário)
 
 ## 🚀 Início Rápido
 

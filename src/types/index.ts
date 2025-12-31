@@ -13,7 +13,12 @@ export interface User extends BaseEntity {
   email: string
   name: string
   role: 'admin' | 'user'
-  isMaster?: boolean // Se é o usuário master (Adventure)
+  isMaster?: boolean // Se é o usuário master (Adventure) - DEPRECATED: usar userType
+  userType?: 'developer' | 'owner' | 'client' | 'user' // Hierarquia de acesso
+  // developer: Acesso completo - geral (backend e firebase)
+  // owner: Acesso completo - geral (backend e firebase)
+  // client: Acesso completo a nível de Projeto (frontend)
+  // user: Acesso específico por nível de cargo (frontend)
 }
 
 // Project (Projeto/Cliente)
