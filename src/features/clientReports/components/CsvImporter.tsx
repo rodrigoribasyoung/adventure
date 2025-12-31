@@ -16,7 +16,7 @@ interface CsvImporterProps {
 export const CsvImporter = ({ onImportComplete }: CsvImporterProps) => {
   const { currentProject } = useProject()
   const { currentUser } = useAuth()
-  const { refetchAll } = useClientReports(currentProject?.id)
+  const { refetchAll, marketingReports: existingMarketingReports, salesReports: existingSalesReports } = useClientReports(currentProject?.id)
   
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState<{ current: number; total: number; status: string } | null>(null)
@@ -67,16 +67,60 @@ export const CsvImporter = ({ onImportComplete }: CsvImporterProps) => {
         currentUser.uid
       )
 
-      const total = marketingReports.length + salesReports.length
+      // Verificar duplicatas antes de importar
+      setProgress({ current: 0, total: 0, status: 'Verificando duplicatas...' })
+      
+      // Função para criar chave única de um relatório de marketing
+      const getMarketingReportKey = (report: MarketingReport) => {
+        const dateStr = report.date?.toDate().toISOString().split('T')[0] || ''
+        return `${report.projectId}_${dateStr}_${report.activeProperty}_${report.channel}`
+      }
+      
+      // Função para criar chave única de um relatório de vendas
+      const getSalesReportKey = (report: SalesReport) => {
+        const dateStr = report.date?.toDate().toISOString().split('T')[0] || ''
+        return `${report.projectId}_${dateStr}_${report.activeProperty}`
+      }
+      
+      // Criar conjunto de chaves dos relatórios existentes
+      const existingMarketingKeys = new Set(
+        existingMarketingReports.map(r => getMarketingReportKey(r))
+      )
+      const existingSalesKeys = new Set(
+        existingSalesReports.map(r => getSalesReportKey(r))
+      )
+      
+      // Filtrar apenas relatórios novos (não duplicados)
+      const newMarketingReports = marketingReports.filter(
+        report => !existingMarketingKeys.has(getMarketingReportKey(report))
+      )
+      const newSalesReports = salesReports.filter(
+        report => !existingSalesKeys.has(getSalesReportKey(report))
+      )
+      
+      const skippedMarketing = marketingReports.length - newMarketingReports.length
+      const skippedSales = salesReports.length - newSalesReports.length
+      const total = newMarketingReports.length + newSalesReports.length
+      
+      if (total === 0) {
+        setToast({
+          message: `Todos os relatórios já existem. ${skippedMarketing} marketing e ${skippedSales} vendas foram pulados.`,
+          type: 'success',
+          visible: true,
+        })
+        setLoading(false)
+        return
+      }
+      
       setProgress({ current: 0, total, status: 'Preparando dados...' })
 
       // Preparar dados para batch (remover id, createdAt, updatedAt, createdBy já está incluído)
-      const marketingReportsData = marketingReports.map(report => {
+      const marketingReportsData = newMarketingReports.map(report => {
         const { id, createdAt, updatedAt, ...data } = report
         return data as Omit<MarketingReport, 'id' | 'createdAt' | 'updatedAt'>
       })
 
-      const salesReportsData = salesReports.map(report => {
+      const salesReportsData = newSalesReports.map(report => {
         const { id, createdAt, updatedAt, ...data } = report
         return data as Omit<SalesReport, 'id' | 'createdAt' | 'updatedAt'>
       })
@@ -131,8 +175,14 @@ export const CsvImporter = ({ onImportComplete }: CsvImporterProps) => {
       })
       await refetchAll()
 
+      // Mensagem final com informações sobre duplicatas
+      let message = `${newMarketingReports.length} relatório(s) de marketing e ${newSalesReports.length} relatório(s) de vendas importado(s) com sucesso!`
+      if (skippedMarketing > 0 || skippedSales > 0) {
+        message += ` (${skippedMarketing} marketing e ${skippedSales} vendas já existiam e foram pulados)`
+      }
+      
       setToast({
-        message: `${marketingReports.length} relatório(s) de marketing e ${salesReports.length} relatório(s) de vendas importado(s) com sucesso!`,
+        message,
         type: 'success',
         visible: true,
       })

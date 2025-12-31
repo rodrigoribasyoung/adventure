@@ -150,22 +150,50 @@ export const transformToSalesReport = (
 
   const activeProperty = row['Ativo'] || ''
 
-  const metrics: SalesMetrics = {
-    activities: parseFloat(row['Atividades'] || '0') || undefined,
-    dealsCreated: parseFloat(row['Negociações criadas'] || '0') || undefined,
-    leadsReceived: parseFloat(row['Leads recebidos'] || '0') || undefined,
-    contactsMade: parseFloat(row['Contatos feitos'] || '0') || undefined,
-    scheduledVisits: parseFloat(row['Visitas agendadas'] || '0') || undefined,
-    completedVisits: parseFloat(row['Visitas realizadas'] || '0') || undefined,
-    signedContracts: parseFloat(row['Fichas assinadas'] || '0') || undefined,
-    internalSales: parseFloat(row['Vendas internas'] || '0') || undefined,
-    losses: parseFloat(row['Perdas'] || '0') || undefined,
-    realEstateContacts: parseFloat(row['Contatos com imobiliárias'] || '0') || undefined,
-    realEstateVideoCalls: parseFloat(row['Videochamadas com imobiliárias'] || '0') || undefined,
-    realEstateVisits: parseFloat(row['Visitas com imobiliárias'] || '0') || undefined,
-    realEstateLeadsInProcess: parseFloat(row['Leads de imobiliárias em atendimento'] || '0') || undefined,
-    sales: parseFloat(row['Vendas'] || '0') || undefined,
-  }
+  // Criar metrics apenas com valores válidos (não undefined)
+  const metrics: SalesMetrics = {}
+  
+  const activities = parseFloat(row['Atividades'] || '0')
+  if (!isNaN(activities) && activities > 0) metrics.activities = activities
+  
+  const dealsCreated = parseFloat(row['Negociações criadas'] || '0')
+  if (!isNaN(dealsCreated) && dealsCreated > 0) metrics.dealsCreated = dealsCreated
+  
+  const leadsReceived = parseFloat(row['Leads recebidos'] || '0')
+  if (!isNaN(leadsReceived) && leadsReceived > 0) metrics.leadsReceived = leadsReceived
+  
+  const contactsMade = parseFloat(row['Contatos feitos'] || '0')
+  if (!isNaN(contactsMade) && contactsMade > 0) metrics.contactsMade = contactsMade
+  
+  const scheduledVisits = parseFloat(row['Visitas agendadas'] || '0')
+  if (!isNaN(scheduledVisits) && scheduledVisits > 0) metrics.scheduledVisits = scheduledVisits
+  
+  const completedVisits = parseFloat(row['Visitas realizadas'] || '0')
+  if (!isNaN(completedVisits) && completedVisits > 0) metrics.completedVisits = completedVisits
+  
+  const signedContracts = parseFloat(row['Fichas assinadas'] || '0')
+  if (!isNaN(signedContracts) && signedContracts > 0) metrics.signedContracts = signedContracts
+  
+  const internalSales = parseFloat(row['Vendas internas'] || '0')
+  if (!isNaN(internalSales) && internalSales > 0) metrics.internalSales = internalSales
+  
+  const losses = parseFloat(row['Perdas'] || '0')
+  if (!isNaN(losses) && losses > 0) metrics.losses = losses
+  
+  const realEstateContacts = parseFloat(row['Contatos com imobiliárias'] || '0')
+  if (!isNaN(realEstateContacts) && realEstateContacts > 0) metrics.realEstateContacts = realEstateContacts
+  
+  const realEstateVideoCalls = parseFloat(row['Videochamadas com imobiliárias'] || '0')
+  if (!isNaN(realEstateVideoCalls) && realEstateVideoCalls > 0) metrics.realEstateVideoCalls = realEstateVideoCalls
+  
+  const realEstateVisits = parseFloat(row['Visitas com imobiliárias'] || '0')
+  if (!isNaN(realEstateVisits) && realEstateVisits > 0) metrics.realEstateVisits = realEstateVisits
+  
+  const realEstateLeadsInProcess = parseFloat(row['Leads de imobiliárias em atendimento'] || '0')
+  if (!isNaN(realEstateLeadsInProcess) && realEstateLeadsInProcess > 0) metrics.realEstateLeadsInProcess = realEstateLeadsInProcess
+  
+  const sales = parseFloat(row['Vendas'] || '0')
+  if (!isNaN(sales) && sales > 0) metrics.sales = sales
 
   const weekISO = parseInt(row['Semana ISO'] || '0') || 0
 

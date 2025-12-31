@@ -21,12 +21,29 @@ import { db } from './config'
 // Tipos utilitários
 export type FirestoreTimestamp = Timestamp
 
-// Helper para remover campos undefined do objeto
+// Helper para remover campos undefined do objeto (recursivo para objetos aninhados)
 const removeUndefinedFields = (obj: Record<string, any>): Record<string, any> => {
+  if (obj === null || obj === undefined) {
+    return {}
+  }
+  
   return Object.entries(obj).reduce((acc, [key, value]) => {
-    if (value !== undefined) {
+    if (value === undefined) {
+      // Ignorar campos undefined
+      return acc
+    }
+    
+    // Se for um objeto (mas não array, Timestamp, Date), processar recursivamente
+    if (value !== null && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date) && !(value.constructor?.name === 'Timestamp')) {
+      const cleaned = removeUndefinedFields(value as Record<string, any>)
+      // Só adicionar se o objeto limpo não estiver vazio ou se tiver propriedades
+      if (Object.keys(cleaned).length > 0) {
+        acc[key] = cleaned
+      }
+    } else {
       acc[key] = value
     }
+    
     return acc
   }, {} as Record<string, any>)
 }
