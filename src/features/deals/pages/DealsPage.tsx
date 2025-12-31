@@ -36,7 +36,7 @@ const initialFilters: DealFiltersType = {
 
 const DealsPage = () => {
   const navigate = useNavigate()
-  const { deals, loading, createDeal, updateDeal, deleteDeal, updateDealStage, closeDeal, pauseDeal, reopenDeal } = useDeals()
+  const { deals, loading, createDeal, updateDeal, deleteDeal, updateDealStage, closeDeal, pauseDeal } = useDeals()
   const { canDeleteDealsAndCompanies } = usePermissions()
   const { activeFunnel } = useFunnels()
   const { contacts } = useContacts()

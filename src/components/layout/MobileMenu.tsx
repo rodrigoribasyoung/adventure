@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Icon } from '@/components/icons/Icon'
 import { FiMenu, FiX } from 'react-icons/fi'
-import { useProject } from '@/contexts/ProjectContext'
 
 interface NavItem {
   label: string

@@ -33,7 +33,6 @@ const DashboardPage = () => {
   // Encontrar valores máximos para normalização
   const maxDeals = Math.max(stats.totalDeals, stats.activeDeals, stats.wonDeals, stats.lostDeals, 1)
   const maxValue = Math.max(stats.totalValue, stats.activeValue, stats.wonValue, stats.lostValue, stats.averageDealValue, 1)
-  const maxConversion = Math.max(stats.conversionRate, stats.lossRate, 1)
   const maxContacts = Math.max(stats.totalContacts, stats.totalCompanies, 1)
 
   if (loading) {

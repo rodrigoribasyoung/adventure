@@ -3,7 +3,6 @@ import { UserMenu } from './UserMenu'
 import { ProjectSelector } from './ProjectSelector'
 import { MobileMenu } from './MobileMenu'
 import { Link, useLocation } from 'react-router-dom'
-import { useProject } from '@/contexts/ProjectContext'
 
 interface TabItem {
   label: string
