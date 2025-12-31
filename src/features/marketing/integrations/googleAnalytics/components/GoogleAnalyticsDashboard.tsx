@@ -1,6 +1,5 @@
 import { Card } from '@/components/ui/Card'
 import { useGoogleAnalytics } from '../hooks/useGoogleAnalytics'
-import { formatCurrency } from '@/lib/utils/formatCurrency'
 
 interface GoogleAnalyticsDashboardProps {
   propertyId?: string

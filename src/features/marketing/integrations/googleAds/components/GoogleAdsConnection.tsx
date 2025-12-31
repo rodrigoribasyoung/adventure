@@ -29,6 +29,10 @@ export const GoogleAdsConnection = ({ onConnected, onError }: GoogleAdsConnectio
       const accountName = 'Minha Conta Google Ads' // Simplificado
       
       // Criar conexão
+      if (!currentProject) {
+        throw new Error('Nenhum projeto selecionado')
+      }
+
       const connectionData = prepareConnectionForStorage({
         provider: 'google_ads',
         accessToken: tokenData.access_token,
@@ -40,6 +44,7 @@ export const GoogleAdsConnection = ({ onConnected, onError }: GoogleAdsConnectio
         accountId,
         accountName,
         userId: '', // Será preenchido no hook
+        projectId: currentProject.id, // Adicionar projectId
         metadata: {},
       })
       

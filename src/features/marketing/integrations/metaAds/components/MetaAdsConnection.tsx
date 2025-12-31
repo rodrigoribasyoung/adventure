@@ -29,6 +29,10 @@ export const MetaAdsConnection = ({ onConnected }: MetaAdsConnectionProps) => {
       const accountName = 'Minha Conta Meta Ads' // Simplificado
       
       // Criar conexão
+      if (!currentProject) {
+        throw new Error('Nenhum projeto selecionado')
+      }
+
       const connectionData = prepareConnectionForStorage({
         provider: 'meta_ads',
         accessToken: tokenData.access_token,
@@ -40,6 +44,7 @@ export const MetaAdsConnection = ({ onConnected }: MetaAdsConnectionProps) => {
         accountId,
         accountName,
         userId: '', // Será preenchido no hook
+        projectId: currentProject.id, // Adicionar projectId
         metadata: {},
       })
       

@@ -29,6 +29,10 @@ export const GoogleAnalyticsConnection = ({ onConnected }: GoogleAnalyticsConnec
       const accountName = 'Minha Propriedade Google Analytics' // Simplificado
       
       // Criar conexão
+      if (!currentProject) {
+        throw new Error('Nenhum projeto selecionado')
+      }
+
       const connectionData = prepareConnectionForStorage({
         provider: 'google_analytics',
         accessToken: tokenData.access_token,
@@ -40,6 +44,7 @@ export const GoogleAnalyticsConnection = ({ onConnected }: GoogleAnalyticsConnec
         accountId,
         accountName,
         userId: '', // Será preenchido no hook
+        projectId: currentProject.id, // Adicionar projectId
         metadata: {},
       })
       
