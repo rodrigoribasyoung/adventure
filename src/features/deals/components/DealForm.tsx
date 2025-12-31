@@ -16,12 +16,14 @@ import { RenderCustomFields } from '@/components/customFields/RenderCustomFields
 import { ContactForm } from '@/features/contacts/components/ContactForm'
 import { CompanyForm } from '@/features/companies/components/CompanyForm'
 import { QuickCreateButton } from '@/components/forms/QuickCreateButton'
+import { Steps } from '@/components/forms/Steps'
 import { formatCurrency } from '@/lib/utils/formatCurrency'
 import { shortenUrl } from '@/lib/utils/shortenUrl'
 import { Timestamp as FirestoreTimestamp } from 'firebase/firestore'
 
+// Schema base - validação dinâmica será feita manualmente no submit
 const dealSchema = z.object({
-  title: z.string().min(1, 'Título é obrigatório'),
+  title: z.string().optional(),
   contactId: z.string().optional(),
   companyId: z.string().optional(),
   stage: z.string().min(1, 'Estágio é obrigatório'),
@@ -44,10 +46,17 @@ type DealFormData = z.infer<typeof dealSchema>
 
 interface DealFormProps {
   deal?: Deal
-  onSubmit: (data: DealFormData) => Promise<void>
+  onSubmit: (data: any) => Promise<void>
   onCancel: () => void
   loading?: boolean
 }
+
+const FORM_STEPS = [
+  { id: 'basic', title: 'Informações Básicas', description: 'Título, contato e estágio' },
+  { id: 'products', title: 'Produtos e Valores', description: 'Serviços e valores' },
+  { id: 'details', title: 'Detalhes Avançados', description: 'Pagamento e responsável' },
+  { id: 'additional', title: 'Informações Adicionais', description: 'Contrato e anotações' },
+]
 
 export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealFormProps) => {
   const { contacts, createContact } = useContacts()
@@ -57,6 +66,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
   const { customFields } = useCustomFields('deal')
   const { members } = useProjectMembers()
   
+  const [currentStep, setCurrentStep] = useState(0)
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
   const [quickCreateLoading, setQuickCreateLoading] = useState(false)
@@ -66,7 +76,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
     defaultValues: deal
       ? {
           title: deal.title,
-          contactId: deal.contactId,
+          contactId: deal.contactId || '',
           companyId: deal.companyId || '',
           stage: deal.stage,
           value: deal.value,
@@ -96,6 +106,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
     watch,
     setValue,
     control,
+    trigger,
     formState: { errors },
   } = form
 
@@ -103,7 +114,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
     form.reset(deal
       ? {
           title: deal.title,
-          contactId: deal.contactId,
+          contactId: deal.contactId || '',
           companyId: deal.companyId || '',
           stage: deal.stage,
           value: deal.value,
@@ -129,6 +140,14 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
   const selectedServices = services.filter(s => selectedServiceIds.includes(s.id))
   const totalValue = selectedServices.reduce((sum, s) => sum + s.price, 0)
   const paymentType = watch('paymentType')
+  const watchedStage = watch('stage')
+
+  // Atualizar campos obrigatórios quando o estágio muda
+  useEffect(() => {
+    if (watchedStage && activeFunnel) {
+      // A validação será refeita no próximo submit
+    }
+  }, [watchedStage, activeFunnel])
 
   const handleQuickCreateContact = async (contactData: any) => {
     try {
@@ -177,6 +196,29 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
     }
   }
 
+  const handleNextStep = async () => {
+    // Validar campos da etapa atual antes de avançar
+    const stepFields: Record<number, (keyof DealFormData)[]> = {
+      0: ['title', 'stage', 'contactId'], // Informações Básicas
+      1: ['serviceIds', 'value'], // Produtos e Valores
+      2: ['assignedTo', 'expectedCloseDate', 'paymentType'], // Detalhes Avançados
+      3: [], // Informações Adicionais (sem validação obrigatória)
+    }
+
+    const fieldsToValidate = stepFields[currentStep] || []
+    const isValid = await trigger(fieldsToValidate as any)
+    
+    if (isValid && currentStep < FORM_STEPS.length - 1) {
+      setCurrentStep(currentStep + 1)
+    }
+  }
+
+  const handlePrevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1)
+    }
+  }
+
   const handleSubmitForm = async (data: DealFormData) => {
     try {
       if (!activeFunnel) {
@@ -186,11 +228,31 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
       if (!data.stage || data.stage.trim() === '') {
         throw new Error('Selecione um estágio para a negociação.')
       }
+
+      // Validar campos obrigatórios da etapa selecionada
+      const selectedStage = activeFunnel.stages.find(s => s.id === data.stage)
+      const requiredFields = selectedStage?.requiredFields || []
       
-      console.log('[DealForm] Dados do formulário:', data)
+      const validationErrors: string[] = []
+      
+      if (requiredFields.includes('title') && (!data.title || data.title.trim() === '')) {
+        validationErrors.push('Título é obrigatório para esta etapa')
+      }
+      
+      if (requiredFields.includes('contactId') && (!data.contactId || data.contactId.trim() === '')) {
+        validationErrors.push('Contato é obrigatório para esta etapa')
+      }
+      
+      if (requiredFields.includes('value') && (!data.value || data.value <= 0)) {
+        validationErrors.push('Valor é obrigatório e deve ser maior que zero para esta etapa')
+      }
+      
+      if (validationErrors.length > 0) {
+        throw new Error(validationErrors.join(', '))
+      }
       
       const submitData: any = {
-        title: data.title,
+        title: data.title || '',
         stage: data.stage,
         contactId: data.contactId && typeof data.contactId === 'string' && data.contactId.trim() !== '' ? data.contactId : undefined,
         value: data.value || 0,
@@ -218,7 +280,6 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
         }
       }
       
-      console.log('[DealForm] Dados preparados para envio:', submitData)
       await onSubmit(submitData)
     } catch (error) {
       console.error('[DealForm] Erro ao preparar dados:', error)
@@ -226,245 +287,294 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
     }
   }
 
-  return (
-    <form onSubmit={handleSubmit(handleSubmitForm)} className="space-y-4">
-      <Input
-        label="Título *"
-        {...register('title')}
-        error={errors.title?.message}
-        placeholder="Nome da negociação"
-      />
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0: // Informações Básicas
+        return (
+          <div className="space-y-4">
+            <Input
+              label="Título"
+              {...register('title')}
+              error={errors.title?.message}
+              placeholder="Nome da negociação"
+            />
 
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-medium text-white/90">
-            Contato
-          </label>
-          <QuickCreateButton onClick={() => setIsContactModalOpen(true)} />
-        </div>
-        <select
-          {...register('contactId')}
-          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
-        >
-          <option value="">Selecione um contato</option>
-          {contacts.map(contact => (
-            <option key={contact.id} value={contact.id}>
-              {contact.name}
-            </option>
-          ))}
-        </select>
-        {errors.contactId && (
-          <p className="mt-1 text-sm text-red-400">{errors.contactId.message}</p>
-        )}
-      </div>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-white/90">
+                  Contato
+                </label>
+                <QuickCreateButton onClick={() => setIsContactModalOpen(true)} />
+              </div>
+              <select
+                {...register('contactId')}
+                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
+              >
+                <option value="">Selecione um contato</option>
+                {contacts.map(contact => (
+                  <option key={contact.id} value={contact.id}>
+                    {contact.name}
+                  </option>
+                ))}
+              </select>
+              {errors.contactId && (
+                <p className="mt-1 text-sm text-red-400">{errors.contactId.message}</p>
+              )}
+            </div>
 
-      <div>
-        <label className="block text-sm font-medium text-white/90 mb-2">
-          Empresa
-        </label>
-        <select
-          {...register('companyId')}
-          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
-        >
-          <option value="">Nenhuma empresa</option>
-          {companies.map(company => (
-            <option key={company.id} value={company.id}>
-              {company.name}
-            </option>
-          ))}
-        </select>
-      </div>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-white/90">
+                  Empresa
+                </label>
+                <QuickCreateButton onClick={() => setIsCompanyModalOpen(true)} />
+              </div>
+              <select
+                {...register('companyId')}
+                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
+              >
+                <option value="">Nenhuma empresa</option>
+                {companies.map(company => (
+                  <option key={company.id} value={company.id}>
+                    {company.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-      {!activeFunnel ? (
-        <div className="p-4 bg-purple-500/20 border border-purple-500/50 rounded-lg">
-          <p className="text-purple-400 text-sm font-medium mb-2 flex items-center gap-2">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            Nenhum funil ativo encontrado
-          </p>
-          <p className="text-purple-300/80 text-sm">
-            É necessário criar e ativar um funil antes de criar negociações. 
-            <a href="/settings/funnels" className="underline ml-1">Criar funil agora</a>
-          </p>
-        </div>
-      ) : (
-        <div>
-          <label className="block text-sm font-medium text-white/90 mb-2">
-            Estágio *
-          </label>
-          <select
-            {...register('stage')}
-            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
-          >
-            <option value="">Selecione um estágio</option>
-            {activeFunnel.stages
-              .sort((a, b) => a.order - b.order)
-              .map(stage => (
-                <option key={stage.id} value={stage.id}>
-                  {stage.name}
-                </option>
-              ))}
-          </select>
-          {errors.stage && (
-            <p className="mt-1 text-sm text-red-400">{errors.stage.message}</p>
-          )}
-        </div>
-      )}
+            {!activeFunnel ? (
+              <div className="p-4 bg-purple-500/20 border border-purple-500/50 rounded-lg">
+                <p className="text-purple-400 text-sm font-medium mb-2 flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  Nenhum funil ativo encontrado
+                </p>
+                <p className="text-purple-300/80 text-sm">
+                  É necessário criar e ativar um funil antes de criar negociações. 
+                  <a href="/settings/funnels" className="underline ml-1">Criar funil agora</a>
+                </p>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-white/90 mb-2">
+                  Estágio *
+                </label>
+                <select
+                  {...register('stage')}
+                  className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
+                >
+                  <option value="">Selecione um estágio</option>
+                  {activeFunnel.stages
+                    .sort((a, b) => a.order - b.order)
+                    .map(stage => (
+                      <option key={stage.id} value={stage.id}>
+                        {stage.name}
+                      </option>
+                    ))}
+                </select>
+                {errors.stage && (
+                  <p className="mt-1 text-sm text-red-400">{errors.stage.message}</p>
+                )}
+              </div>
+            )}
+          </div>
+        )
 
-      <div>
-        <label className="block text-sm font-medium text-white/90 mb-2">
-          Serviços
-        </label>
-        <div className="space-y-2 max-h-40 overflow-y-auto bg-white/5 border border-white/10 rounded-lg p-3">
-          {services.filter(s => s.active).map(service => (
-            <label key={service.id} className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={(selectedServiceIds || []).includes(service.id)}
-                onChange={() => handleServiceToggle(service.id)}
-                className="w-4 h-4 text-primary-red bg-white/5 border-white/10 rounded focus:ring-primary-red/50"
+      case 1: // Produtos e Valores
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-white/90 mb-2">
+                Serviços
+              </label>
+              <div className="space-y-2 max-h-40 overflow-y-auto bg-white/5 border border-white/10 rounded-lg p-3">
+                {services.filter(s => s.active).map(service => (
+                  <label key={service.id} className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={(selectedServiceIds || []).includes(service.id)}
+                      onChange={() => handleServiceToggle(service.id)}
+                      className="w-4 h-4 text-primary-red bg-white/5 border-white/10 rounded focus:ring-primary-red/50"
+                    />
+                    <span className="text-white/90">{service.name}</span>
+                    <span className="ml-auto text-primary-red font-semibold">
+                      {formatCurrency(service.price, service.currency)}
+                    </span>
+                  </label>
+                ))}
+              </div>
+              {selectedServices.length > 0 && (
+                <p className="mt-2 text-sm text-white/70">
+                  Total dos serviços: <span className="font-bold text-primary-red">
+                    {formatCurrency(totalValue, 'BRL')}
+                  </span>
+                </p>
+              )}
+            </div>
+
+            <Input
+              label="Valor Total (R$)"
+              type="number"
+              step="0.01"
+              min="0"
+              {...register('value', { valueAsNumber: true })}
+              error={errors.value?.message}
+              placeholder="0.00"
+            />
+
+            <Input
+              label="Probabilidade (%)"
+              type="number"
+              min="0"
+              max="100"
+              {...register('probability', { valueAsNumber: true })}
+              error={errors.probability?.message}
+              placeholder="50"
+            />
+          </div>
+        )
+
+      case 2: // Detalhes Avançados
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-white/90 mb-2">
+                Responsável
+              </label>
+              <select
+                {...register('assignedTo')}
+                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
+              >
+                <option value="">Nenhum responsável</option>
+                {members.filter(m => m.active).map(member => (
+                  <option key={member.id} value={member.id}>
+                    {member.name} {member.role ? `- ${member.role}` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <Input
+              label="Data de Fechamento Esperada"
+              type="date"
+              {...register('expectedCloseDate')}
+              error={errors.expectedCloseDate?.message}
+            />
+
+            <div>
+              <label className="block text-sm font-medium text-white/90 mb-2">
+                Forma de Pagamento
+              </label>
+              <select
+                {...register('paymentType')}
+                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
+              >
+                <option value="">Selecione</option>
+                <option value="cash">À Vista</option>
+                <option value="installment">À Prazo</option>
+              </select>
+            </div>
+
+            {paymentType && (
+              <div>
+                <label className="block text-sm font-medium text-white/90 mb-2">
+                  Método de Pagamento
+                </label>
+                <select
+                  {...register('paymentMethod')}
+                  className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
+                >
+                  <option value="">Selecione</option>
+                  <option value="pix">PIX</option>
+                  <option value="boleto">Boleto</option>
+                  <option value="credit_card">Cartão de Crédito</option>
+                  <option value="debit_card">Cartão de Débito</option>
+                  <option value="bank_transfer">Transferência Bancária</option>
+                  <option value="exchange">Permuta</option>
+                  <option value="other">Outro</option>
+                </select>
+              </div>
+            )}
+          </div>
+        )
+
+      case 3: // Informações Adicionais
+        return (
+          <div className="space-y-4">
+            <Input
+              label="Link do Contrato (Drive ou outro)"
+              type="url"
+              {...register('contractUrl')}
+              error={errors.contractUrl?.message}
+              placeholder="https://drive.google.com/..."
+            />
+
+            <div>
+              <label className="block text-sm font-medium text-white/90 mb-2">
+                Anotações
+              </label>
+              <textarea
+                {...register('notes')}
+                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200 resize-none"
+                placeholder="Adicione observações sobre esta negociação..."
+                rows={4}
               />
-              <span className="text-white/90">{service.name}</span>
-              <span className="ml-auto text-primary-red font-semibold">
-                {formatCurrency(service.price, service.currency)}
-              </span>
-            </label>
-          ))}
-        </div>
-        {selectedServices.length > 0 && (
-          <p className="mt-2 text-sm text-white/70">
-            Total dos serviços: <span className="font-bold text-primary-red">
-              {formatCurrency(totalValue, 'BRL')}
-            </span>
-          </p>
-        )}
-      </div>
+            </div>
 
-      <Input
-        label="Valor Total (R$)"
-        type="number"
-        step="0.01"
-        min="0"
-        {...register('value', { valueAsNumber: true })}
-        error={errors.value?.message}
-        placeholder="0.00"
+            <RenderCustomFields
+              customFields={customFields}
+              control={control}
+              entityCustomFields={deal?.customFields}
+            />
+          </div>
+        )
+
+      default:
+        return null
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit(handleSubmitForm)} className="space-y-6">
+      <Steps
+        steps={FORM_STEPS}
+        currentStep={currentStep}
+        onStepClick={(stepIndex) => {
+          // Permitir voltar para etapas anteriores
+          if (stepIndex < currentStep) {
+            setCurrentStep(stepIndex)
+          }
+        }}
+        className="mb-6"
       />
 
-      <Input
-        label="Probabilidade (%)"
-        type="number"
-        min="0"
-        max="100"
-        {...register('probability', { valueAsNumber: true })}
-        error={errors.probability?.message}
-        placeholder="50"
-      />
-
-      <Input
-        label="Data de Fechamento Esperada"
-        type="date"
-        {...register('expectedCloseDate')}
-        error={errors.expectedCloseDate?.message}
-      />
-
-      <div>
-        <label className="block text-sm font-medium text-white/90 mb-2">
-          Responsável
-        </label>
-        <select
-          {...register('assignedTo')}
-          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
-        >
-          <option value="">Nenhum responsável</option>
-          {members.filter(m => m.active).map(member => (
-            <option key={member.id} value={member.id}>
-              {member.name} {member.role ? `- ${member.role}` : ''}
-            </option>
-          ))}
-        </select>
-        {errors.assignedTo && (
-          <p className="mt-1 text-sm text-red-400">{errors.assignedTo.message}</p>
-        )}
+      <div className="min-h-[400px]">
+        {renderStepContent()}
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-white/90 mb-2">
-          Forma de Pagamento
-        </label>
-        <select
-          {...register('paymentType')}
-          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
-        >
-          <option value="">Selecione</option>
-          <option value="cash">À Vista</option>
-          <option value="installment">À Prazo</option>
-        </select>
-        {errors.paymentType && (
-          <p className="mt-1 text-sm text-red-400">{errors.paymentType.message}</p>
-        )}
-      </div>
-
-      {paymentType && (
+      <div className="flex justify-between gap-3 pt-4 border-t border-white/10">
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-2">
-            Método de Pagamento
-          </label>
-          <select
-            {...register('paymentMethod')}
-            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
-          >
-            <option value="">Selecione</option>
-            <option value="pix">PIX</option>
-            <option value="boleto">Boleto</option>
-            <option value="credit_card">Cartão de Crédito</option>
-            <option value="debit_card">Cartão de Débito</option>
-            <option value="bank_transfer">Transferência Bancária</option>
-            <option value="exchange">Permuta</option>
-            <option value="other">Outro</option>
-          </select>
-          {errors.paymentMethod && (
-            <p className="mt-1 text-sm text-red-400">{errors.paymentMethod.message}</p>
+          {currentStep > 0 && (
+            <Button type="button" variant="ghost" onClick={handlePrevStep} disabled={loading}>
+              Voltar
+            </Button>
           )}
         </div>
-      )}
-
-      <Input
-        label="Link do Contrato (Drive ou outro)"
-        type="url"
-        {...register('contractUrl')}
-        error={errors.contractUrl?.message}
-        placeholder="https://drive.google.com/..."
-      />
-
-      <div>
-        <label className="block text-sm font-medium text-white/90 mb-2">
-          Anotações
-        </label>
-        <textarea
-          {...register('notes')}
-          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200 resize-none"
-          placeholder="Adicione observações sobre esta negociação..."
-          rows={4}
-        />
-        {errors.notes && (
-          <p className="mt-1 text-sm text-red-400">{errors.notes.message}</p>
-        )}
-      </div>
-
-      <RenderCustomFields
-        customFields={customFields}
-        control={control}
-        entityCustomFields={deal?.customFields}
-      />
-
-      <div className="flex justify-end gap-3 pt-4">
-        <Button type="button" variant="ghost" onClick={onCancel} disabled={loading}>
-          Cancelar
-        </Button>
-        <Button type="submit" variant="primary-red" disabled={loading}>
-          {loading ? 'Salvando...' : deal ? 'Atualizar' : 'Criar'}
-        </Button>
+        <div className="flex gap-3">
+          <Button type="button" variant="ghost" onClick={onCancel} disabled={loading}>
+            Cancelar
+          </Button>
+          {currentStep < FORM_STEPS.length - 1 ? (
+            <Button type="button" variant="primary-red" onClick={handleNextStep} disabled={loading}>
+              Próximo
+            </Button>
+          ) : (
+            <Button type="submit" variant="primary-red" disabled={loading}>
+              {loading ? 'Salvando...' : deal ? 'Atualizar' : 'Criar'}
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Modal rápido de criação de contato */}
@@ -497,4 +607,3 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
     </form>
   )
 }
-

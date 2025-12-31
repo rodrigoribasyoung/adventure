@@ -1,11 +1,16 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Contact } from '@/types'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { Modal } from '@/components/ui/Modal'
 import { useCustomFields } from '@/features/customFields/hooks/useCustomFields'
 import { RenderCustomFields } from '@/components/customFields/RenderCustomFields'
+import { useCompanies } from '@/features/companies/hooks/useCompanies'
+import { CompanyForm } from '@/features/companies/components/CompanyForm'
+import { QuickCreateButton } from '@/components/forms/QuickCreateButton'
 
 const contactSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -26,10 +31,15 @@ interface ContactFormProps {
 
 export const ContactForm = ({ contact, onSubmit, onCancel, loading = false }: ContactFormProps) => {
   const { customFields } = useCustomFields('contact')
+  const { companies, createCompany } = useCompanies()
+  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
+  const [quickCreateLoading, setQuickCreateLoading] = useState(false)
+  
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
@@ -45,6 +55,20 @@ export const ContactForm = ({ contact, onSubmit, onCancel, loading = false }: Co
           customFields: {},
         },
   })
+
+  const handleQuickCreateCompany = async (companyData: any) => {
+    try {
+      setQuickCreateLoading(true)
+      const companyId = await createCompany(companyData)
+      setValue('companyId', companyId)
+      setIsCompanyModalOpen(false)
+    } catch (error) {
+      console.error('Erro ao criar empresa:', error)
+      throw error
+    } finally {
+      setQuickCreateLoading(false)
+    }
+  }
 
   const handleFormSubmit = async (data: ContactFormData) => {
     // Converter name em firstName e lastName
@@ -86,6 +110,29 @@ export const ContactForm = ({ contact, onSubmit, onCancel, loading = false }: Co
         placeholder="(00) 00000-0000"
       />
 
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-white/90">
+            Empresa
+          </label>
+          <QuickCreateButton onClick={() => setIsCompanyModalOpen(true)} />
+        </div>
+        <select
+          {...register('companyId')}
+          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
+        >
+          <option value="">Nenhuma empresa</option>
+          {companies.map(company => (
+            <option key={company.id} value={company.id}>
+              {company.name}
+            </option>
+          ))}
+        </select>
+        {errors.companyId && (
+          <p className="mt-1 text-sm text-red-400">{errors.companyId.message}</p>
+        )}
+      </div>
+
       <RenderCustomFields
         customFields={customFields}
         control={control}
@@ -100,6 +147,20 @@ export const ContactForm = ({ contact, onSubmit, onCancel, loading = false }: Co
           {loading ? 'Salvando...' : contact ? 'Atualizar' : 'Criar'}
         </Button>
       </div>
+
+      {/* Modal rápido de criação de empresa */}
+      <Modal
+        isOpen={isCompanyModalOpen}
+        onClose={() => setIsCompanyModalOpen(false)}
+        title="Nova Empresa"
+        size="md"
+      >
+        <CompanyForm
+          onSubmit={handleQuickCreateCompany}
+          onCancel={() => setIsCompanyModalOpen(false)}
+          loading={quickCreateLoading}
+        />
+      </Modal>
     </form>
   )
 }

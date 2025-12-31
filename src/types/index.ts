@@ -167,6 +167,7 @@ export interface FunnelStage {
   color: string
   isWonStage?: boolean // se é etapa de ganho
   isLostStage?: boolean // se é etapa de perda
+  requiredFields?: string[] // campos obrigatórios para esta etapa (ex: ['title', 'contactId', 'value'])
 }
 
 // Close Reason (Motivo de Fechamento)

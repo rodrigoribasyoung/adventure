@@ -13,6 +13,7 @@ const stageSchema = z.object({
   color: z.string().min(1, 'Cor é obrigatória'),
   isWonStage: z.boolean().optional(),
   isLostStage: z.boolean().optional(),
+  requiredFields: z.array(z.string()).optional(),
 })
 
 const funnelSchema = z.object({
@@ -61,6 +62,7 @@ export const FunnelForm = ({ funnel, onSubmit, onCancel, loading = false }: Funn
               color: getStageColor(1, 1),
               isWonStage: false,
               isLostStage: false,
+              requiredFields: [],
             },
           ],
         },
@@ -83,6 +85,7 @@ export const FunnelForm = ({ funnel, onSubmit, onCancel, loading = false }: Funn
       color: getStageColor(newOrder, totalStages),
       isWonStage: false,
       isLostStage: false,
+      requiredFields: [],
     })
   }
 
@@ -242,6 +245,43 @@ export const FunnelForm = ({ funnel, onSubmit, onCancel, loading = false }: Funn
                   />
                   <span className="text-sm text-white/90">Estágio de Perda</span>
                 </label>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white/90 mb-2">
+                  Campos Obrigatórios (para esta etapa)
+                </label>
+                <p className="text-xs text-white/60 mb-2">
+                  Selecione quais campos devem ser obrigatórios quando uma negociação estiver nesta etapa
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { value: 'title', label: 'Título' },
+                    { value: 'contactId', label: 'Contato' },
+                    { value: 'value', label: 'Valor' },
+                  ].map(field => {
+                    const currentRequiredFields = watch(`stages.${index}.requiredFields`) || []
+                    const isChecked = currentRequiredFields.includes(field.value)
+                    return (
+                      <label key={field.value} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            const current = currentRequiredFields
+                            if (e.target.checked) {
+                              setValue(`stages.${index}.requiredFields`, [...current, field.value])
+                            } else {
+                              setValue(`stages.${index}.requiredFields`, current.filter(f => f !== field.value))
+                            }
+                          }}
+                          className="w-4 h-4 text-primary-red bg-white/5 border-white/10 rounded focus:ring-primary-red/50"
+                        />
+                        <span className="text-sm text-white/90">{field.label}</span>
+                      </label>
+                    )
+                  })}
+                </div>
               </div>
             </div>
           ))}
