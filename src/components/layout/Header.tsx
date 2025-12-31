@@ -3,13 +3,14 @@ import { UserMenu } from './UserMenu'
 import { ProjectSelector } from './ProjectSelector'
 import { MobileMenu } from './MobileMenu'
 import { Link, useLocation } from 'react-router-dom'
+import { useProject } from '@/contexts/ProjectContext'
 
 interface TabItem {
   label: string
   path: string
 }
 
-const tabs: TabItem[] = [
+const baseTabs: TabItem[] = [
   { label: 'Início', path: '/' },
   { label: 'Dashboard', path: '/dashboard' },
   { label: 'Negociações', path: '/deals' },
@@ -23,6 +24,12 @@ const tabs: TabItem[] = [
 
 export const Header = () => {
   const location = useLocation()
+  const { isMaster } = useProject()
+  
+  // Adicionar "Relatórios de Cliente" apenas para usuários master
+  const tabs = isMaster 
+    ? [...baseTabs, { label: 'Relatórios de Cliente', path: '/client-reports' }]
+    : baseTabs
 
   // Verificar se a rota atual corresponde a uma aba
   const isActive = (path: string) => {

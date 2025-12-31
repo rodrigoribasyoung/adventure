@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Icon } from '@/components/icons/Icon'
 import { FiMenu, FiX } from 'react-icons/fi'
+import { useProject } from '@/contexts/ProjectContext'
 
 interface NavItem {
   label: string
@@ -9,7 +10,7 @@ interface NavItem {
   icon: keyof typeof import('@/components/icons/Icon').Icons
 }
 
-const navItems: NavItem[] = [
+const baseNavItems: NavItem[] = [
   { label: 'Início', path: '/', icon: 'home' },
   { label: 'Dashboard', path: '/dashboard', icon: 'reports' },
   { label: 'Negociações', path: '/deals', icon: 'deals' },
@@ -26,6 +27,12 @@ export const MobileMenu = () => {
   const [isOpen, setIsOpen] = useState(false)
   const location = useLocation()
   const menuRef = useRef<HTMLDivElement>(null)
+  const { isMaster } = useProject()
+  
+  // Adicionar "Relatórios de Cliente" apenas para usuários master
+  const navItems = isMaster
+    ? [...baseNavItems, { label: 'Relatórios de Cliente', path: '/client-reports', icon: 'reports' as keyof typeof import('@/components/icons/Icon').Icons }]
+    : baseNavItems
 
   // Fechar menu ao clicar fora
   useEffect(() => {
