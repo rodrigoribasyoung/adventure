@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/lib/firebase/auth'
 import { signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword, signOut } from '@/lib/firebase/auth'
-import { getDocument, createDocument } from '@/lib/firebase/db'
+import { getDocument, createDocumentWithId } from '@/lib/firebase/db'
 import { seedDatabase } from '@/lib/firebase/seed'
 import { User } from '@/types'
 
@@ -49,14 +49,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           
           if (!userDoc) {
             console.log('[AuthContext] Usuário não encontrado, criando novo documento')
-            // Criar documento do usuário se não existir
+            // Criar documento do usuário usando user.uid como ID do documento
             const newUserData: Omit<User, 'id' | 'createdAt' | 'updatedAt'> = {
               email: user.email || '',
               name: user.displayName || user.email || '',
               role: 'user',
               createdBy: user.uid,
             }
-            await createDocument<User>('users', newUserData)
+            await createDocumentWithId<User>('users', user.uid, newUserData)
             userDoc = await getDocument<User>('users', user.uid)
             console.log('[AuthContext] Usuário criado com sucesso')
           } else {

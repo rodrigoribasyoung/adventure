@@ -4,6 +4,7 @@ import {
   getDoc,
   getDocs,
   addDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -87,6 +88,33 @@ export const createDocument = async <T extends Record<string, any>>(
     return docRef.id
   } catch (error: any) {
     console.error(`[Firestore] Erro ao criar documento em ${collectionName}:`, error)
+    console.error(`[Firestore] Código do erro: ${error.code}, Mensagem: ${error.message}`)
+    throw error
+  }
+}
+
+// Criar documento com ID específico (útil para usuários onde o ID deve ser o UID)
+export const createDocumentWithId = async <T extends Record<string, any>>(
+  collectionName: string,
+  docId: string,
+  data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<string> => {
+  try {
+    // Remove campos undefined antes de salvar
+    const cleanData = removeUndefinedFields(data as Record<string, any>)
+    
+    const docData = {
+      ...cleanData,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    }
+    console.log(`[Firestore] Criando documento ${collectionName}/${docId}:`, docData)
+    const docRef = doc(db, collectionName, docId)
+    await setDoc(docRef, docData)
+    console.log(`[Firestore] Documento criado com sucesso: ${docId}`)
+    return docId
+  } catch (error: any) {
+    console.error(`[Firestore] Erro ao criar documento ${collectionName}/${docId}:`, error)
     console.error(`[Firestore] Código do erro: ${error.code}, Mensagem: ${error.message}`)
     throw error
   }
