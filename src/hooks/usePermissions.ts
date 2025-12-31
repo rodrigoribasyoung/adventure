@@ -7,6 +7,13 @@ export const usePermissions = () => {
   const { isMaster } = useProject()
   const { projectUser } = useCurrentProjectUser()
 
+  // Debug: log dos valores de permissão
+  console.log('[usePermissions] Debug:', {
+    userData: userData ? { id: userData.id, email: userData.email, isMaster: userData.isMaster } : null,
+    isMasterFromProject: isMaster,
+    isMasterFromUserData: userData?.isMaster === true,
+  })
+
   const isAdmin = () => {
     return userData?.role === 'admin' || isMaster
   }
@@ -39,13 +46,24 @@ export const usePermissions = () => {
   }
 
   // Permissão para acessar relatórios de clientes - apenas master
+  // Verifica tanto isMaster do ProjectContext quanto diretamente do userData
   const canAccessClientReports = () => {
-    return isMaster
+    const masterFromContext = isMaster
+    const masterFromUserData = userData?.isMaster === true
+    const result = masterFromContext || masterFromUserData
+    
+    console.log('[usePermissions] canAccessClientReports:', {
+      masterFromContext,
+      masterFromUserData,
+      result,
+    })
+    
+    return result
   }
 
   // Permissão para gerenciar integrações de clientes - apenas master
   const canManageClientIntegrations = () => {
-    return isMaster
+    return isMaster || userData?.isMaster === true
   }
 
   return {

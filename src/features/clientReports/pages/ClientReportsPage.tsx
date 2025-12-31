@@ -3,13 +3,37 @@ import { Container } from '@/components/layout/Container'
 import { Button } from '@/components/ui/Button'
 import { useProjects } from '@/hooks/useProjects'
 import { usePermissions } from '@/hooks/usePermissions'
+import { useAuth } from '@/contexts/AuthContext'
+import { useProject } from '@/contexts/ProjectContext'
 import { Link } from 'react-router-dom'
 import { CsvImporter } from '../components/CsvImporter'
 
 const ClientReportsPage = () => {
   const { projects, loading: projectsLoading } = useProjects()
-  const { canAccessClientReports } = usePermissions()
+  const { canAccessClientReports, isMaster } = usePermissions()
+  const { userData, loading: authLoading } = useAuth()
+  const { loading: projectLoading } = useProject()
   const [showImporter, setShowImporter] = useState(false)
+
+  // Aguardar carregamento dos dados antes de verificar permissões
+  if (authLoading || projectLoading) {
+    return (
+      <Container>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-white">Carregando permissões...</div>
+        </div>
+      </Container>
+    )
+  }
+
+  // Debug: log dos valores
+  console.log('[ClientReportsPage] Debug:', {
+    canAccessClientReports,
+    isMaster,
+    userData: userData ? { id: userData.id, email: userData.email, isMaster: userData.isMaster } : null,
+    authLoading,
+    projectLoading,
+  })
 
   if (!canAccessClientReports) {
     return (
@@ -18,6 +42,9 @@ const ClientReportsPage = () => {
           <div className="text-red-400 text-center">
             <p className="text-xl font-semibold mb-2">Acesso Negado</p>
             <p className="text-white/60">Você não tem permissão para acessar relatórios de clientes.</p>
+            <p className="text-white/40 text-xs mt-4">
+              Debug: isMaster={String(isMaster)}, userData.isMaster={String(userData?.isMaster)}
+            </p>
           </div>
         </div>
       </Container>
