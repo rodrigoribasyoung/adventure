@@ -32,7 +32,13 @@ export const ProjectProvider = ({ children }: ProjectProviderProps) => {
   const [currentProject, setCurrentProjectState] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const isMaster = userData?.isMaster === true
+  // Verificar se é Desenvolvedor ou Proprietário (acesso total)
+  const isDeveloper = userData?.userType === 'developer'
+  const isOwner = userData?.userType === 'owner'
+  const isDeveloperOrOwner = isDeveloper || isOwner
+  
+  // Calcular isMaster (compatibilidade com código antigo + nova hierarquia)
+  const isMaster = isDeveloperOrOwner || userData?.isMaster === true
 
   // Carregar projeto salvo do localStorage ou selecionar o primeiro disponível
   useEffect(() => {

@@ -7,12 +7,30 @@ export const usePermissions = () => {
   const { isMaster: isMasterFromProject } = useProject()
   const { projectUser } = useCurrentProjectUser()
 
-  // Calcular isMaster diretamente do userData para garantir que está atualizado
-  const isMaster = userData?.isMaster === true || isMasterFromProject
+  // Verificar se é Desenvolvedor (nível 0 - acesso total)
+  const isDeveloper = userData?.userType === 'developer'
+  
+  // Verificar se é Proprietário (nível 1 - acesso total)
+  const isOwner = userData?.userType === 'owner'
+  
+  // Verificar se é Desenvolvedor ou Proprietário (acesso total)
+  const isDeveloperOrOwner = isDeveloper || isOwner
+  
+  // Calcular isMaster (compatibilidade com código antigo + nova hierarquia)
+  // isMaster = developer, owner, ou isMaster antigo
+  const isMaster = isDeveloperOrOwner || userData?.isMaster === true || isMasterFromProject
 
   // Debug: log dos valores de permissão
   console.log('[usePermissions] Debug:', {
-    userData: userData ? { id: userData.id, email: userData.email, isMaster: userData.isMaster } : null,
+    userData: userData ? { 
+      id: userData.id, 
+      email: userData.email, 
+      userType: userData.userType,
+      isMaster: userData.isMaster 
+    } : null,
+    isDeveloper,
+    isOwner,
+    isDeveloperOrOwner,
     isMasterFromProject,
     isMasterFromUserData: userData?.isMaster === true,
     finalIsMaster: isMaster,
@@ -27,42 +45,53 @@ export const usePermissions = () => {
   }
 
   const canManageUsers = () => {
-    return isMaster || isAdmin()
+    // Desenvolvedor, Proprietário ou Admin podem gerenciar usuários
+    return isDeveloperOrOwner || isAdmin()
   }
 
   const canManageSettings = () => {
-    return isMaster || isAdmin()
+    // Desenvolvedor, Proprietário ou Admin podem gerenciar configurações
+    return isDeveloperOrOwner || isAdmin()
   }
 
   const canManageProjects = () => {
-    return isMaster
+    // Apenas Desenvolvedor ou Proprietário podem gerenciar projetos
+    return isDeveloperOrOwner
   }
 
   const canManageProjectMembers = () => {
-    return isMaster
+    // Apenas Desenvolvedor ou Proprietário podem gerenciar membros
+    return isDeveloperOrOwner
   }
 
-  // Permissão para excluir deals e companies - apenas owner e admin
+  // Permissão para excluir deals e companies
   const canDeleteDealsAndCompanies = () => {
-    if (isMaster) return true
+    // Desenvolvedor e Proprietário sempre podem excluir
+    if (isDeveloperOrOwner) return true
+    // Outros: apenas owner e admin do projeto
     const role = projectUser?.role
     return role === 'owner' || role === 'admin'
   }
 
-  // Permissão para acessar relatórios de clientes - apenas master
+  // Permissão para acessar relatórios de clientes
+  // Desenvolvedor e Proprietário têm acesso total
   const canAccessClientReports = () => {
-    return isMaster
+    return isDeveloperOrOwner
   }
 
-  // Permissão para gerenciar integrações de clientes - apenas master
+  // Permissão para gerenciar integrações de clientes
+  // Desenvolvedor e Proprietário têm acesso total
   const canManageClientIntegrations = () => {
-    return isMaster
+    return isDeveloperOrOwner
   }
 
   return {
     isAdmin: isAdmin(),
     isUser: isUser(),
-    isMaster,
+    isMaster, // Mantido para compatibilidade
+    isDeveloper,
+    isOwner,
+    isDeveloperOrOwner,
     canManageUsers: canManageUsers(),
     canManageSettings: canManageSettings(),
     canManageProjects: canManageProjects(),

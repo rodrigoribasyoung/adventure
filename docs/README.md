@@ -9,19 +9,17 @@ Bem-vindo à documentação do Adventure CRM. Aqui você encontra todos os guias
 - **[Visão Geral](WHATSAPP_INTEGRATION.md)** - Arquitetura, funcionalidades e estrutura
 - **[Guia de Configuração](SETUP_GUIDE.md)** - Passo a passo completo para configurar
 - **[Solução de Problemas](TROUBLESHOOTING.md)** - Troubleshooting e debug
-- **[Regras do Firestore](FIRESTORE_RULES.md)** - Configuração de segurança
 
-### Configuração Multi-Tenant
+### Configuração do Firebase
 
-- **[Configuração Firebase Multi-Tenant](FIREBASE_MULTI_TENANT_SETUP.md)** - Guia completo para configurar o Firebase Firestore para suportar multi-tenant (projectId)
-- **[Hierarquia de Acesso](FIRESTORE_RULES_HIERARCHY.md)** - Sistema de hierarquia de acesso (Desenvolvedor, Proprietário, Cliente, Usuário)
+- **[Hierarquia de Acesso](FIRESTORE_RULES_HIERARCHY.md)** - Sistema de hierarquia de acesso (Desenvolvedor, Proprietário, Cliente, Usuário) e regras do Firestore
 
 ## 🚀 Início Rápido
 
 Se você está configurando a integração WhatsApp pela primeira vez:
 
 1. Comece pelo [Guia de Configuração](SETUP_GUIDE.md)
-2. Configure as [Regras do Firestore](FIRESTORE_RULES.md)
+2. Configure as [Regras do Firestore](FIRESTORE_RULES_HIERARCHY.md)
 3. Consulte [Solução de Problemas](TROUBLESHOOTING.md) se encontrar erros
 
 ## 📖 Outros Documentos
