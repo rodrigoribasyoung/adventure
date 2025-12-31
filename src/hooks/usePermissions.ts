@@ -38,6 +38,16 @@ export const usePermissions = () => {
     return role === 'owner' || role === 'admin'
   }
 
+  // Permissão para acessar relatórios de clientes - apenas master
+  const canAccessClientReports = () => {
+    return isMaster
+  }
+
+  // Permissão para gerenciar integrações de clientes - apenas master
+  const canManageClientIntegrations = () => {
+    return isMaster
+  }
+
   return {
     isAdmin: isAdmin(),
     isUser: isUser(),
@@ -47,6 +57,8 @@ export const usePermissions = () => {
     canManageProjects: canManageProjects(),
     canManageProjectMembers: canManageProjectMembers(),
     canDeleteDealsAndCompanies: canDeleteDealsAndCompanies(),
+    canAccessClientReports: canAccessClientReports(),
+    canManageClientIntegrations: canManageClientIntegrations(),
   }
 }
 
