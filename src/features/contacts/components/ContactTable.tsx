@@ -57,7 +57,10 @@ export const ContactTable = ({ contacts, loading, onEdit, onDelete, canDelete = 
                       Telefone
                     </th>
                     <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
-                      Empresa
+                      Empresas
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
+                      Cargo
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
                       Ações
@@ -66,7 +69,15 @@ export const ContactTable = ({ contacts, loading, onEdit, onDelete, canDelete = 
                 </thead>
                 <tbody className="divide-y divide-white/10">
                   {paginatedContacts.map((contact) => {
-                    const company = contact.companyId ? companies.find(c => c.id === contact.companyId) : null
+                    // Buscar empresas relacionadas (usando companyIds ou companyId para compatibilidade)
+                    const relatedCompanies = contact.companyIds && contact.companyIds.length > 0
+                      ? companies.filter(c => contact.companyIds!.includes(c.id))
+                      : contact.companyId
+                        ? companies.filter(c => c.id === contact.companyId)
+                        : []
+                    const companiesDisplay = relatedCompanies.length > 0
+                      ? relatedCompanies.map(c => c.name).join(', ')
+                      : '-'
                     return (
                       <tr
                         key={contact.id}
@@ -82,8 +93,13 @@ export const ContactTable = ({ contacts, loading, onEdit, onDelete, canDelete = 
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-white/70">{contact.phone || '-'}</div>
                         </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-white/70 max-w-xs truncate" title={companiesDisplay}>
+                            {companiesDisplay}
+                          </div>
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-white/70">{company?.name || '-'}</div>
+                          <div className="text-sm text-white/70">{contact.jobTitle || '-'}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>

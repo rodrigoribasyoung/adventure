@@ -16,7 +16,12 @@ const contactSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   phone: z.string().optional(),
-  companyId: z.string().optional(),
+  companyId: z.string().optional(), // DEPRECATED - usar companyIds
+  companyIds: z.array(z.string()).optional(),
+  jobTitle: z.string().optional(),
+  department: z.string().optional(),
+  linkedin: z.string().url('URL inválida').optional().or(z.literal('')),
+  notes: z.string().optional(),
   customFields: z.record(z.any()).optional(),
 })
 
@@ -24,7 +29,19 @@ type ContactFormData = z.infer<typeof contactSchema>
 
 interface ContactFormProps {
   contact?: Contact
-  onSubmit: (data: { firstName: string; lastName?: string; email?: string; phone?: string; companyId?: string; customFields?: Record<string, any> }) => Promise<void>
+  onSubmit: (data: { 
+    firstName: string
+    lastName?: string
+    email?: string
+    phone?: string
+    companyId?: string
+    companyIds?: string[]
+    jobTitle?: string
+    department?: string
+    linkedin?: string
+    notes?: string
+    customFields?: Record<string, any>
+  }) => Promise<void>
   onCancel: () => void
   loading?: boolean
 }
@@ -49,9 +66,15 @@ export const ContactForm = ({ contact, onSubmit, onCancel, loading = false }: Co
           email: contact.email || '',
           phone: contact.phone || '',
           companyId: contact.companyId || '',
+          companyIds: contact.companyIds || (contact.companyId ? [contact.companyId] : []),
+          jobTitle: contact.jobTitle || '',
+          department: contact.department || '',
+          linkedin: contact.linkedin || '',
+          notes: contact.notes || '',
           customFields: contact.customFields || {},
         }
       : {
+          companyIds: [],
           customFields: {},
         },
   })
@@ -81,7 +104,12 @@ export const ContactForm = ({ contact, onSubmit, onCancel, loading = false }: Co
       lastName,
       email: data.email || undefined,
       phone: data.phone || undefined,
-      companyId: data.companyId || undefined,
+      companyId: data.companyId || undefined, // Manter para compatibilidade
+      companyIds: data.companyIds && data.companyIds.length > 0 ? data.companyIds : undefined,
+      jobTitle: data.jobTitle || undefined,
+      department: data.department || undefined,
+      linkedin: data.linkedin || undefined,
+      notes: data.notes || undefined,
       customFields: data.customFields && Object.keys(data.customFields).length > 0 ? data.customFields : undefined,
     })
   }
@@ -110,16 +138,53 @@ export const ContactForm = ({ contact, onSubmit, onCancel, loading = false }: Co
         placeholder="(00) 00000-0000"
       />
 
+      <Input
+        label="Cargo/Função"
+        {...register('jobTitle')}
+        error={errors.jobTitle?.message}
+        placeholder="Ex: Gerente de Vendas, Diretor"
+      />
+
+      <Input
+        label="Departamento"
+        {...register('department')}
+        error={errors.department?.message}
+        placeholder="Ex: Vendas, Marketing"
+      />
+
+      <Input
+        label="LinkedIn"
+        type="url"
+        {...register('linkedin')}
+        error={errors.linkedin?.message}
+        placeholder="https://linkedin.com/in/exemplo"
+      />
+
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="block text-sm font-medium text-white/90">
-            Empresa
+            Empresas
           </label>
           <QuickCreateButton onClick={() => setIsCompanyModalOpen(true)} />
         </div>
         <select
+          multiple
+          {...register('companyIds')}
+          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200 min-h-[120px]"
+        >
+          {companies.map(company => (
+            <option key={company.id} value={company.id}>
+              {company.name}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-xs text-white/60">
+          Segure Ctrl/Cmd para selecionar múltiplas empresas
+        </p>
+        {/* Manter campo antigo para compatibilidade (oculto) */}
+        <select
           {...register('companyId')}
-          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
+          className="hidden"
         >
           <option value="">Nenhuma empresa</option>
           {companies.map(company => (
@@ -128,9 +193,18 @@ export const ContactForm = ({ contact, onSubmit, onCancel, loading = false }: Co
             </option>
           ))}
         </select>
-        {errors.companyId && (
-          <p className="mt-1 text-sm text-red-400">{errors.companyId.message}</p>
-        )}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-white/90 mb-2">
+          Observações
+        </label>
+        <textarea
+          {...register('notes')}
+          rows={3}
+          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200 resize-none"
+          placeholder="Observações sobre o contato..."
+        />
       </div>
 
       <RenderCustomFields

@@ -72,7 +72,12 @@ export interface Contact extends BaseEntity {
   name: string // Nome completo (gerado automaticamente)
   email?: string
   phone?: string
-  companyId?: string
+  companyId?: string // DEPRECATED - usar companyIds
+  companyIds?: string[] // Múltiplas empresas (relação N:N)
+  jobTitle?: string // Cargo/função
+  department?: string // Departamento
+  linkedin?: string // LinkedIn
+  notes?: string // Observações sobre o contato
   customFields?: Record<string, any>
 }
 
@@ -90,6 +95,21 @@ export interface Company extends BaseEntity {
     zipCode?: string
     country?: string
   }
+  // Campos de segmentação
+  segment?: string // Segmento de mercado
+  industry?: string // Setor/Indústria
+  size?: 'micro' | 'pequena' | 'media' | 'grande' | 'enterprise' // Porte da empresa
+  annualRevenue?: number // Faturamento anual
+  employeeCount?: number // Número de funcionários
+  website?: string // Website
+  socialMedia?: {
+    linkedin?: string
+    instagram?: string
+    facebook?: string
+    twitter?: string
+  }
+  contactIds?: string[] // Múltiplos contatos (relação N:N)
+  notes?: string // Observações sobre a empresa
   customFields?: Record<string, any>
 }
 

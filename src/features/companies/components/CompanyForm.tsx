@@ -13,6 +13,19 @@ const companySchema = z.object({
   cnpj: z.string().optional(),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   phone: z.string().optional(),
+  // Campos de segmentação
+  segment: z.string().optional(),
+  industry: z.string().optional(),
+  size: z.enum(['micro', 'pequena', 'media', 'grande', 'enterprise']).optional(),
+  annualRevenue: z.number().optional(),
+  employeeCount: z.number().optional(),
+  website: z.string().url('URL inválida').optional().or(z.literal('')),
+  linkedin: z.string().url('URL inválida').optional().or(z.literal('')),
+  instagram: z.string().optional(),
+  facebook: z.string().optional(),
+  twitter: z.string().optional(),
+  notes: z.string().optional(),
+  contactIds: z.array(z.string()).optional(),
   customFields: z.record(z.any()).optional(),
 })
 
@@ -29,8 +42,14 @@ export const CompanyForm = ({ company, onSubmit, onCancel, loading = false }: Co
   const { customFields } = useCustomFields('company')
   const { contacts } = useContacts()
   
-  // Buscar contatos relacionados a esta empresa
-  const relatedContacts = company ? contacts.filter(c => c.companyId === company.id) : []
+  // Buscar contatos relacionados a esta empresa (usando companyIds ou companyId para compatibilidade)
+  const relatedContacts = company 
+    ? contacts.filter(c => 
+        (company.contactIds?.includes(c.id)) || 
+        (c.companyId === company.id) ||
+        (c.companyIds?.includes(company.id))
+      )
+    : []
   const {
     register,
     handleSubmit,
@@ -44,9 +63,22 @@ export const CompanyForm = ({ company, onSubmit, onCancel, loading = false }: Co
           cnpj: company.cnpj || '',
           email: company.email || '',
           phone: company.phone || '',
+          segment: company.segment || '',
+          industry: company.industry || '',
+          size: company.size || undefined,
+          annualRevenue: company.annualRevenue || undefined,
+          employeeCount: company.employeeCount || undefined,
+          website: company.website || '',
+          linkedin: company.socialMedia?.linkedin || '',
+          instagram: company.socialMedia?.instagram || '',
+          facebook: company.socialMedia?.facebook || '',
+          twitter: company.socialMedia?.twitter || '',
+          notes: company.notes || '',
+          contactIds: company.contactIds || [],
           customFields: company.customFields || {},
         }
       : {
+          contactIds: [],
           customFields: {},
         },
   })
@@ -57,6 +89,20 @@ export const CompanyForm = ({ company, onSubmit, onCancel, loading = false }: Co
       email: data.email || undefined,
       phone: data.phone || undefined,
       cnpj: data.cnpj || undefined,
+      website: data.website || undefined,
+      segment: data.segment || undefined,
+      industry: data.industry || undefined,
+      size: data.size || undefined,
+      annualRevenue: data.annualRevenue || undefined,
+      employeeCount: data.employeeCount || undefined,
+      socialMedia: {
+        linkedin: data.linkedin || undefined,
+        instagram: data.instagram || undefined,
+        facebook: data.facebook || undefined,
+        twitter: data.twitter || undefined,
+      },
+      notes: data.notes || undefined,
+      contactIds: data.contactIds && data.contactIds.length > 0 ? data.contactIds : undefined,
       customFields: data.customFields && Object.keys(data.customFields).length > 0 ? data.customFields : undefined,
     })
   }
@@ -92,27 +138,143 @@ export const CompanyForm = ({ company, onSubmit, onCancel, loading = false }: Co
         placeholder="(00) 00000-0000"
       />
 
+      <Input
+        label="Website"
+        type="url"
+        {...register('website')}
+        error={errors.website?.message}
+        placeholder="https://exemplo.com"
+      />
+
+      {/* Campos de Segmentação */}
+      <div className="pt-4 border-t border-white/10">
+        <h3 className="text-sm font-medium text-white/90 mb-3">Segmentação</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Segmento"
+            {...register('segment')}
+            error={errors.segment?.message}
+            placeholder="Ex: B2B, B2C, SaaS"
+          />
+
+          <Input
+            label="Setor/Indústria"
+            {...register('industry')}
+            error={errors.industry?.message}
+            placeholder="Ex: Tecnologia, Varejo"
+          />
+
+          <div>
+            <label className="block text-sm font-medium text-white/90 mb-2">
+              Porte da Empresa
+            </label>
+            <select
+              {...register('size')}
+              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
+            >
+              <option value="">Selecione o porte</option>
+              <option value="micro">Micro</option>
+              <option value="pequena">Pequena</option>
+              <option value="media">Média</option>
+              <option value="grande">Grande</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+          </div>
+
+          <Input
+            label="Faturamento Anual (R$)"
+            type="number"
+            step="0.01"
+            {...register('annualRevenue', { valueAsNumber: true })}
+            error={errors.annualRevenue?.message}
+            placeholder="0.00"
+          />
+
+          <Input
+            label="Número de Funcionários"
+            type="number"
+            {...register('employeeCount', { valueAsNumber: true })}
+            error={errors.employeeCount?.message}
+            placeholder="0"
+          />
+        </div>
+      </div>
+
+      {/* Redes Sociais */}
+      <div className="pt-4 border-t border-white/10">
+        <h3 className="text-sm font-medium text-white/90 mb-3">Redes Sociais</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="LinkedIn"
+            type="url"
+            {...register('linkedin')}
+            error={errors.linkedin?.message}
+            placeholder="https://linkedin.com/company/exemplo"
+          />
+
+          <Input
+            label="Instagram"
+            {...register('instagram')}
+            error={errors.instagram?.message}
+            placeholder="@exemplo"
+          />
+
+          <Input
+            label="Facebook"
+            {...register('facebook')}
+            error={errors.facebook?.message}
+            placeholder="https://facebook.com/exemplo"
+          />
+
+          <Input
+            label="Twitter/X"
+            {...register('twitter')}
+            error={errors.twitter?.message}
+            placeholder="@exemplo"
+          />
+        </div>
+      </div>
+
+      {/* Múltiplos Contatos */}
+      <div className="pt-4 border-t border-white/10">
+        <label className="block text-sm font-medium text-white/90 mb-2">
+          Contatos
+        </label>
+        <select
+          multiple
+          {...register('contactIds')}
+          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200 min-h-[120px]"
+        >
+          {contacts.map(contact => (
+            <option key={contact.id} value={contact.id}>
+              {contact.name} {contact.email && `(${contact.email})`}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-xs text-white/60">
+          Segure Ctrl/Cmd para selecionar múltiplos contatos
+        </p>
+      </div>
+
+      {/* Observações */}
+      <div>
+        <label className="block text-sm font-medium text-white/90 mb-2">
+          Observações
+        </label>
+        <textarea
+          {...register('notes')}
+          rows={3}
+          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200 resize-none"
+          placeholder="Observações sobre a empresa..."
+        />
+      </div>
+
       <RenderCustomFields
         customFields={customFields}
         control={control}
         entityCustomFields={company?.customFields}
       />
 
-      {/* Contatos Relacionados */}
-      {company && relatedContacts.length > 0 && (
-        <div className="pt-4 border-t border-white/10">
-          <label className="block text-sm font-medium text-white/90 mb-2">
-            Contatos Relacionados ({relatedContacts.length})
-          </label>
-          <div className="space-y-2 max-h-32 overflow-y-auto bg-white/5 rounded-lg p-3">
-            {relatedContacts.map(contact => (
-              <div key={contact.id} className="text-sm text-white/70">
-                {contact.name} {contact.email && `(${contact.email})`}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="flex justify-end gap-3 pt-4">
         <Button type="button" variant="ghost" onClick={onCancel} disabled={loading}>

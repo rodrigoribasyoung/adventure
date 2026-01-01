@@ -291,20 +291,28 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
 
       // Validar campos obrigatórios da etapa selecionada
       const selectedStage = activeFunnel.stages.find(s => s.id === data.stage)
-      const requiredFields = selectedStage?.requiredFields || []
+      // Se o stage não existe no funil ativo, permitir edição mesmo assim (pode ser deal perdido/ganho)
+      // Não validar campos obrigatórios se o stage não existir (deal pode estar fechado)
+      if (!selectedStage) {
+        console.warn('Stage não encontrado no funil ativo, pulando validação de campos obrigatórios')
+      }
       
+      const requiredFields = selectedStage?.requiredFields || []
       const validationErrors: string[] = []
       
-      if (requiredFields.includes('title') && (!data.title || data.title.trim() === '')) {
-        validationErrors.push('Título é obrigatório para esta etapa')
-      }
-      
-      if (requiredFields.includes('contactId') && (!data.contactId || data.contactId.trim() === '')) {
-        validationErrors.push('Contato é obrigatório para esta etapa')
-      }
-      
-      if (requiredFields.includes('value') && (!data.value || data.value <= 0)) {
-        validationErrors.push('Valor é obrigatório e deve ser maior que zero para esta etapa')
+      // Só validar campos obrigatórios se o stage existir
+      if (selectedStage) {
+        if (requiredFields.includes('title') && (!data.title || data.title.trim() === '')) {
+          validationErrors.push('Título é obrigatório para esta etapa')
+        }
+        
+        if (requiredFields.includes('contactId') && (!data.contactId || data.contactId.trim() === '')) {
+          validationErrors.push('Contato é obrigatório para esta etapa')
+        }
+        
+        if (requiredFields.includes('value') && (!data.value || data.value <= 0)) {
+          validationErrors.push('Valor é obrigatório e deve ser maior que zero para esta etapa')
+        }
       }
       
       if (validationErrors.length > 0) {
@@ -432,9 +440,20 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
                         {stage.name}
                       </option>
                     ))}
+                  {/* Mostrar stage atual se não estiver no funil ativo (deal perdido/ganho) */}
+                  {deal && deal.stage && !activeFunnel.stages.find(s => s.id === deal.stage) && (
+                    <option value={deal.stage} disabled>
+                      {deal.stage} (Não disponível no funil atual)
+                    </option>
+                  )}
                 </select>
                 {errors.stage && (
                   <p className="mt-1 text-sm text-red-400">{errors.stage.message}</p>
+                )}
+                {deal && deal.stage && !activeFunnel.stages.find(s => s.id === deal.stage) && (
+                  <p className="mt-1 text-sm text-yellow-400">
+                    ⚠️ Este estágio não está mais disponível no funil ativo. A negociação pode estar fechada.
+                  </p>
                 )}
               </div>
             )}

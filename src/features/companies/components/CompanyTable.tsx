@@ -63,7 +63,7 @@ export const CompanyTable = ({ companies, loading, onEdit, onDelete, canDelete =
                       Endereço
                     </th>
                     <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
-                      Contato Principal
+                      Contatos
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
                       Ações
@@ -77,8 +77,11 @@ export const CompanyTable = ({ companies, loading, onEdit, onDelete, canDelete =
                       ? `${address.street || ''}${address.city ? `, ${address.city}` : ''}${address.state ? ` - ${address.state}` : ''}${address.zipCode ? `, ${address.zipCode}` : ''}`.trim()
                       : '-'
                     
-                    // Buscar contato principal da empresa (primeiro contato vinculado)
-                    const companyContact = contacts.find(c => c.companyId === company.id)
+                    // Buscar contatos relacionados (usando contactIds ou companyId para compatibilidade)
+                    const relatedContacts = company.contactIds && company.contactIds.length > 0
+                      ? contacts.filter(c => company.contactIds!.includes(c.id))
+                      : contacts.filter(c => c.companyId === company.id || c.companyIds?.includes(company.id))
+                    const primaryContact = relatedContacts.length > 0 ? relatedContacts[0] : null
                     
                     return (
                       <tr
@@ -103,8 +106,21 @@ export const CompanyTable = ({ companies, loading, onEdit, onDelete, canDelete =
                             {addressString}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-white/70">{companyContact?.name || '-'}</div>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-white/70">
+                            {relatedContacts.length > 0 ? (
+                              <div className="space-y-1">
+                                <div>{primaryContact?.name || '-'}</div>
+                                {relatedContacts.length > 1 && (
+                                  <div className="text-xs text-white/50">
+                                    +{relatedContacts.length - 1} outro(s)
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              '-'
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
