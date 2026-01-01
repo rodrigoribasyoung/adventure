@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Container } from '@/components/layout/Container'
 import { CompanyTable } from '../components/CompanyTable'
 import { CompanyForm } from '../components/CompanyForm'
@@ -20,6 +21,7 @@ interface CompanyFilters {
 }
 
 const CompaniesPage = () => {
+  const navigate = useNavigate()
   const { companies, loading, createCompany, updateCompany, deleteCompany } = useCompanies()
   const { contacts } = useContacts()
   const { canDeleteDealsAndCompanies } = usePermissions()
@@ -91,8 +93,7 @@ const CompaniesPage = () => {
   }
 
   const handleEdit = (company: Company) => {
-    setSelectedCompany(company)
-    setIsModalOpen(true)
+    navigate(`/companies/${company.id}`)
   }
 
   const handleSubmit = async (data: any) => {

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Container } from '@/components/layout/Container'
 import { ContactTable } from '../components/ContactTable'
 import { usePermissions } from '@/hooks/usePermissions'
@@ -19,6 +20,7 @@ interface ContactFilters {
 }
 
 const ContactsPage = () => {
+  const navigate = useNavigate()
   const { contacts, loading, createContact, updateContact, deleteContact } = useContacts()
   const { companies } = useCompanies()
   const { canDeleteDealsAndCompanies } = usePermissions()
@@ -78,8 +80,7 @@ const ContactsPage = () => {
   }
 
   const handleEdit = (contact: Contact) => {
-    setSelectedContact(contact)
-    setIsModalOpen(true)
+    navigate(`/contacts/${contact.id}`)
   }
 
   const handleSubmit = async (data: any) => {

@@ -5,7 +5,9 @@ import CRMPage from '@/features/home/pages/CRMPage'
 import HomePage from '@/features/home/pages/HomePage'
 import DashboardPage from '@/features/dashboard/pages/DashboardPage'
 import ContactsPage from '@/features/contacts/pages/ContactsPage'
+import ContactDetailPage from '@/features/contacts/pages/ContactDetailPage'
 import CompaniesPage from '@/features/companies/pages/CompaniesPage'
+import CompanyDetailPage from '@/features/companies/pages/CompanyDetailPage'
 import ServicesPage from '@/features/services/pages/ServicesPage'
 import DealsPage from '@/features/deals/pages/DealsPage'
 import DealDetailPage from '@/features/deals/pages/DealDetailPage'
@@ -94,10 +96,26 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    path: '/contacts/:id',
+    element: (
+      <PrivateRoute>
+        <ContactDetailPage />
+      </PrivateRoute>
+    ),
+  },
+  {
     path: '/companies',
     element: (
       <PrivateRoute>
         <CompaniesPage />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/companies/:id',
+    element: (
+      <PrivateRoute>
+        <CompanyDetailPage />
       </PrivateRoute>
     ),
   },
