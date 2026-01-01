@@ -84,6 +84,11 @@ export const useTasks = (dealId?: string) => {
       if (!currentUser) throw new Error('Usuário não autenticado')
       if (!currentProject) throw new Error('Nenhum projeto selecionado')
       
+      // Validar se há responsável atribuído
+      if (!data.assignedTo || data.assignedTo.trim() === '') {
+        throw new Error('É obrigatório atribuir um responsável à tarefa.')
+      }
+      
       const taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'> = {
         ...data,
         projectId: currentProject.id,

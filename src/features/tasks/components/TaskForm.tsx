@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -13,7 +14,7 @@ const taskSchema = z.object({
   type: z.string().min(1, 'Tipo é obrigatório'),
   dueDate: z.string().optional(),
   status: z.enum(['pending', 'completed']).optional(),
-  assignedTo: z.string().optional(),
+  assignedTo: z.string().min(1, 'Responsável é obrigatório'),
 })
 
 type TaskFormData = z.infer<typeof taskSchema>
@@ -40,17 +41,31 @@ const TASK_TYPES = [
 ]
 
 export const TaskForm = ({ task, dealId, onSubmit, onCancel, loading = false }: TaskFormProps) => {
-  const { members } = useProjectMembers()
+  const { members, loading: membersLoading } = useProjectMembers()
+  
+  // Filtrar apenas responsáveis ativos
+  const activeMembers = members.filter(m => m.active)
   
   const {
     register,
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
-    defaultValues: task
+    defaultValues: {
+      status: 'pending',
+      assignedTo: '',
+    },
+  })
+  
+  // Atualizar valores padrão quando membros forem carregados
+  useEffect(() => {
+    if (membersLoading) return
+    
+    reset(task
       ? {
           title: task.title,
           description: task.description || '',
@@ -59,14 +74,31 @@ export const TaskForm = ({ task, dealId, onSubmit, onCancel, loading = false }: 
             ? new Date(task.dueDate.toMillis()).toISOString().split('T')[0]
             : '',
           status: task.status,
-          assignedTo: task.assignedTo || '',
+          assignedTo: task.assignedTo || (activeMembers.length > 0 ? activeMembers[0].id : ''),
         }
       : {
           status: 'pending',
-        },
-  })
+          assignedTo: activeMembers.length > 0 ? activeMembers[0].id : '',
+        })
+  }, [task, activeMembers, membersLoading, reset])
 
   const handleSubmitForm = async (data: TaskFormData) => {
+    // Validar se há responsáveis ativos no projeto
+    if (activeMembers.length === 0) {
+      throw new Error('É necessário ter pelo menos um responsável ativo no projeto para criar tarefas. Por favor, cadastre um responsável primeiro.')
+    }
+    
+    // Validar se responsável foi selecionado
+    if (!data.assignedTo || data.assignedTo.trim() === '') {
+      throw new Error('É obrigatório selecionar um responsável para a tarefa.')
+    }
+    
+    // Validar se o responsável selecionado existe e está ativo
+    const selectedMember = activeMembers.find(m => m.id === data.assignedTo)
+    if (!selectedMember) {
+      throw new Error('O responsável selecionado não é válido ou está inativo.')
+    }
+    
     const submitData: any = {
       ...data,
       description: data.description || undefined,
@@ -137,25 +169,41 @@ export const TaskForm = ({ task, dealId, onSubmit, onCancel, loading = false }: 
         error={errors.dueDate?.message}
       />
 
-      <div>
-        <label className="block text-sm font-medium text-white/90 mb-2">
-          Responsável
-        </label>
-        <select
-          {...register('assignedTo')}
-          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
-        >
-          <option value="">Nenhum responsável</option>
-          {members.filter(m => m.active).map(member => (
-            <option key={member.id} value={member.id}>
-              {member.name} {member.role ? `- ${member.role}` : ''}
-            </option>
-          ))}
-        </select>
-        {errors.assignedTo && (
-          <p className="mt-1 text-sm text-red-400">{errors.assignedTo.message}</p>
-        )}
-      </div>
+      {activeMembers.length === 0 ? (
+        <div className="p-4 bg-yellow-500/20 border border-yellow-500/50 rounded-lg">
+          <p className="text-yellow-400 text-sm font-medium mb-2 flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            Nenhum responsável ativo encontrado
+          </p>
+          <p className="text-yellow-300/80 text-sm">
+            É necessário ter pelo menos um responsável ativo no projeto para criar tarefas. 
+            <a href="/settings/project-members" className="underline ml-1">Cadastrar responsável agora</a>
+          </p>
+        </div>
+      ) : (
+        <div>
+          <label className="block text-sm font-medium text-white/90 mb-2">
+            Responsável *
+          </label>
+          <select
+            {...register('assignedTo')}
+            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
+            disabled={membersLoading}
+          >
+            <option value="">Selecione um responsável</option>
+            {activeMembers.map(member => (
+              <option key={member.id} value={member.id}>
+                {member.name} {member.role ? `- ${member.role}` : ''}
+              </option>
+            ))}
+          </select>
+          {errors.assignedTo && (
+            <p className="mt-1 text-sm text-red-400">{errors.assignedTo.message}</p>
+          )}
+        </div>
+      )}
 
       {task && (
         <div className="flex items-center gap-3">
