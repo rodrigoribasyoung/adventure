@@ -19,6 +19,7 @@ import { IceExplosion } from '@/components/animations/IceExplosion'
 import { FireExplosion } from '@/components/animations/FireExplosion'
 import { formatCurrency } from '@/lib/utils/formatCurrency'
 import { formatWhatsAppLink } from '@/lib/utils/whatsapp'
+import { toDate } from '@/lib/utils/timestamp'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -308,7 +309,10 @@ const DealDetailPage = () => {
                   <div>
                     <label className="text-sm text-white/70">Data de Fechamento Esperada</label>
                     <p className="text-white">
-                      {format(deal.expectedCloseDate.toDate(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                      {(() => {
+                        const date = toDate(deal.expectedCloseDate)
+                        return date ? format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : '-'
+                      })()}
                     </p>
                   </div>
                 )}
@@ -317,7 +321,10 @@ const DealDetailPage = () => {
                   <div>
                     <label className="text-sm text-white/70">Data de Fechamento</label>
                     <p className="text-white">
-                      {format(deal.closedAt.toDate(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                      {(() => {
+                        const date = toDate(deal.closedAt)
+                        return date ? format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : '-'
+                      })()}
                     </p>
                   </div>
                 )}
