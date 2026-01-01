@@ -118,6 +118,10 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
     formState: { errors },
   } = form
 
+  // Detectar responsável automaticamente baseado em empresa/projeto
+  const watchedCompanyId = watch('companyId')
+  const autoAssignedResponsible = useAutoAssignResponsible(watchedCompanyId)
+
   useEffect(() => {
     if (membersLoading) return // Aguardar carregamento dos membros
     
