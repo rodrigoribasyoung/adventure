@@ -292,13 +292,14 @@ export const CompanyForm = ({ company, onSubmit, onCancel, loading = false }: Co
         </div>
         
         {/* Campo de busca */}
-        <Input
-          label="Buscar contato"
-          value={contactSearch}
-          onChange={(e) => setContactSearch(e.target.value)}
-          placeholder="Digite para buscar..."
-          className="mb-2"
-        />
+        <div className="mb-2">
+          <Input
+            label="Buscar contato"
+            value={contactSearch}
+            onChange={(e) => setContactSearch(e.target.value)}
+            placeholder="Digite para buscar..."
+          />
+        </div>
         
         <select
           multiple
