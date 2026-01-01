@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Company } from '@/types'
+import { Company, Contact } from '@/types'
 import { Button } from '@/components/ui/Button'
 import { Pagination } from '@/components/ui/Pagination'
 
@@ -10,7 +10,7 @@ interface CompanyTableProps {
   onDelete: (id: string) => void
   onCreateNew?: () => void
   canDelete?: boolean
-  contacts?: Array<{ id: string; name: string; companyId?: string }>
+  contacts?: Contact[]
 }
 
 export const CompanyTable = ({ companies, loading, onEdit, onDelete, canDelete = true, contacts = [] }: CompanyTableProps) => {
