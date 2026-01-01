@@ -3,6 +3,7 @@ import { Deal } from '@/types'
 import { FunnelStage } from '@/types'
 import { Card } from '@/components/ui/Card'
 import { formatCurrency } from '@/lib/utils/formatCurrency'
+import { toDate } from '@/lib/utils/timestamp'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { FiArrowUp, FiArrowDown, FiPause, FiPlay } from 'react-icons/fi'
@@ -146,7 +147,10 @@ export const DealKanban = ({
                     </p>
                     {deal.expectedCloseDate && (
                       <p className="text-xs text-white/60">
-                        Fechamento: {format(deal.expectedCloseDate.toDate(), "dd/MM/yyyy", { locale: ptBR })}
+                        Fechamento: {(() => {
+                          const date = toDate(deal.expectedCloseDate)
+                          return date ? format(date, "dd/MM/yyyy", { locale: ptBR }) : '-'
+                        })()}
                       </p>
                     )}
                     <div className="flex items-center justify-between">

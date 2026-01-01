@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Pagination } from '@/components/ui/Pagination'
 import { formatCurrency } from '@/lib/utils/formatCurrency'
+import { toDate } from '@/lib/utils/timestamp'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -234,7 +235,10 @@ export const DealListView = ({
                       <div className="flex items-center gap-4 text-sm text-white/70">
                         {deal.expectedCloseDate && (
                           <span>
-                            Fechamento: {format(deal.expectedCloseDate.toDate(), "dd/MM/yyyy", { locale: ptBR })}
+                            Fechamento: {(() => {
+                              const date = toDate(deal.expectedCloseDate)
+                              return date ? format(date, "dd/MM/yyyy", { locale: ptBR }) : '-'
+                            })()}
                           </span>
                         )}
                         <span>{deal.probability}% de chance</span>
