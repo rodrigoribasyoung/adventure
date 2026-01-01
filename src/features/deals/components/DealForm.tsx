@@ -92,7 +92,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
             ? new Date(deal.expectedCloseDate.toMillis()).toISOString().split('T')[0]
             : '',
           serviceIds: deal.serviceIds || [],
-          assignedTo: deal.assignedTo || (autoAssignedResponsible?.id || activeMembers[0]?.id || ''),
+          assignedTo: deal.assignedTo || (activeMembers[0]?.id || ''),
           notes: deal.notes || '',
           customFields: deal.customFields || {},
         }
@@ -137,7 +137,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
             ? new Date(deal.expectedCloseDate.toMillis()).toISOString().split('T')[0]
             : '',
           serviceIds: deal.serviceIds || [],
-          assignedTo: deal.assignedTo || (autoAssignedResponsible?.id || activeMembers[0]?.id || ''),
+          assignedTo: deal.assignedTo || (activeMembers[0]?.id || ''),
           notes: deal.notes || '',
           customFields: deal.customFields || {},
         }
