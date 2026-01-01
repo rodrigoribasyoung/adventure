@@ -18,7 +18,7 @@ interface ProjectMemberFilters {
 }
 
 const ProjectMembersPage = () => {
-  const { responsibles, members, loading, createMember, updateMember, deleteMember } = useProjectUsers()
+  const { responsibles, loading, createMember, updateMember, deleteMember } = useProjectUsers()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedMember, setSelectedMember] = useState<ProjectResponsible | undefined>()
   const [formLoading, setFormLoading] = useState(false)

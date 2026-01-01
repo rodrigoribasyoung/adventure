@@ -49,7 +49,7 @@ export const useTenants = () => {
       }
 
       // Buscar dados dos usuários
-      const userIds = [...new Set(allProjectUsers.map(pu => pu.userId))]
+      const userIds = [...new Set(allProjectUsers.map(pu => pu.userId).filter((id): id is string => !!id))]
       const usersMap = new Map<string, User>()
       
       for (const userId of userIds) {
@@ -69,7 +69,7 @@ export const useTenants = () => {
           .filter(pu => pu.projectId === project.id)
           .map(pu => ({
             ...pu,
-            userData: usersMap.get(pu.userId),
+            userData: pu.userId ? usersMap.get(pu.userId) : undefined,
           }))
         
         return {
@@ -112,12 +112,26 @@ export const useTenants = () => {
           updatedAt: Timestamp.now(),
         })
       } else {
+        // Buscar dados do usuário para preencher nome
+        let userName = 'Usuário'
+        try {
+          const user = await getDocument<User>('users', userId)
+          if (user) {
+            userName = user.name || user.email || 'Usuário'
+          }
+        } catch (err) {
+          console.warn(`Erro ao buscar usuário ${userId}:`, err)
+        }
+        
         // Criar novo
         const projectUser: Omit<ProjectUser, 'id' | 'createdAt' | 'updatedAt'> = {
           projectId,
           userId,
+          name: userName,
           role,
           accessLevel,
+          active: true,
+          createdBy: currentUser.uid,
         }
         await createDocument<ProjectUser>('projectUsers', projectUser)
       }

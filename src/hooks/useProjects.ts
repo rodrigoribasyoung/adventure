@@ -87,8 +87,11 @@ export const useProjects = () => {
       const projectUser: Omit<ProjectUser, 'id' | 'createdAt' | 'updatedAt'> = {
         projectId: id,
         userId: currentUser.uid,
+        name: currentUser.displayName || currentUser.email || 'Usuário',
         role: 'owner',
         accessLevel: 'full',
+        active: true,
+        createdBy: currentUser.uid,
       }
       await createDocument<ProjectUser>('projectUsers', projectUser)
       
