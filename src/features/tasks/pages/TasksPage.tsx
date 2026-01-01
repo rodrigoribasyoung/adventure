@@ -121,10 +121,10 @@ const TasksPage = () => {
     }
 
     if (filters.dateTo && task.dueDate) {
-      const toDate = new Date(filters.dateTo)
-      toDate.setHours(23, 59, 59, 999)
+      const toDateFilter = new Date(filters.dateTo)
+      toDateFilter.setHours(23, 59, 59, 999)
       const dueDate = toDate(task.dueDate)
-      if (dueDate && dueDate > toDate) return false
+      if (dueDate && dueDate > toDateFilter) return false
     }
 
     return true

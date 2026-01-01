@@ -72,10 +72,6 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
   // Filtrar apenas responsáveis ativos
   const activeMembers = responsibles.filter(m => m.active)
   
-  // Detectar responsável automaticamente baseado em empresa/projeto
-  const watchedCompanyId = watch('companyId')
-  const autoAssignedResponsible = useAutoAssignResponsible(watchedCompanyId)
-  
   const [currentStep, setCurrentStep] = useState(0)
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
