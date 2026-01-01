@@ -383,7 +383,7 @@ const CompanyDetailPage = () => {
       <Toast
         message={toast.message}
         type={toast.type}
-        visible={toast.visible}
+        isVisible={toast.visible}
         onClose={() => setToast({ ...toast, visible: false })}
       />
     </Container>
