@@ -1,12 +1,16 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Company } from '@/types'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { Modal } from '@/components/ui/Modal'
 import { useCustomFields } from '@/features/customFields/hooks/useCustomFields'
 import { RenderCustomFields } from '@/components/customFields/RenderCustomFields'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
+import { ContactForm } from '@/features/contacts/components/ContactForm'
+import { QuickCreateButton } from '@/components/forms/QuickCreateButton'
 
 const companySchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -33,27 +37,43 @@ type CompanyFormData = z.infer<typeof companySchema>
 
 interface CompanyFormProps {
   company?: Company
-  onSubmit: (data: CompanyFormData) => Promise<void>
+  onSubmit: (data: {
+    name: string
+    cnpj?: string
+    email?: string
+    phone?: string
+    website?: string
+    segment?: string
+    industry?: string
+    size?: 'micro' | 'pequena' | 'media' | 'grande' | 'enterprise'
+    annualRevenue?: number
+    employeeCount?: number
+    socialMedia?: {
+      linkedin?: string
+      instagram?: string
+      facebook?: string
+      twitter?: string
+    }
+    notes?: string
+    contactIds?: string[]
+    customFields?: Record<string, any>
+  }) => Promise<void>
   onCancel: () => void
   loading?: boolean
 }
 
 export const CompanyForm = ({ company, onSubmit, onCancel, loading = false }: CompanyFormProps) => {
   const { customFields } = useCustomFields('company')
-  const { contacts } = useContacts()
-  
-  // Buscar contatos relacionados a esta empresa (usando companyIds ou companyId para compatibilidade)
-  const relatedContacts = company 
-    ? contacts.filter(c => 
-        (company.contactIds?.includes(c.id)) || 
-        (c.companyId === company.id) ||
-        (c.companyIds?.includes(company.id))
-      )
-    : []
+  const { contacts, createContact } = useContacts()
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false)
+  const [quickCreateLoading, setQuickCreateLoading] = useState(false)
+  const [contactSearch, setContactSearch] = useState('')
   const {
     register,
     handleSubmit,
     control,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<CompanyFormData>({
     resolver: zodResolver(companySchema),
@@ -83,9 +103,36 @@ export const CompanyForm = ({ company, onSubmit, onCancel, loading = false }: Co
         },
   })
 
+  const selectedContactIds = watch('contactIds') || []
+  
+  // Filtrar contatos por busca
+  const filteredContacts = contacts.filter(contact =>
+    contact.name.toLowerCase().includes(contactSearch.toLowerCase()) ||
+    contact.email?.toLowerCase().includes(contactSearch.toLowerCase()) ||
+    contact.phone?.includes(contactSearch)
+  )
+
+  const handleQuickCreateContact = async (contactData: any) => {
+    try {
+      setQuickCreateLoading(true)
+      const contactId = await createContact(contactData)
+      // Adicionar o novo contato aos selecionados
+      const currentIds = selectedContactIds
+      if (!currentIds.includes(contactId)) {
+        setValue('contactIds', [...currentIds, contactId])
+      }
+      setIsContactModalOpen(false)
+    } catch (error) {
+      console.error('Erro ao criar contato:', error)
+      throw error
+    } finally {
+      setQuickCreateLoading(false)
+    }
+  }
+
   const handleFormSubmit = async (data: CompanyFormData) => {
     await onSubmit({
-      ...data,
+      name: data.name,
       email: data.email || undefined,
       phone: data.phone || undefined,
       cnpj: data.cnpj || undefined,
@@ -237,23 +284,53 @@ export const CompanyForm = ({ company, onSubmit, onCancel, loading = false }: Co
 
       {/* Múltiplos Contatos */}
       <div className="pt-4 border-t border-white/10">
-        <label className="block text-sm font-medium text-white/90 mb-2">
-          Contatos
-        </label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-white/90">
+            Contatos
+          </label>
+          <QuickCreateButton onClick={() => setIsContactModalOpen(true)} label="+ Novo Contato" />
+        </div>
+        
+        {/* Campo de busca */}
+        <Input
+          label="Buscar contato"
+          value={contactSearch}
+          onChange={(e) => setContactSearch(e.target.value)}
+          placeholder="Digite para buscar..."
+          className="mb-2"
+        />
+        
         <select
           multiple
           {...register('contactIds')}
           className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200 min-h-[120px]"
+          value={selectedContactIds}
+          onChange={(e) => {
+            const selected = Array.from(e.target.selectedOptions, option => option.value)
+            setValue('contactIds', selected)
+          }}
         >
-          {contacts.map(contact => (
-            <option key={contact.id} value={contact.id}>
-              {contact.name} {contact.email && `(${contact.email})`}
-            </option>
-          ))}
+          {filteredContacts.length > 0 ? (
+            filteredContacts.map(contact => (
+              <option 
+                key={contact.id} 
+                value={contact.id}
+              >
+                {contact.name} {contact.email && `(${contact.email})`} {contact.jobTitle && `- ${contact.jobTitle}`}
+              </option>
+            ))
+          ) : (
+            <option disabled>Nenhum contato encontrado</option>
+          )}
         </select>
         <p className="mt-1 text-xs text-white/60">
           Segure Ctrl/Cmd para selecionar múltiplos contatos
         </p>
+        {selectedContactIds.length > 0 && (
+          <p className="mt-1 text-xs text-white/70">
+            {selectedContactIds.length} contato(s) selecionado(s)
+          </p>
+        )}
       </div>
 
       {/* Observações */}
@@ -284,6 +361,20 @@ export const CompanyForm = ({ company, onSubmit, onCancel, loading = false }: Co
           {loading ? 'Salvando...' : company ? 'Atualizar' : 'Criar'}
         </Button>
       </div>
+
+      {/* Modal rápido de criação de contato */}
+      <Modal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        title="Novo Contato"
+        size="md"
+      >
+        <ContactForm
+          onSubmit={handleQuickCreateContact}
+          onCancel={() => setIsContactModalOpen(false)}
+          loading={quickCreateLoading}
+        />
+      </Modal>
     </form>
   )
 }
