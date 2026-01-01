@@ -125,6 +125,9 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
   useEffect(() => {
     if (membersLoading) return // Aguardar carregamento dos membros
     
+    // Calcular assignedTo com base no autoAssignedResponsible ou primeiro membro ativo
+    const defaultAssignedTo = deal?.assignedTo || autoAssignedResponsible?.id || activeMembers[0]?.id || ''
+    
     form.reset(deal
       ? {
           title: deal.title,
@@ -137,7 +140,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
             ? new Date(deal.expectedCloseDate.toMillis()).toISOString().split('T')[0]
             : '',
           serviceIds: deal.serviceIds || [],
-          assignedTo: deal.assignedTo || (activeMembers[0]?.id || ''),
+          assignedTo: defaultAssignedTo,
           notes: deal.notes || '',
           customFields: deal.customFields || {},
         }
@@ -147,7 +150,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
           value: 0,
           contactId: '',
           stage: activeFunnel?.stages[0]?.id || '',
-          assignedTo: autoAssignedResponsible?.id || activeMembers[0]?.id || '',
+          assignedTo: defaultAssignedTo,
           notes: '',
           customFields: {},
         })
