@@ -4,6 +4,7 @@ import { CompanyTable } from '../components/CompanyTable'
 import { CompanyForm } from '../components/CompanyForm'
 import { Modal } from '@/components/ui/Modal'
 import { useCompanies } from '../hooks/useCompanies'
+import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { Company } from '@/types'
 import { Toast } from '@/components/ui/Toast'
 import { AdvancedFilter } from '@/components/common/AdvancedFilter'
@@ -20,6 +21,7 @@ interface CompanyFilters {
 
 const CompaniesPage = () => {
   const { companies, loading, createCompany, updateCompany, deleteCompany } = useCompanies()
+  const { contacts } = useContacts()
   const { canDeleteDealsAndCompanies } = usePermissions()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedCompany, setSelectedCompany] = useState<Company | undefined>()
@@ -156,6 +158,7 @@ const CompaniesPage = () => {
           onDelete={handleDelete}
           onCreateNew={handleCreateNew}
           canDelete={canDeleteDealsAndCompanies}
+          contacts={contacts}
         />
       </div>
 

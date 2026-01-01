@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button'
 import { Pagination } from '@/components/ui/Pagination'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { toDate } from '@/lib/utils/timestamp'
 
 interface TaskTableProps {
   tasks: Task[]
@@ -80,8 +81,9 @@ export const TaskTable = ({ tasks, loading, onEdit, onDelete, onToggleStatus }: 
             </thead>
             <tbody className="divide-y divide-white/10">
               {paginatedTasks.map((task) => {
-                const isOverdue = task.dueDate && 
-                  task.dueDate.toDate() < new Date() && 
+                const dueDate = toDate(task.dueDate)
+                const isOverdue = dueDate && 
+                  dueDate < new Date() && 
                   task.status === 'pending'
                 
                 return (
@@ -106,8 +108,8 @@ export const TaskTable = ({ tasks, loading, onEdit, onDelete, onToggleStatus }: 
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-white/70">
-                        {task.dueDate 
-                          ? format(task.dueDate.toDate(), 'dd/MM/yyyy', { locale: ptBR })
+                        {dueDate 
+                          ? format(dueDate, 'dd/MM/yyyy', { locale: ptBR })
                           : '-'}
                       </div>
                     </td>

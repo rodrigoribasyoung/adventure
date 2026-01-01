@@ -7,6 +7,7 @@ import { TaskTable } from '../components/TaskTable'
 import { TaskForm } from '../components/TaskForm'
 import { TaskScorecards } from '../components/TaskScorecards'
 import { Modal } from '@/components/ui/Modal'
+import { toDate } from '@/lib/utils/timestamp'
 import { useTasks } from '../hooks/useTasks'
 import { Task } from '@/types'
 import { Toast } from '@/components/ui/Toast'
@@ -115,13 +116,15 @@ const TasksPage = () => {
     // Filtro por data de vencimento
     if (filters.dateFrom && task.dueDate) {
       const fromDate = new Date(filters.dateFrom)
-      if (task.dueDate.toDate() < fromDate) return false
+      const dueDate = toDate(task.dueDate)
+      if (dueDate && dueDate < fromDate) return false
     }
 
     if (filters.dateTo && task.dueDate) {
       const toDate = new Date(filters.dateTo)
       toDate.setHours(23, 59, 59, 999)
-      if (task.dueDate.toDate() > toDate) return false
+      const dueDate = toDate(task.dueDate)
+      if (dueDate && dueDate > toDate) return false
     }
 
     return true

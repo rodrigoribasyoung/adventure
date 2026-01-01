@@ -10,9 +10,10 @@ interface CompanyTableProps {
   onDelete: (id: string) => void
   onCreateNew?: () => void
   canDelete?: boolean
+  contacts?: Array<{ id: string; name: string; companyId?: string }>
 }
 
-export const CompanyTable = ({ companies, loading, onEdit, onDelete, canDelete = true }: CompanyTableProps) => {
+export const CompanyTable = ({ companies, loading, onEdit, onDelete, canDelete = true, contacts = [] }: CompanyTableProps) => {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(25)
 
@@ -61,6 +62,9 @@ export const CompanyTable = ({ companies, loading, onEdit, onDelete, canDelete =
                     <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
                       Endereço
                     </th>
+                    <th className="px-3 py-2 text-left text-xs text-white/60 uppercase tracking-wider">
+                      Contato Principal
+                    </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
                       Ações
                     </th>
@@ -72,6 +76,9 @@ export const CompanyTable = ({ companies, loading, onEdit, onDelete, canDelete =
                     const addressString = address 
                       ? `${address.street || ''}${address.city ? `, ${address.city}` : ''}${address.state ? ` - ${address.state}` : ''}${address.zipCode ? `, ${address.zipCode}` : ''}`.trim()
                       : '-'
+                    
+                    // Buscar contato principal da empresa (primeiro contato vinculado)
+                    const companyContact = contacts.find(c => c.companyId === company.id)
                     
                     return (
                       <tr
@@ -95,6 +102,9 @@ export const CompanyTable = ({ companies, loading, onEdit, onDelete, canDelete =
                           <div className="text-sm text-white/70 max-w-xs truncate" title={addressString}>
                             {addressString}
                           </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-white/70">{companyContact?.name || '-'}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>

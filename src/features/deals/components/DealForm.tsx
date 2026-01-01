@@ -13,6 +13,7 @@ import { useServices } from '@/features/services/hooks/useServices'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
 import { useCustomFields } from '@/features/customFields/hooks/useCustomFields'
 import { useProjectUsers } from '@/features/projectMembers/hooks/useProjectUsers'
+import { useAutoAssignResponsible } from '@/hooks/useAutoAssignResponsible'
 import { RenderCustomFields } from '@/components/customFields/RenderCustomFields'
 import { ContactForm } from '@/features/contacts/components/ContactForm'
 import { CompanyForm } from '@/features/companies/components/CompanyForm'
@@ -71,6 +72,10 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
   // Filtrar apenas responsáveis ativos
   const activeMembers = responsibles.filter(m => m.active)
   
+  // Detectar responsável automaticamente baseado em empresa/projeto
+  const watchedCompanyId = watch('companyId')
+  const autoAssignedResponsible = useAutoAssignResponsible(watchedCompanyId)
+  
   const [currentStep, setCurrentStep] = useState(0)
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
@@ -91,7 +96,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
             ? new Date(deal.expectedCloseDate.toMillis()).toISOString().split('T')[0]
             : '',
           serviceIds: deal.serviceIds || [],
-          assignedTo: deal.assignedTo || (activeMembers.length > 0 ? activeMembers[0].id : ''),
+          assignedTo: deal.assignedTo || (autoAssignedResponsible?.id || activeMembers[0]?.id || ''),
           notes: deal.notes || '',
           customFields: deal.customFields || {},
         }
@@ -132,7 +137,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
             ? new Date(deal.expectedCloseDate.toMillis()).toISOString().split('T')[0]
             : '',
           serviceIds: deal.serviceIds || [],
-          assignedTo: deal.assignedTo || (activeMembers.length > 0 ? activeMembers[0].id : ''),
+          assignedTo: deal.assignedTo || (autoAssignedResponsible?.id || activeMembers[0]?.id || ''),
           notes: deal.notes || '',
           customFields: deal.customFields || {},
         }
@@ -142,11 +147,18 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
           value: 0,
           contactId: '',
           stage: activeFunnel?.stages[0]?.id || '',
-          assignedTo: activeMembers.length > 0 ? activeMembers[0].id : '',
+          assignedTo: autoAssignedResponsible?.id || activeMembers[0]?.id || '',
           notes: '',
           customFields: {},
         })
-  }, [deal, activeFunnel, form, activeMembers, membersLoading])
+  }, [deal, activeFunnel, form, activeMembers, membersLoading, autoAssignedResponsible])
+  
+  // Atualizar assignedTo quando companyId mudar
+  useEffect(() => {
+    if (!deal && watchedCompanyId && autoAssignedResponsible) {
+      setValue('assignedTo', autoAssignedResponsible.id)
+    }
+  }, [watchedCompanyId, autoAssignedResponsible, deal, setValue])
 
   const selectedServiceIds = watch('serviceIds') || []
   const selectedServices = services.filter(s => selectedServiceIds.includes(s.id))

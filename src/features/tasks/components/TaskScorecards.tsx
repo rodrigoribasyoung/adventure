@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/Card'
 import { Task } from '@/types'
 import { FiAlertCircle, FiClock, FiCheckCircle, FiList } from 'react-icons/fi'
+import { toDate } from '@/lib/utils/timestamp'
 
 interface TaskScorecardsProps {
   tasks: Task[]
@@ -9,16 +10,18 @@ interface TaskScorecardsProps {
 export const TaskScorecards = ({ tasks }: TaskScorecardsProps) => {
   const totalTasks = tasks.length
   
-  const overdueTasks = tasks.filter(task => 
-    task.dueDate && 
-    task.dueDate.toDate() < new Date() && 
-    task.status === 'pending'
-  )
+  const overdueTasks = tasks.filter(task => {
+    const dueDate = toDate(task.dueDate)
+    return dueDate && 
+      dueDate < new Date() && 
+      task.status === 'pending'
+  })
   
-  const pendingTasks = tasks.filter(task => 
-    task.status === 'pending' && 
-    (!task.dueDate || task.dueDate.toDate() >= new Date())
-  )
+  const pendingTasks = tasks.filter(task => {
+    const dueDate = toDate(task.dueDate)
+    return task.status === 'pending' && 
+      (!dueDate || dueDate >= new Date())
+  })
   
   const completedTasks = tasks.filter(task => task.status === 'completed')
 

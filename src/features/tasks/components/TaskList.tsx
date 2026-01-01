@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { toDate, toMillis } from '@/lib/utils/timestamp'
 
 interface TaskListProps {
   tasks: Task[]
@@ -55,16 +56,17 @@ export const TaskList = ({
       return a.status === 'pending' ? -1 : 1
     }
     // Ordenar por data de vencimento (sem vencimento por último)
-    const aDue = a.dueDate?.toMillis() || Number.MAX_SAFE_INTEGER
-    const bDue = b.dueDate?.toMillis() || Number.MAX_SAFE_INTEGER
+    const aDue = toMillis(a.dueDate) || Number.MAX_SAFE_INTEGER
+    const bDue = toMillis(b.dueDate) || Number.MAX_SAFE_INTEGER
     return aDue - bDue
   })
 
   return (
     <div className="space-y-3">
       {sortedTasks.map((task) => {
-        const isOverdue = task.dueDate && 
-          task.dueDate.toDate() < new Date() && 
+        const dueDate = toDate(task.dueDate)
+        const isOverdue = dueDate && 
+          dueDate < new Date() && 
           task.status === 'pending'
         const isCompleted = task.status === 'completed'
 
@@ -94,9 +96,9 @@ export const TaskList = ({
                       <span className="px-2 py-1 bg-white/10 rounded text-xs">
                         {TASK_TYPE_LABELS[task.type] || task.type}
                       </span>
-                      {task.dueDate && (
+                      {dueDate && (
                         <span className={isOverdue && !isCompleted ? 'text-red-400 font-semibold' : ''}>
-                          Vence: {format(task.dueDate.toDate(), "dd/MM/yyyy", { locale: ptBR })}
+                          Vence: {format(dueDate, "dd/MM/yyyy", { locale: ptBR })}
                         </span>
                       )}
                       {isCompleted && (
