@@ -6,8 +6,7 @@ import { Toast } from '@/components/ui/Toast'
 import { ProjectMemberForm } from '../components/ProjectMemberForm'
 import { ProjectMemberList } from '../components/ProjectMemberList'
 import { ProjectMemberTable } from '../components/ProjectMemberTable'
-import { useProjectMembers } from '../hooks/useProjectMembers'
-import { ProjectMember } from '@/types'
+import { useProjectUsers, ProjectResponsible } from '../hooks/useProjectUsers'
 import { AdvancedFilter } from '@/components/common/AdvancedFilter'
 import { useAdvancedFilter } from '@/hooks/useAdvancedFilter'
 import { FilterField } from '@/components/common/AdvancedFilter'
@@ -19,9 +18,9 @@ interface ProjectMemberFilters {
 }
 
 const ProjectMembersPage = () => {
-  const { members, loading, createMember, updateMember, deleteMember } = useProjectMembers()
+  const { responsibles, members, loading, createMember, updateMember, deleteMember } = useProjectUsers()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedMember, setSelectedMember] = useState<ProjectMember | undefined>()
+  const [selectedMember, setSelectedMember] = useState<ProjectResponsible | undefined>()
   const [formLoading, setFormLoading] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'table'>('table')
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; visible: boolean }>({
@@ -66,7 +65,7 @@ const ProjectMembersPage = () => {
     },
   ]
 
-  const filteredMembers = members.filter(member => {
+  const filteredMembers = responsibles.filter(member => {
     // Busca por texto
     if (filters.search) {
       const searchLower = filters.search.toLowerCase()
@@ -74,7 +73,7 @@ const ProjectMembersPage = () => {
         member.name.toLowerCase().includes(searchLower) ||
         member.email?.toLowerCase().includes(searchLower) ||
         member.phone?.includes(searchLower) ||
-        member.role?.toLowerCase().includes(searchLower)
+        member.jobTitle?.toLowerCase().includes(searchLower)
       if (!matchesSearch) return false
     }
 
@@ -97,7 +96,7 @@ const ProjectMembersPage = () => {
     setIsModalOpen(true)
   }
 
-  const handleEdit = (member: ProjectMember) => {
+  const handleEdit = (member: ProjectResponsible) => {
     setSelectedMember(member)
     setIsModalOpen(true)
   }
@@ -106,10 +105,24 @@ const ProjectMembersPage = () => {
     try {
       setFormLoading(true)
       if (selectedMember) {
-        await updateMember(selectedMember.id, data)
+        await updateMember(selectedMember.id, {
+          name: data.name,
+          email: data.email || undefined,
+          phone: data.phone || undefined,
+          jobTitle: data.role || undefined,
+          functionLevel: data.functionLevel || undefined,
+          active: data.active,
+        })
         setToast({ message: 'Responsável atualizado com sucesso!', type: 'success', visible: true })
       } else {
-        await createMember(data)
+        await createMember({
+          name: data.name,
+          email: data.email || undefined,
+          phone: data.phone || undefined,
+          jobTitle: data.role || undefined,
+          functionLevel: data.functionLevel || undefined,
+          active: data.active ?? true,
+        })
         setToast({ message: 'Responsável criado com sucesso!', type: 'success', visible: true })
       }
       setIsModalOpen(false)

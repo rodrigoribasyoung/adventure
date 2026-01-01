@@ -6,7 +6,7 @@ import { FiSearch } from 'react-icons/fi'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { useCompanies } from '@/features/companies/hooks/useCompanies'
-import { useProjectMembers } from '@/features/projectMembers/hooks/useProjectMembers'
+import { useProjectUsers } from '@/features/projectMembers/hooks/useProjectUsers'
 
 export interface DealFilters {
   search: string
@@ -32,7 +32,8 @@ export const DealFilters = ({ filters, onFiltersChange, onReset }: DealFiltersPr
   const { activeFunnel } = useFunnels()
   const { contacts } = useContacts()
   const { companies } = useCompanies()
-  const { members } = useProjectMembers()
+  const { responsibles } = useProjectUsers()
+  const members = responsibles // Compatibilidade
 
   const handleFilterChange = (key: keyof DealFilters, value: any) => {
     onFiltersChange({
@@ -236,9 +237,9 @@ export const DealFilters = ({ filters, onFiltersChange, onReset }: DealFiltersPr
                 className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-red/50 focus:border-primary-red/50 transition-all duration-200"
               >
                 <option value="">Todos os responsáveis</option>
-                {members.filter(m => m.active).map(member => (
+                {members.filter((m: any) => m.active).map((member: any) => (
                   <option key={member.id} value={member.id}>
-                    {member.name} {member.role ? `- ${member.role}` : ''}
+                    {member.name} {member.jobTitle ? `- ${member.jobTitle}` : ''}
                   </option>
                 ))}
               </select>

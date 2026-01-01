@@ -34,25 +34,32 @@ export interface Project extends BaseEntity {
   }
 }
 
-// ProjectUser (Usuário do Projeto - Cliente da Adventure)
-export interface ProjectUser {
-  id: string
-  projectId: string
-  userId: string
-  role: 'owner' | 'admin' | 'user' | 'viewer'
-  accessLevel: 'full' | 'limited'
-  createdAt: Timestamp
-  updatedAt: Timestamp
+// ProjectUser (Usuário do Projeto - Unificado com Responsáveis)
+// Representa a relação entre User e Project, incluindo responsáveis/colaboradores
+export interface ProjectUser extends BaseEntity {
+  projectId: string // Projeto ao qual pertence
+  userId?: string // ID do usuário (opcional - se não houver, é responsável sem conta de usuário)
+  // Campos de acesso/permissão
+  role: 'owner' | 'admin' | 'user' | 'viewer' // Role no projeto
+  accessLevel: 'full' | 'limited' // Nível de acesso
+  // Campos de responsável (para usuários que são responsáveis)
+  name: string // Nome do responsável (obrigatório)
+  email?: string // Email (opcional, pode vir do User ou ser específico)
+  phone?: string // Telefone (opcional)
+  jobTitle?: string // Cargo/função (ex: "Vendedor", "Gerente", etc.)
+  functionLevel?: 'vendedor' | 'gerente' | 'diretor' | 'coordenador' | 'analista' | string // Nível de função
+  active: boolean // Se o responsável está ativo
 }
 
-// ProjectMember (Responsável/Colaborador do Projeto)
+// ProjectMember (DEPRECATED - usar ProjectUser)
+// Mantido para compatibilidade durante migração
 export interface ProjectMember extends BaseEntity {
-  projectId: string // Projeto ao qual pertence
-  name: string // Nome do responsável
-  email?: string // Email (opcional)
-  phone?: string // Telefone (opcional)
-  role?: string // Cargo/função (ex: "Vendedor", "Gerente", etc.)
-  functionLevel?: 'vendedor' | 'gerente' | 'diretor' | 'coordenador' | 'analista' | string // Nível de função
+  projectId: string
+  name: string
+  email?: string
+  phone?: string
+  role?: string
+  functionLevel?: 'vendedor' | 'gerente' | 'diretor' | 'coordenador' | 'analista' | string
   active: boolean
 }
 
@@ -109,7 +116,7 @@ export interface Deal extends BaseEntity {
   probability: number // 0-100
   expectedCloseDate?: Timestamp
   serviceIds: string[]
-  assignedTo?: string // projectMemberId (responsável/colaborador do projeto)
+  assignedTo?: string // projectUserId (ID do ProjectUser - responsável/colaborador do projeto)
   paymentType?: 'cash' | 'installment' // à vista ou à prazo
   paymentMethod?: 'pix' | 'boleto' | 'credit_card' | 'debit_card' | 'bank_transfer' | 'exchange' | 'other' // método de pagamento
   contractUrl?: string // link do contrato (drive ou outro)
@@ -129,7 +136,7 @@ export interface Task extends BaseEntity {
   type: string
   status: 'pending' | 'completed'
   dueDate?: Timestamp
-  assignedTo?: string // projectMemberId (responsável/colaborador do projeto)
+  assignedTo?: string // projectUserId (ID do ProjectUser - responsável/colaborador do projeto)
 }
 
 // Proposal (Proposta)

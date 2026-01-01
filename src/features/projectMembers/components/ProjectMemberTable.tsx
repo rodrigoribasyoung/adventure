@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { ProjectMember } from '@/types'
+import { ProjectResponsible } from '../hooks/useProjectUsers'
 import { Button } from '@/components/ui/Button'
 import { Pagination } from '@/components/ui/Pagination'
 
 interface ProjectMemberTableProps {
-  members: ProjectMember[]
+  members: ProjectResponsible[]
   loading: boolean
-  onEdit: (member: ProjectMember) => void
+  onEdit: (member: ProjectResponsible) => void
   onDelete: (id: string) => void
 }
 
@@ -87,7 +87,7 @@ export const ProjectMemberTable = ({ members, loading, onEdit, onDelete }: Proje
                     <div className="text-sm font-medium text-white">{member.name}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-white/70">{member.role || '-'}</div>
+                    <div className="text-sm text-white/70">{member.jobTitle || '-'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {member.functionLevel ? (

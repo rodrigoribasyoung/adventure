@@ -1,3 +1,5 @@
+// DEPRECATED: Use useProjectUsers instead
+// Mantido para compatibilidade durante migração
 import { useState, useEffect } from 'react'
 import { ProjectMember } from '@/types'
 import { getDocuments, createDocument, updateDocument, deleteDocument, orderBy, where } from '@/lib/firebase/db'
@@ -95,4 +97,7 @@ export const useProjectMembers = () => {
     refetch: fetchMembers,
   }
 }
+
+// Re-export useProjectUsers como alternativa
+export { useProjectUsers } from './useProjectUsers'
 

@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -6,7 +7,7 @@ import { Task } from '@/types'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { Timestamp as FirestoreTimestamp } from 'firebase/firestore'
-import { useProjectMembers } from '@/features/projectMembers/hooks/useProjectMembers'
+import { useProjectUsers } from '@/features/projectMembers/hooks/useProjectUsers'
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
@@ -41,10 +42,11 @@ const TASK_TYPES = [
 ]
 
 export const TaskForm = ({ task, dealId, onSubmit, onCancel, loading = false }: TaskFormProps) => {
-  const { members, loading: membersLoading } = useProjectMembers()
+  const navigate = useNavigate()
+  const { responsibles, loading: membersLoading } = useProjectUsers()
   
   // Filtrar apenas responsáveis ativos
-  const activeMembers = members.filter(m => m.active)
+  const activeMembers = responsibles.filter(m => m.active)
   
   const {
     register,
@@ -179,7 +181,13 @@ export const TaskForm = ({ task, dealId, onSubmit, onCancel, loading = false }: 
           </p>
           <p className="text-yellow-300/80 text-sm">
             É necessário ter pelo menos um responsável ativo no projeto para criar tarefas. 
-            <a href="/settings/project-members" className="underline ml-1">Cadastrar responsável agora</a>
+            <button
+              type="button"
+              onClick={() => navigate('/project-members')}
+              className="underline ml-1 hover:text-yellow-200 transition-colors"
+            >
+              Cadastrar responsável agora
+            </button>
           </p>
         </div>
       ) : (
@@ -195,7 +203,7 @@ export const TaskForm = ({ task, dealId, onSubmit, onCancel, loading = false }: 
             <option value="">Selecione um responsável</option>
             {activeMembers.map(member => (
               <option key={member.id} value={member.id}>
-                {member.name} {member.role ? `- ${member.role}` : ''}
+                {member.name} {member.jobTitle ? `- ${member.jobTitle}` : ''}
               </option>
             ))}
           </select>

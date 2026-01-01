@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ProjectMember } from '@/types'
+import { ProjectResponsible } from '../hooks/useProjectUsers'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 
@@ -9,7 +9,7 @@ const memberSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   phone: z.string().optional(),
-  role: z.string().optional(),
+  role: z.string().optional(), // jobTitle no formulário (mantido como role para compatibilidade)
   functionLevel: z.string().optional(),
   active: z.boolean().default(true),
 })
@@ -17,7 +17,7 @@ const memberSchema = z.object({
 type MemberFormData = z.infer<typeof memberSchema>
 
 interface ProjectMemberFormProps {
-  member?: ProjectMember
+  member?: ProjectResponsible
   onSubmit: (data: MemberFormData) => Promise<void>
   onCancel: () => void
   loading?: boolean
@@ -35,7 +35,7 @@ export const ProjectMemberForm = ({ member, onSubmit, onCancel, loading = false 
           name: member.name,
           email: member.email || '',
           phone: member.phone || '',
-          role: member.role || '',
+          role: member.jobTitle || '',
           functionLevel: member.functionLevel || '',
           active: member.active,
         }

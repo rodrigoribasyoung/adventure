@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useDeals } from '@/features/deals/hooks/useDeals'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
+import { useProjectUsers } from '@/features/projectMembers/hooks/useProjectUsers'
 
 export interface SalesReportFilters {
   startDate?: Date
@@ -36,6 +37,7 @@ export interface SalesReportData {
 export const useSalesReport = (filters: SalesReportFilters) => {
   const { deals, loading: dealsLoading } = useDeals()
   const { funnels } = useFunnels()
+  const { responsibles } = useProjectUsers()
   const [reportData, setReportData] = useState<SalesReportData | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -125,9 +127,15 @@ export const useSalesReport = (filters: SalesReportFilters) => {
       }
     })
 
-    const dealsByResponsible = Array.from(dealsByResponsibleMap.entries()).map(([userId, data]) => ({
-      userId,
-      userName: userId, // TODO: Buscar nome do usuário se houver hook de usuários
+    // Criar mapa de responsáveis para lookup rápido
+    const responsiblesMap = new Map<string, string>()
+    responsibles.forEach(r => {
+      responsiblesMap.set(r.id, r.name)
+    })
+
+    const dealsByResponsible = Array.from(dealsByResponsibleMap.entries()).map(([responsibleId, data]) => ({
+      userId: responsibleId,
+      userName: responsiblesMap.get(responsibleId) || responsibleId,
       count: data.count,
       value: data.value,
     }))
@@ -146,7 +154,7 @@ export const useSalesReport = (filters: SalesReportFilters) => {
     })
 
     setLoading(false)
-  }, [deals, dealsLoading, filters, funnels])
+  }, [deals, dealsLoading, filters, funnels, responsibles])
 
   return { reportData, loading }
 }

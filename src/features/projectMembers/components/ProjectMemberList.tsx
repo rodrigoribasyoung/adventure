@@ -1,11 +1,11 @@
-import { ProjectMember } from '@/types'
+import { ProjectResponsible } from '../hooks/useProjectUsers'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 
 interface ProjectMemberListProps {
-  members: ProjectMember[]
+  members: ProjectResponsible[]
   loading: boolean
-  onEdit: (member: ProjectMember) => void
+  onEdit: (member: ProjectResponsible) => void
   onDelete: (id: string) => void
 }
 
@@ -39,8 +39,8 @@ export const ProjectMemberList = ({ members, loading, onEdit, onDelete }: Projec
             <div className="flex items-start justify-between mb-3">
               <div>
                 <h3 className="text-lg font-semibold text-white mb-1">{member.name}</h3>
-                {member.role && (
-                  <p className="text-white/70 text-sm">{member.role}</p>
+                {member.jobTitle && (
+                  <p className="text-white/70 text-sm">{member.jobTitle}</p>
                 )}
               </div>
               {member.active ? (

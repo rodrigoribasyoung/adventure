@@ -37,3 +37,6 @@ functions/node_modules/
 extension/*.png
 extension/*.jpg
 extension/*.jpeg
+
+# Cache
+.npm-cache/

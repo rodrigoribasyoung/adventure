@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -11,7 +12,7 @@ import { useCompanies } from '@/features/companies/hooks/useCompanies'
 import { useServices } from '@/features/services/hooks/useServices'
 import { useFunnels } from '@/features/funnels/hooks/useFunnels'
 import { useCustomFields } from '@/features/customFields/hooks/useCustomFields'
-import { useProjectMembers } from '@/features/projectMembers/hooks/useProjectMembers'
+import { useProjectUsers } from '@/features/projectMembers/hooks/useProjectUsers'
 import { RenderCustomFields } from '@/components/customFields/RenderCustomFields'
 import { ContactForm } from '@/features/contacts/components/ContactForm'
 import { CompanyForm } from '@/features/companies/components/CompanyForm'
@@ -59,15 +60,16 @@ const FORM_STEPS = [
 ]
 
 export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealFormProps) => {
+  const navigate = useNavigate()
   const { contacts, createContact } = useContacts()
   const { companies, createCompany } = useCompanies()
   const { services } = useServices()
   const { activeFunnel } = useFunnels()
   const { customFields } = useCustomFields('deal')
-  const { members, loading: membersLoading } = useProjectMembers()
+  const { responsibles, loading: membersLoading } = useProjectUsers()
   
   // Filtrar apenas responsáveis ativos
-  const activeMembers = members.filter(m => m.active)
+  const activeMembers = responsibles.filter(m => m.active)
   
   const [currentStep, setCurrentStep] = useState(0)
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
@@ -491,7 +493,13 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
                 </p>
                 <p className="text-yellow-300/80 text-sm">
                   É necessário ter pelo menos um responsável ativo no projeto para criar negociações. 
-                  <a href="/settings/project-members" className="underline ml-1">Cadastrar responsável agora</a>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/project-members')}
+                    className="underline ml-1 hover:text-yellow-200 transition-colors"
+                  >
+                    Cadastrar responsável agora
+                  </button>
                 </p>
               </div>
             ) : (
@@ -507,7 +515,7 @@ export const DealForm = ({ deal, onSubmit, onCancel, loading = false }: DealForm
                   <option value="">Selecione um responsável</option>
                   {activeMembers.map(member => (
                     <option key={member.id} value={member.id}>
-                      {member.name} {member.role ? `- ${member.role}` : ''}
+                      {member.name} {member.jobTitle ? `- ${member.jobTitle}` : ''}
                     </option>
                   ))}
                 </select>
